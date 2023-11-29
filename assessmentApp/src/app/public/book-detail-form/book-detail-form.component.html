@@ -1,0 +1,106 @@
+<div mat-dialog-title>
+    <h1>Book Details</h1>
+  </div>
+  <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
+        <div mat-dialog-content class="content">
+          <div class="row">
+            <mat-form-field appearance="outline">
+              <mat-label>Title</mat-label>
+              <input
+                matInput
+                type="text"
+                placeholder="Book name"
+                formControlName="title"
+              />
+            </mat-form-field>
+  
+            <mat-form-field appearance="outline">
+              <mat-label>Author</mat-label>
+              <input
+                matInput
+                type="text"
+                placeholder="e.g. Agatha"
+                formControlName="author"
+              />
+            </mat-form-field>
+  
+            <mat-form-field appearance="outline">
+              <mat-label>ISBN Number</mat-label>
+              <input
+                matInput
+                type="text"
+                placeholder="ISBN 6767-8478-82-637"
+                formControlName="isbnNum"
+              />
+            </mat-form-field>
+          </div>
+  
+          <div class="row">
+            <mat-form-field appearance="outline">
+                <mat-label>Genre</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  placeholder="eg: Fiction"
+                  formControlName="genre"
+                />
+            </mat-form-field>  
+            <mat-form-field appearance="outline">
+              <mat-label>Published Year</mat-label>
+              <input
+                matInput
+                placeholder="eg: 2002"
+                formControlName="pubYear"
+              />
+            </mat-form-field>
+  
+            <mat-form-field appearance="outline">
+              <mat-label>Publisher</mat-label>
+              <input
+                matInput
+                type="text"
+                placeholder="eg: John"
+                formControlName="Publisher"
+              />
+            </mat-form-field>
+          </div>
+        <div class="row">
+            <mat-form-field appearance="outline">
+              <mat-label>Copies</mat-label>
+              <input
+                matInput
+                placeholder="No. of copies"
+                formControlName="copies"
+              />
+            </mat-form-field>
+  
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input
+                matInput
+                type="text"
+                placeholder="Description of the book"
+                formControlName="description"
+              />
+            </mat-form-field>
+  
+          </div>
+  
+  
+        </div>
+        <div mat-dialog-actions class="action">
+          <button mat-stroked-button mat-dialog-close>Cancel</button>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!bookForm.valid"
+            [mat-dialog-close]="bookForm.value"
+  
+          >
+            {{data.buttonName}}
+          </button>
+        </div>
+        <mat-card-footer> </mat-card-footer>
+      <mat-divider></mat-divider>
+    </form>
+  
