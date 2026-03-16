@@ -5,55 +5,54 @@ $(document).ready(function(){
         var isValid = true;
         var primaryCount = 0;
 
-        $("#newDelayTable-<s:property value='flightId'/> tbody tr").each(function(){
+        var rowCount = $("#newDelayTable-<s:property value='flightId'/> tr").length - 1;
 
-            var process = $(this).find("select[name*='processId']").val();
-            var reason = $(this).find("select[name*='reasonId']").val();
-            var stakeholder = $(this).find("select[name*='stakeholderId']").val();
-            var delayCode = $(this).find("input[name*='delayCode']").val();
-            var delayMinutes = $(this).find("input[name*='delayMinutes']").val();
-            var type = $(this).find("select[name*='type']").val();
-            var remarks = $(this).find("input[name*='delayRemarks']").val();
+        for(var i=0; i<rowCount; i++){
 
-            if(process == "-1" || process == "" || process == null){
-                alert("Please select Process");
-                isValid = false;
+            var process = $("#process_" + i).val();
+            var reason = $("#reason_" + i).val();
+            var stakeholder = $("#stakeholder_" + i).val();
+            var delayCode = $("#delayCode_" + i).val();
+            var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
+            var type = $("select[name='delayDetailsNew["+i+"].type']").val();
+            var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
+
+            if(process == "-1" || process == null){
+                alert("Please select Process in row " + (i+1));
+                $("#process_" + i).focus();
                 return false;
             }
 
-            if(reason == "-1" || reason == "" || reason == null){
-                alert("Please select Reason");
-                isValid = false;
+            if(reason == "-1" || reason == null){
+                alert("Please select Reason in row " + (i+1));
+                $("#reason_" + i).focus();
                 return false;
             }
 
-            if(stakeholder == "-1" || stakeholder == "" || stakeholder == null){
-                alert("Please select Stakeholder");
-                isValid = false;
+            if(stakeholder == "-1" || stakeholder == null){
+                alert("Please select Stakeholder in row " + (i+1));
+                $("#stakeholder_" + i).focus();
                 return false;
             }
 
             if(delayCode == "" || delayCode == null){
-                alert("Delay Code is missing");
-                isValid = false;
+                alert("Delay Code is missing in row " + (i+1));
+                $("#delayCode_" + i).focus();
                 return false;
             }
 
             if(delayMinutes == "" || delayMinutes == null){
-                alert("Delay Minutes is missing");
-                isValid = false;
+                alert("Delay Minutes is missing in row " + (i+1));
                 return false;
             }
 
             if(isNaN(delayMinutes)){
-                alert("Delay Minutes must be numeric");
-                isValid = false;
+                alert("Delay Minutes must be numeric in row " + (i+1));
                 return false;
             }
 
             if(type == "" || type == null){
-                alert("Please select Type (Primary / Secondary)");
-                isValid = false;
+                alert("Please select Type in row " + (i+1));
                 return false;
             }
 
@@ -62,49 +61,41 @@ $(document).ready(function(){
             }
 
             if(remarks == "" || remarks == null){
-                alert("Delay Remarks is missing");
-                isValid = false;
+                alert("Delay Remarks is missing in row " + (i+1));
                 return false;
             }
+        }
 
-        });
-
-        // Validate Primary rule
         if(primaryCount > 1){
             alert("Only one delay can be marked as Primary.");
-            isValid = false;
+            return false;
         }
 
         if(primaryCount == 0){
             alert("One delay must be marked as Primary.");
-            isValid = false;
+            return false;
         }
 
-        if(isValid){
+        $("#divIndicator").show();
 
-            $("#divIndicator").show();
+        var formData = $("#delaytbl :input").serialize();
 
-            var url = "saveDelayDtls.action";
+        $.ajax({
+            type: "POST",
+            url: "saveDelayDtls.action",
+            data: formData,
 
-            var formData = $("#delaytbl :input").serialize();
+            success: function(data){
+                $("#divIndicator").hide();
+                alert("Delay details saved successfully");
+            },
 
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: formData,
+            error: function(){
+                $("#divIndicator").hide();
+                alert("Error while saving delay details");
+            }
 
-                success: function(response){
-                    $("#divIndicator").hide();
-                    alert("Delay details saved successfully");
-                },
-
-                error: function(){
-                    $("#divIndicator").hide();
-                    alert("Error while saving delay details");
-                }
-            });
-
-        }
+        });
 
     });
 
