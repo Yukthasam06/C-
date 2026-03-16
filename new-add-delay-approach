@@ -1,1 +1,270 @@
 
+function addDelay(tag){
+
+    var fltid = $(tag).attr('id').split("-")[1];
+
+    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
+
+    $.ajax({
+
+        url: "delayDtlsNewFirstRow.action",
+        type: "GET",
+
+        data:{
+            flightId: fltid,
+            rowIndex: rowCount
+        },
+
+        success:function(response){
+
+            $("#newDelayTable-"+fltid+" tbody").append(response);
+
+        },
+
+        error:function(){
+            alert("Unable to add new delay row");
+        }
+
+    });
+}
+
+
+
+function loadReasons(processId,rowIndex){
+
+    var reasonSelect=$("#reason_"+rowIndex);
+
+    if(processId==-1){
+        reasonSelect.html('<option value="-1">Select Reason</option>');
+        return;
+    }
+
+    $.ajax({
+
+        url:"loadReasons.action",
+        type:"GET",
+
+        data:{
+            processId:processId
+        },
+
+        success:function(response){
+
+            reasonSelect.empty();
+            reasonSelect.append('<option value="-1">Select Reason</option>');
+            reasonSelect.append(response);
+
+        },
+
+        error:function(){
+            alert("Unable to load reasons");
+        }
+
+    });
+
+}
+
+
+
+function loadStakeholders(reasonId,rowIndex){
+
+    var stakeholderSelect=$("#stakeholder_"+rowIndex);
+
+    if(reasonId==-1){
+        stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
+        return;
+    }
+
+    $.ajax({
+
+        url:"loadStakeholders.action",
+        type:"GET",
+
+        data:{
+            reasonId:reasonId
+        },
+
+        success:function(response){
+
+            stakeholderSelect.empty();
+            stakeholderSelect.append('<option value="-1">Select Stakeholder</option>');
+            stakeholderSelect.append(response);
+
+        },
+
+        error:function(){
+            alert("Unable to load stakeholders");
+        }
+
+    });
+
+}
+
+
+
+function loadDelayCode(stakeholderId,rowIndex){
+
+    var delayCodeField=$("#delayCode_"+rowIndex);
+
+    if(stakeholderId==-1){
+        delayCodeField.val("");
+        return;
+    }
+
+    $.ajax({
+
+        url:"loadDelayCode.action",
+        type:"GET",
+
+        data:{
+            stakeholderId:stakeholderId
+        },
+
+        success:function(response){
+
+            delayCodeField.val(response);
+
+        },
+
+        error:function(){
+            alert("Unable to fetch delay code");
+        }
+
+    });
+
+}
+
+
+
+function deleteDelay(tag){
+
+    if(confirm('Are you sure you want to delete?')){
+
+        $(tag).closest("tr").remove();
+
+    }
+
+}
+
+
+<s:iterator value="delayDetailsNew" status="stat1">
+
+<tr>
+
+<td>
+
+<s:select
+name="delayDetailsNew[%{#stat1.index}].processId"
+list="processes"
+listKey="id"
+listValue="value"
+headerKey="-1"
+headerValue="Select Process"
+id="process_%{#stat1.index}"
+cssClass="pax_inputSelect"
+onchange="loadReasons(this.value,%{#stat1.index})"
+/>
+
+</td>
+
+
+<td>
+
+<s:select
+name="delayDetailsNew[%{#stat1.index}].reasonId"
+headerKey="-1"
+headerValue="Select Reason"
+id="reason_%{#stat1.index}"
+cssClass="pax_inputSelect"
+onchange="loadStakeholders(this.value,%{#stat1.index})"
+/>
+
+</td>
+
+
+<td>
+
+<s:select
+name="delayDetailsNew[%{#stat1.index}].stakeholderId"
+headerKey="-1"
+headerValue="Select Stakeholder"
+id="stakeholder_%{#stat1.index}"
+cssClass="pax_inputSelect"
+onchange="loadDelayCode(this.value,%{#stat1.index})"
+/>
+
+</td>
+
+
+<td>
+
+<s:textfield
+name="delayDetailsNew[%{#stat1.index}].delayCode"
+id="delayCode_%{#stat1.index}"
+readonly="true"
+cssClass="pax_inputTextBox"
+/>
+
+</td>
+
+
+<td>
+
+<s:textfield
+name="delayDetailsNew[%{#stat1.index}].delayMinutes"
+cssClass="pax_inputTextBox"
+/>
+
+</td>
+
+
+<td>
+
+<select
+name="delayDetailsNew[%{#stat1.index}].type"
+id="type_%{#stat1.index}"
+class="pax_inputSelect">
+
+<option value="">Select</option>
+<option value="Primary">Primary</option>
+<option value="Secondary">Secondary</option>
+
+</select>
+
+</td>
+
+
+<td>
+
+<s:textfield
+name="delayDetailsNew[%{#stat1.index}].delayRemarks"
+cssClass="pax_inputTextBox"
+/>
+
+</td>
+
+<td><s:property value="lastModifiedBy"/></td>
+
+<td><s:property value="lastModifiedDate"/></td>
+
+
+<td>
+
+<img
+src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
+width="16"
+height="16"
+style="cursor:pointer"
+onclick="deleteDelay(this)">
+
+</td>
+
+</tr>
+
+</s:iterator>
+
+
+<img id="addDelay-<s:property value='flightId'/>"
+src="<%=request.getContextPath()%>/images/icons/ico_16x16_addDelay.png"
+class="addRow"
+onclick="addDelay(this)">
