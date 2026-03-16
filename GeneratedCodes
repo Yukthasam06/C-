@@ -1,0 +1,26 @@
+function loadDelayCode(stakeholderId, rowIndex) {
+
+    var delayCodeField = $("#delayCode_" + rowIndex);
+
+    if (stakeholderId == -1) {
+        delayCodeField.val("");
+        return;
+    }
+
+    $.ajax({
+        url: "loadDelayCode.action",
+        type: "GET",
+        data: { stakeholderId: stakeholderId },
+
+        success: function(response) {
+
+            console.log("Delay code:", response);
+
+            delayCodeField.val(response);
+        },
+
+        error: function() {
+            alert("Unable to fetch delay code");
+        }
+    });
+}
