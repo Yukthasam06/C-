@@ -1,0 +1,247 @@
+public String saveDelayDtls() throws FileNotFoundException, IOException {
+       // System.out.println("in1 saveDelayDtls() .. flightId = " + flightId);
+        int len = getFlightId().split(",").length - 1;
+        setFlightId(getFlightId().split(",")[0]);
+       // System.out.println("in saveDelayDtls()");
+        ArrayList<DelayDetailTO> addDelayDtls = new ArrayList<DelayDetailTO>();
+        ArrayList<DelayDetailTO> updDelayDtls = new ArrayList<DelayDetailTO>();
+        ArrayList<String> deleteDelayIds = new ArrayList<String>();
+        ArrayList<DelayDetailTO> origDelayDtls = 
+            new ArrayList<DelayDetailTO>();
+         try {
+        
+            if("error".equals(initPage()) || !serverValidate()){
+                return "error";
+            }        
+        
+            origDelayDtls = 
+                    (ArrayList<DelayDetailTO>)getDelegate().getFlightDelayDetails(getFlightId());
+                        
+            
+            deleteDelayIds = getDeletedDelayIds(origDelayDtls,getDelayDetails());
+             for (DelayDetailTO dtl: getDelayDetails()) {
+                if (dtl != null) {
+                
+                    if (dtl.getDelayId() == null || 
+                        "".equals(dtl.getDelayId().trim())) {
+                    	dtl.setIsnew(true);
+                        addDelayDtls.add(dtl);
+                       // System.out.println("delay detail added by " + 
+                         //                  getUserTO().getUserId());
+                    } else {
+                        if (origDelayDtls.contains(dtl)) {
+                            int index = origDelayDtls.indexOf(dtl);
+                            DelayDetailTO origDelayDtl = 
+                                origDelayDtls.get(index);
+                            boolean isDirty = false;
+                            if (changeInValue(dtl.getDelayMinutes(), 
+                                              origDelayDtl.getDelayMinutes())) {
+                                isDirty = true;
+                                dtl.setActivityLog(new ActivityLogTO("DELAY_UPD ("+dtl.getDelayCode()+")", 
+                                                                     "Delay minutes updated", 
+                                                                     "Delay minute changed from " + 
+                                                                     origDelayDtl.getDelayMinutes() + 
+                                                                     " to " + 
+                                                                     dtl.getDelayMinutes()+
+                                                                     " for delay code " + dtl.getDelayCode(),   
+                                                                     "OTP", 
+                                                                     getUserTO().getUserId()));
+                            }
+                            if (changeInValue(dtl.getAccountSecStn(), 
+                                              origDelayDtl.getAccountSecStn())) {
+                                isDirty = true;
+                                dtl.setActivityLog(new ActivityLogTO("DELAY_UPD ("+dtl.getDelayCode()+")", 
+                                                                     "Delay section updated", 
+                                                                     "Delay section changed from " + 
+                                                                     origDelayDtl.getAccountSecStn() + 
+                                                                     " to " + 
+                                                                     dtl.getAccountSecStn()+
+                                                                     " for delay code " + dtl.getDelayCode(),  
+                                                                     "OTP", 
+                                                                     getUserTO().getUserId()));
+                            }
+                            if (changeInValue(dtl.getDelayRemarks(), 
+                                              origDelayDtl.getDelayRemarks())) {
+                                isDirty = true;
+                                dtl.setActivityLog(new ActivityLogTO("DLY_UPD ("+dtl.getDelayCode()+")", 
+                                                                     "Delay remarks updated", 
+                                                                     "Delay remarks changed from " + 
+                                                                     origDelayDtl.getDelayRemarks() + 
+                                                                     " to " + 
+                                                                     dtl.getDelayRemarks() +
+                                                                     " for delay code " + dtl.getDelayCode(), 
+                                                                     "OTP", 
+                                                                     getUserTO().getUserId()));
+                            }
+                            if (isDirty) {
+                                updDelayDtls.add(dtl);
+                            } 
+                        } else {
+                            String updDelayCode = "";
+                            for (DelayDetailTO dtlTO: origDelayDtls) {
+                                if (dtlTO.getDelayId().equals(dtl.getDelayId())) {
+                                    updDelayCode = dtlTO.getDelayCode();
+                                }
+                            }
+                            getDelegate().deleteDelay(getFlightId(), 
+                                                      dtl.getDelayId(), 
+                                                      getUserTO());
+
+                            dtl.setIsnew(false);
+                            addDelayDtls.add(dtl);
+                        }
+                    }
+                }
+            }
+            getDelegate().saveDelayDetails(getFlightId(), addDelayDtls, 
+                                           updDelayDtls, getUserTO());
+            deleteAllDelays(getFlightId(),deleteDelayIds);
+            fetchDelays(getFlightId());       
+            setDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidDelayCodes(flightId));
+           // getFlightHandler().saveDelayDetails(getDelayDetails(), getFlightId(), getUserTO().getUserId());
+        } catch (OtpException e) {
+            e.printStackTrace();
+        }catch(Exception e){
+        	e.printStackTrace();
+        	
+        }
+        return "success";        
+    }
+
+public class DelayDetailNewTO implements Serializable {
+
+	private String processId;
+	private String processName;
+	private String reasonId;
+	private String reasonName;
+	private String stakeholderId;
+	private String stakeholderName;
+	private String stakeholderSubgroup;
+    private String delayCode;
+    private String delayMinutes;
+    private String delayRemarks;
+    private String delayId;
+    private String flightId;
+    private String type;
+    private String lastModifiedBy;
+    private String lastModifiedDate;
+    
+	public String getProcessId() {
+		return processId;
+	}
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
+	public String getProcessName() {
+		return processName;
+	}
+	public void setProcessName(String processName) {
+		this.processName = processName;
+	}
+	public String getReasonId() {
+		return reasonId;
+	}
+	public void setReasonId(String reasonId) {
+		this.reasonId = reasonId;
+	}
+	public String getReasonName() {
+		return reasonName;
+	}
+	public void setReasonName(String reasonName) {
+		this.reasonName = reasonName;
+	}
+	public String getStakeholderId() {
+		return stakeholderId;
+	}
+	public void setStakeholderId(String stakeholderId) {
+		this.stakeholderId = stakeholderId;
+	}
+	public String getStakeholderName() {
+		return stakeholderName;
+	}
+	public void setStakeholderName(String stakeholderName) {
+		this.stakeholderName = stakeholderName;
+	}
+	public String getStakeholderSubgroup() {
+		return stakeholderSubgroup;
+	}
+	public void setStakeholderSubgroup(String stakeholderSubgroup) {
+		this.stakeholderSubgroup = stakeholderSubgroup;
+	}
+	public String getDelayCode() {
+		return delayCode;
+	}
+	public void setDelayCode(String delayCode) {
+		this.delayCode = delayCode;
+	}
+	public String getDelayMinutes() {
+		return delayMinutes;
+	}
+	public void setDelayMinutes(String delayMinutes) {
+		this.delayMinutes = delayMinutes;
+	}
+	public String getDelayRemarks() {
+		return delayRemarks;
+	}
+	public void setDelayRemarks(String delayRemarks) {
+		this.delayRemarks = delayRemarks;
+	}
+	public String getDelayId() {
+		return delayId;
+	}
+	public void setDelayId(String delayId) {
+		this.delayId = delayId;
+	}
+	public String getFlightId() {
+		return flightId;
+	}
+	public void setFlightId(String flightId) {
+		this.flightId = flightId;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String getLastModifiedBy() {
+		return lastModifiedBy;
+	}
+	public void setLastModifiedBy(String lastModifiedBy) {
+		this.lastModifiedBy = lastModifiedBy;
+	}
+	public String getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+	public void setLastModifiedDate(String lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+}
+
+ private ArrayList<String> getDeletedDelayIds(ArrayList<DelayDetailTO> oldDelays, ArrayList<DelayDetailTO> newDelays){
+        ArrayList<String> deltedIds = new ArrayList<String>();
+        ArrayList<String> newIds = new ArrayList<String>();
+        for (DelayDetailTO newDdly: newDelays) {
+            //System.out.println("New Delays ***************************** "+newDdly);
+            if(newDdly != null)
+                newIds.add(newDdly.getDelayId());
+        }
+        for (DelayDetailTO oldDly: oldDelays) {
+            if(!newIds.contains(oldDly.getDelayId())){
+                deltedIds.add(oldDly.getDelayId());
+            }
+        }
+       // System.out.println("Deleted IDs "+deltedIds);
+        return deltedIds;
+    }
+
+private boolean changeInValue(String first, String second) {
+        if ((first == null || "".equals(first.trim())) && 
+            (second == null || "".equals(second.trim()))) {
+            return false;
+        } else if ((first == null || "".equals(first.trim()))) {
+            return true;
+        } else {
+            return !first.equals(second);
+        }
+    }
