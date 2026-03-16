@@ -72,72 +72,32 @@ function showArrival(pathObj) {
 function addDelay(tag){
 
     var fltid = $(tag).attr('id').split("-")[1];
-    var table = $("#newDelayTable-"+fltid);
 
-    var rowCount = table.find("tr").length - 1; // exclude header
-    var newIndex = rowCount;
+    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
 
-    if(rowCount > 0){
+    var url = "delayDtlsNewFirstRow.action";
 
-        var newRow = table.find("tr:last").clone();
+    $.ajax({
 
-        // update ids + names
-        newRow.find("input,select").each(function(){
+        url : url,
+        type : "GET",
 
-            var oldName = $(this).attr("name");
-            var oldId   = $(this).attr("id");
+        data : {
+            flightId : fltid,
+            rowIndex : rowCount
+        },
 
-            if(oldName){
-                var newName = oldName.replace(/\[[0-9]+\]/,"["+newIndex+"]");
-                $(this).attr("name", newName);
-            }
+        success : function(response){
 
-            if(oldId){
+            $("#newDelayTable-"+fltid+" tbody").append(response);
 
-                if(oldId.startsWith("process_"))
-                    $(this).attr("id","process_"+newIndex);
+        },
 
-                if(oldId.startsWith("reason_"))
-                    $(this).attr("id","reason_"+newIndex);
+        error : function(){
+            alert("Unable to add new delay row");
+        }
 
-                if(oldId.startsWith("stakeholder_"))
-                    $(this).attr("id","stakeholder_"+newIndex);
-
-                if(oldId.startsWith("delayCode_"))
-                    $(this).attr("id","delayCode_"+newIndex);
-            }
-
-            $(this).val("");
-        });
-
-        // reset dropdown values
-        newRow.find("#process_"+newIndex).val(-1);
-        newRow.find("#reason_"+newIndex)
-              .html('<option value="-1">Select Reason</option>');
-        newRow.find("#stakeholder_"+newIndex)
-              .html('<option value="-1">Select Stakeholder</option>');
-
-        // rebind onchange events with correct index
-        newRow.find("#process_"+newIndex)
-              .attr("onchange","loadReasons(this.value,"+newIndex+")");
-
-        newRow.find("#reason_"+newIndex)
-              .attr("onchange","loadStakeholders(this.value,"+newIndex+")");
-
-        newRow.find("#stakeholder_"+newIndex)
-              .attr("onchange","loadDelayCode(this.value,"+newIndex+")");
-
-        table.append(newRow);
-
-    } else {
-
-        // use your action mapping for first row
-        var url = "delayDtlsNewFirstRow.action?flightId=" + fltid;
-
-        $.get(url,function(data){
-            $('#delays-'+fltid).html(data).show();
-        });
-    }
+    });
 }
 function loadReasons(processId, rowIndex){
     var reasonSelect = $("#reason_" + rowIndex);
