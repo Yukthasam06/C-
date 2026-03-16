@@ -1,0 +1,375 @@
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ include file="header.jsp"%>
+<%@ include file="menu.jsp"%>
+<%@ include file="tabletop.htm"%>
+<%@ page import="aero.omanair.pax.common.utils.PaxUtil" %>
+<%@ page import="aero.omanair.pax.common.to.FlightTO" %>
+<%@ page contentType="text/html;charset=UTF-8;" pageEncoding="UTF-8"%>
+
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/common.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/dynapopulate.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/jquery-1.4.4.js"></script>
+<script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/scripts/upliftdetail.js"></script>
+
+<% 
+
+   
+    FlightTO outFlightTO = (FlightTO)request.getAttribute("outFlightTO");
+    FlightTO inFlightTO = (FlightTO)request.getAttribute("inFlightTO");
+	String inFlightDate ="";
+	String flightDate = "";
+	StringBuffer inTail = new StringBuffer("");
+	StringBuffer outTail = new StringBuffer("");
+	if(outFlightTO != null){
+		outTail.append(outFlightTO.getAircraft());
+		flightDate = PaxUtil.toStringFormat(PaxUtil.toDate(outFlightTO.getScheduledDate(), PaxUtil.ADVANCED_DATE_FORMAT),PaxUtil.DISPLAY_DATE_FORMAT);		
+		if(outFlightTO.getFlightTail() != null){
+			outTail.append("-");
+			outTail.append(outFlightTO.getFlightTail());
+		}
+	}
+	
+	if(inFlightTO != null){
+		inTail.append(inFlightTO.getAircraft());
+		inFlightDate = PaxUtil.toStringFormat(PaxUtil.toDate(inFlightTO.getScheduledDate(), PaxUtil.ADVANCED_DATE_FORMAT),PaxUtil.DISPLAY_DATE_FORMAT);		
+		if(outFlightTO.getFlightTail() != null){
+			inTail.append("-");
+			inTail.append(inFlightTO.getFlightTail());
+		}
+	}
+
+%>
+
+<script>
+function validateData(){
+        return true;
+}
+	
+function confirmClose(){
+    if(confirm('Are you sure to close the details?')) { 
+            return true;
+    }
+    return false;
+}	
+
+function showFligtMessages(pathObj) {    
+    var fltId = document.getElementById('flightId').value;
+    var uplId = document.getElementById('upliftId').value;
+    var actionStr = '/messageScreenLoad.do?txtFlightId='+fltId+'&txtUpliftId='+uplId;
+        
+    document.forms[0].action = pathObj+actionStr;   
+    document.forms[0].command.value = actionStr.split(".do")[0];    
+    document.forms[0].submit();    
+}
+
+function showArrival(pathObj) {
+	alert('Hi');
+}
+
+
+
+
+function addDelay(tag){
+    //alert('id = '+$(this).attr('id'));
+	var fltid = $(tag).attr('id').split("-")[1];
+	//alert('fltid = '+fltid);
+	var rowCount = $("#newDelayTable-"+fltid+" tr").length;
+	//alert('rowcount = '+rowCount);
+	if(rowCount > 1){
+	    $("#newDelayTable-"+fltid+" tr:last").removeClass("ui-state-highlight");
+	    var lastIndex = $("#newDelayTable-"+fltid+" tr:last").children(":nth-child(2)").children(":first").attr('name');
+	    //alert('lastIndex = ' +lastIndex);
+	    var newIndex = parseInt((lastIndex.split("[")[1]).split("]")[0]) + 1;
+	    //alert('newIndex = ' +newIndex);
+	    $("#newDelayTable-"+fltid+" tr:last").clone(true).insertAfter("#newDelayTable-"+fltid+" tr:last");
+	    //alert('inserted');
+	    $("#newDelayTable-"+fltid+" tr:last input").val("");
+
+	    $("#newDelayTable-"+fltid+" tr:last").children().each(function(index) {
+		$(this).children().each(function(ind){
+		    var id = $(this).attr('id');
+		    //alert('old id = '+id);
+		    var newId = id.replace(new RegExp("_[0-9]{1,2}_"), "_"+newIndex+"_");
+		    //alert('new id = '+newId);
+		    var name = $(this).attr('name');
+		    //alert('old name = '+name);
+		    var newName = name.replace(new RegExp("\\[[0-9]{1,2}\\]"), "["+newIndex+"]");
+		    //alert('new name = '+newName);
+		    $(this).attr('id', newId);
+		    $(this).attr('name', newName);
+                    if(newId == 'processes'){
+                        $(this).val(-1);
+                    }
+		});
+	    });
+	}else{
+	    var url = "delayDtlsNewFirstRow.action?flightId=" + <s:property value="flightId"/>;
+	    $.get(url, function(data){
+		$('#delays-'+<s:property value="flightId"/>).html(data).show();
+	    });
+	}
+	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(5)").text(" ");
+	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(6)").text(" ");
+	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(7)").children(":first").attr("id", "deleteDelay-0-0");
+}
+
+function loadReasons(processId, rowIndex){
+    var reasonSelect = $("#reason_" + rowIndex);
+    console.log("Dropdown ID:", "#reason_"+rowIndex);
+    if(processId == -1){
+        // Reset to default single option
+        reasonSelect.html('<option value="-1">Select Reason</option>');
+        return;
+    }
+
+    $.ajax({
+        url: "loadReasons.action",
+        type: "GET",
+        data: {
+            processId: processId
+        },
+        success: function(response){
+            // Expecting response = options markup like <option value="1">Reason 1</option>...
+            console.log("AJAX response:", response);  // Log response to browser console
+            //alert("Response length: " + response);
+            // Reset options first with default
+            reasonSelect.html('<option value="-1">Select Reason</option>');
+            
+            // Append returned options
+            reasonSelect.append(response);
+        },
+        error: function(){
+            alert("Unable to load reasons");
+            reasonSelect.html('<option value="-1">Select Reason</option>'); // reset on error too
+        }
+    });
+}
+
+function loadStakeholders(reasonId, rowIndex){
+    var stakeholderSelect = $("#stakeholder_" + rowIndex);
+    console.log("Dropdown ID:", "#stakeholder_"+rowIndex);
+    console.log("ReasonId: "+reasonId);
+    if(reasonId == -1){
+        // Reset to default single option
+        stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
+        return;
+    }
+
+    $.ajax({
+        url: "loadStakeholders.action",
+        type: "GET",
+        data: {
+            reasonId: reasonId
+        },
+        success: function(response){
+            console.log("AJAX response:", response);  // Log response to browser console
+            //alert("Response length: " + response);
+            // Reset options first with default
+            stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
+            
+            // Append returned options
+            stakeholderSelect.append(response);
+        },
+        error: function(){
+            alert("Unable to load stakeholders");
+            reasonSelect.html('<option value="-1">Select Stakeholder</option>'); // reset on error too
+        }
+    });
+}
+
+function loadDelayCode(stakeholderId, rowIndex) {
+    var delayCodeField = $("#delayCode_" + rowIndex);
+    if (stakeholderId == -1) {
+        delayCodeField.val("");
+        return;
+    }
+
+    $.ajax({
+        url: "loadDelayCode.action",
+        type: "GET",
+        data: { stakeholderId: stakeholderId },
+        success: function(response) {
+            console.log("Delay code:", response);
+            delayCodeField.val(response);
+        },
+        error: function() {
+            alert("Unable to fetch delay code");
+        }
+    });
+}
+
+function deleteDelay(tag){
+    //$(this).parent().remove(); 
+   // alert(tag.id);
+    if(confirm('Are you sure you want to delete?')){
+	$('#divIndicator').show();
+        var fltid = $(tag).attr('id').split("-")[1];
+	var dlyid = $(tag).attr('id').split("-")[2];
+	var currRow = $(tag).parent().parent();
+            currRow.remove();
+	$('#divIndicator').hide();
+        updateTotalDelay();
+    }
+}
+
+function serialiseDiv(div) {
+    if(!div) {
+            return;
+    }
+    returnString ="";
+    div = typeof div === "string" ? document.getElementById(div) : div;
+    var elms = div.getElementsByTagName("*");
+    for(var i = 0, maxI = elms.length; i < maxI; ++i) {
+            var elm = elms[i];
+            switch(elm.type) {
+                case "text":
+                case "textarea":
+                case "hidden":
+                case "select-one":
+                    if(elm.name != 'undefined') {
+                        if(TrimString(elm.value).length>0 ) {
+                            returnString=returnString+"&"+escape(elm.name)+"="+escape(elm.value);
+                        }
+                    }                        
+            }
+    }
+    return returnString;
+}
+
+</script>
+
+
+<s:form name="delayForm" id="delayForm-<s:property value='flightId'/>">
+<s:hidden name="flightId" id="flightId"/>
+<s:hidden name="upliftId" id="upliftId"/>
+
+<input type="hidden" name="command" />
+			<br>
+			<table width="100%" border="0" align="center" cellpadding="4" cellspacing="1" class="pax_tblBorder">
+
+		
+				<tr class="pax_trHeading">
+					<td valign="center">
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+							<tbody>
+								<tr>
+									<td valign="center" align="left">&nbsp;
+									<s:url action="loadFltArrScreen" id="fltArr" escapeAmp="false">
+										<s:param name="flightId"><s:property value="flightId"/></s:param>
+										<s:param name="upliftId"><s:property value="upliftId"/></s:param>
+									</s:url> 
+									<img src="<%=request.getContextPath()%>/images/icons/arrivals.gif" alt="Arrival" title="Arrival" width="24" border="0" height="24">&nbsp;&nbsp;
+                                                                        <a href="javascript:showFligtMessages('<%=request.getContextPath()%>')"><img src="<%=request.getContextPath()%>/images/icons/messages.gif" alt="Post Flight Messages" title="Post Flight Messages" width="24" border="0" height="24"></a>
+                                                                        &nbsp;&nbsp;<a href="javascript:void(0)" onclick="printScreen()"><img src="<%=request.getContextPath()%>/images/icons/print_icon.gif" alt="Print" title="Print" width="24" border="0" height="24"></a>
+									&nbsp;&nbsp;&nbsp;&nbsp;Delay Details New&nbsp;&nbsp; <font color="Red">WY<s:property value="outFlightTO.flightNo"/>&nbsp;<%=flightDate%>&nbsp;<s:property value="outFlightTO.stationFrom"/>-<s:property value="outFlightTO.stationTo"/></font></td>
+									<td align="right">&nbsp;<font color="red"><b><s:property value="outFlightTO.status"/></b></font>&nbsp;&nbsp;</td>
+								</tr>
+							</tbody>
+						</table></td>
+				</tr>
+				
+			
+				
+				<tr>
+					<td colspan="3"><fieldset title="Outbound">
+						<legend class="pax_Legend">&nbsp;Outbound&nbsp;</legend>
+						<table width="100%" border="0" cellpadding="2" cellspacing="2">		
+						
+                                                        <s:if test="outFlightTO != null">
+                                                        <s:set name="outTail"><%=outTail.toString()%></s:set>
+                                                        
+                                                        
+                                                            <tr>
+                                                                    <td nowrap="nowrap"><s:textfield name="outAircraft" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="8" readonly="true" value="%{outTail}" title="%{outFlightTO.flightType}" /></td>
+                                                                    <td nowrap="nowrap"><s:textfield name="flightNo" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{outFlightTO.flightNo}" /></td>
+                                                                    <td nowrap="nowrap"><s:textfield name="stationFrom" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{outFlightTO.stationFrom}" /><s:textfield name="stationTo" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{outFlightTO.stationTo}" /></td>
+
+                                                                    <td nowrap="nowrap"><s:set name="scheduledDate"><%=flightDate%></s:set><s:textfield name="flightDate" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="9" readonly="true" value="%{scheduledDate}" /></td>								
+                                                                    <td nowrap="nowrap">STD </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="flightStd" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="4" readonly="true" value="%{outFlightTO.flightStd}" /></td>
+                                                                    <td nowrap="nowrap">ATD </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="txtATD" tabindex="1" cssClass="pax_inputTextBox_disabled" size="20" readonly="true"  value="%{outFlightTO.flightAtd}"/></td>
+                                                                    <td nowrap="nowrap">STA </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="flightSta" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="4" readonly="true" value="%{outFlightTO.flightSta}" /></td>
+                                                                    <td nowrap="nowrap">ATA </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="flightAtaFull" tabindex="1" cssClass="pax_inputTextBox_disabled" readonly="true" size="5" value="%{outFlightTO.flightAta}" /></td>
+                                                                    <td nowrap="nowrap">Re-Schd</td>
+                                                                    <td nowrap="nowrap">
+                                                                    <s:textfield name="txtReScheduledDate" tabindex="2" cssClass="pax_inputTextBox_disabled" readonly="true" size="18" value="%{outFlightTO.txtReScheduledDate}"  /></td>
+                                                            </tr>
+                                                        </s:if>
+                                                        <s:else>
+                                                            <tr>
+                                                                <td>&nbsp;&nbsp;No Flight Information found</td>
+                                                            </tr>
+                                                        </s:else>
+						</table>
+						</fieldset></td>
+				</tr>		
+				
+				
+				<tr>
+					<td colspan="3"><fieldset title="Inbound">
+						<legend class="pax_Legend">&nbsp;Inbound&nbsp;</legend>
+						<table width="100%" border="0" cellpadding="2" cellspacing="2">
+						
+														<s:if test="inFlightTO != null">
+															<s:set name="inTail"><%=inTail.toString()%></s:set>
+                                                             <tr>
+                                                                    <td nowrap="nowrap">
+                                                                    	<s:textfield name="inAircraftTail" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="8" readonly="true" value="%{inTail}" title="%{inFlightTO.flightType}" /> 
+                                                                    </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="inFlightNo" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{inFlightTO.flightNo}" /></td>
+                                                                    <td nowrap="nowrap"><s:textfield name="inStationFrom" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{inFlightTO.stationFrom}" /><s:textfield name="inStationTo" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{inFlightTO.stationTo}" /></td>
+                                                                    <td nowrap="nowrap"><s:set name="inScheduledDate"><%=inFlightDate%></s:set><s:textfield name="inFlightDate" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="9" readonly="true" value="%{inScheduledDate}" /></td>								
+                                                                    <td nowrap="nowrap">STD </td>
+																	<td nowrap="nowrap"><s:textfield name="inFlightStd" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="5" readonly="true" value="%{inFlightTO.flightStd}" /></td>                                                                    
+                                                                    <td nowrap="nowrap">ATD </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="inTxtATD" tabindex="1" cssClass="pax_inputTextBox_disabled" size="5" readonly="true" value="%{inFlightTO.flightAtd}" onblur="if(checkDateTime(this)) calculateDelay(this)"  ondblclick="showDateTime(this,'gfPop');this.focus();"/></td>
+                                                                    <td nowrap="nowrap">STA </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="inFlightSta" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="4" readonly="true" value="%{inFlightTO.flightSta}" /></td>
+                                                                    <td nowrap="nowrap">ATA </td>
+                                                                    <td nowrap="nowrap"><s:textfield name="inFlightAtaFull" tabindex="1" cssClass="pax_inputTextBox_disabled" size="18" value="%{inFlightTO.flightAta}" readonly="true" />&nbsp;</td>
+                                                                    <td nowrap="nowrap">Re-Schd</td>
+                                                                    <td nowrap="nowrap"><s:textfield name="inResheduledDate" readonly="true" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="19" value="%{inFlightTO.txtReScheduledDate}"/></td>
+                                                            </tr>                   
+                                                        </s:if>
+                                                        <s:else>
+                                                            <tr>
+                                                                <td>&nbsp;&nbsp;No Inbound Flight Information found</td>
+                                                            </tr>
+                                                        </s:else>
+						</table>
+						</fieldset></td>
+				</tr>	
+				<tr><td>
+ 
+
+				 <div id="protabbercontent_main"><jsp:include page="departures_tabs.jsp">
+						
+						<jsp:param name="current" value="newDelays" />
+						<jsp:param name="upliftId" value="${upliftId}" />
+						<jsp:param name="flightId" value="${flightId}" />	
+                                                
+					</jsp:include>
+						<!--Begin Tab Content Div-->
+						<div id="protabbercontent"><br>
+                              
+                                             
+                                 <div id="delays-<s:property value='flightId' />" class="content">          
+                                    <%@ include file="departure-tab-delays-dtls-new.jsp"%>
+                                 </div>                                                        
+ 
+                        		</div></div> 
+						<!--End Tab Content Div-->                                                         
+
+                                </td>
+				</tr>
+                                   
+
+			</table>
+			<br>
+</s:form>			
+			
+<br>
+<%@ include file="footer.jsp"%>
