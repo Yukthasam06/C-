@@ -72,62 +72,73 @@ function showArrival(pathObj) {
 function addDelay(tag){
 
     var fltid = $(tag).attr('id').split("-")[1];
-
     var table = $("#newDelayTable-"+fltid);
-    var lastRow = table.find("tr:last");
-    var rowCount = table.find("tr").length - 1;
+
+    var rowCount = table.find("tr").length - 1; // exclude header
+    var newIndex = rowCount;
 
     if(rowCount > 0){
 
-        var newRow = lastRow.clone(true);
+        var newRow = table.find("tr:last").clone();
 
-        var newIndex = rowCount;
-
-        newRow.find("input, select").each(function(){
+        // update ids + names
+        newRow.find("input,select").each(function(){
 
             var oldName = $(this).attr("name");
-            var oldId = $(this).attr("id");
+            var oldId   = $(this).attr("id");
 
             if(oldName){
-                var newName = oldName.replace(/\[[0-9]+\]/, "["+newIndex+"]");
+                var newName = oldName.replace(/\[[0-9]+\]/,"["+newIndex+"]");
                 $(this).attr("name", newName);
             }
 
             if(oldId){
 
-                if(oldId.startsWith("process_")){
+                if(oldId.startsWith("process_"))
                     $(this).attr("id","process_"+newIndex);
-                }
 
-                if(oldId.startsWith("reason_")){
+                if(oldId.startsWith("reason_"))
                     $(this).attr("id","reason_"+newIndex);
-                }
 
-                if(oldId.startsWith("stakeholder_")){
+                if(oldId.startsWith("stakeholder_"))
                     $(this).attr("id","stakeholder_"+newIndex);
-                }
 
-                if(oldId.startsWith("delayCode_")){
+                if(oldId.startsWith("delayCode_"))
                     $(this).attr("id","delayCode_"+newIndex);
-                }
-
-                if(oldId.startsWith("type_")){
-                    $(this).attr("id","type_"+newIndex);
-                }
             }
 
             $(this).val("");
         });
 
+        // reset dropdown values
         newRow.find("#process_"+newIndex).val(-1);
-        newRow.find("#reason_"+newIndex).html('<option value="-1">Select Reason</option>');
-        newRow.find("#stakeholder_"+newIndex).html('<option value="-1">Select Stakeholder</option>');
+        newRow.find("#reason_"+newIndex)
+              .html('<option value="-1">Select Reason</option>');
+        newRow.find("#stakeholder_"+newIndex)
+              .html('<option value="-1">Select Stakeholder</option>');
+
+        // rebind onchange events with correct index
+        newRow.find("#process_"+newIndex)
+              .attr("onchange","loadReasons(this.value,"+newIndex+")");
+
+        newRow.find("#reason_"+newIndex)
+              .attr("onchange","loadStakeholders(this.value,"+newIndex+")");
+
+        newRow.find("#stakeholder_"+newIndex)
+              .attr("onchange","loadDelayCode(this.value,"+newIndex+")");
 
         table.append(newRow);
 
+    } else {
+
+        // use your action mapping for first row
+        var url = "delayDtlsNewFirstRow.action?flightId=" + fltid;
+
+        $.get(url,function(data){
+            $('#delays-'+fltid).html(data).show();
+        });
     }
 }
-
 function loadReasons(processId, rowIndex){
     var reasonSelect = $("#reason_" + rowIndex);
     console.log("Dropdown ID:", "#reason_"+rowIndex);
