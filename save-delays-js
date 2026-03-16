@@ -14,7 +14,10 @@ $(document).ready(function(){
             var stakeholder = $("#stakeholder_" + i).val();
             var delayCode = $("#delayCode_" + i).val();
             var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
-            var type = $("select[name='delayDetailsNew["+i+"].type']").val();
+            var type = $("#newDelayTable-<s:property value='flightId'/> tr")
+            .eq(i+1)
+            .find("select[name$='.type']")
+            .val();
             var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
 
             if(process == "-1" || process == null){
@@ -51,7 +54,7 @@ $(document).ready(function(){
                 return false;
             }
 
-            if(type == "" || type == null){
+            if(type == "" || type == null || type == undefined){
                 alert("Please select Type in row " + (i+1));
                 return false;
             }
