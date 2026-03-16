@@ -1,0 +1,111 @@
+$(document).ready(function(){
+
+    $(".saveIcon").click(function(){
+
+        var isValid = true;
+        var primaryCount = 0;
+
+        $("#newDelayTable-<s:property value='flightId'/> tbody tr").each(function(){
+
+            var process = $(this).find("select[name*='processId']").val();
+            var reason = $(this).find("select[name*='reasonId']").val();
+            var stakeholder = $(this).find("select[name*='stakeholderId']").val();
+            var delayCode = $(this).find("input[name*='delayCode']").val();
+            var delayMinutes = $(this).find("input[name*='delayMinutes']").val();
+            var type = $(this).find("select[name*='type']").val();
+            var remarks = $(this).find("input[name*='delayRemarks']").val();
+
+            if(process == "-1" || process == "" || process == null){
+                alert("Please select Process");
+                isValid = false;
+                return false;
+            }
+
+            if(reason == "-1" || reason == "" || reason == null){
+                alert("Please select Reason");
+                isValid = false;
+                return false;
+            }
+
+            if(stakeholder == "-1" || stakeholder == "" || stakeholder == null){
+                alert("Please select Stakeholder");
+                isValid = false;
+                return false;
+            }
+
+            if(delayCode == "" || delayCode == null){
+                alert("Delay Code is missing");
+                isValid = false;
+                return false;
+            }
+
+            if(delayMinutes == "" || delayMinutes == null){
+                alert("Delay Minutes is missing");
+                isValid = false;
+                return false;
+            }
+
+            if(isNaN(delayMinutes)){
+                alert("Delay Minutes must be numeric");
+                isValid = false;
+                return false;
+            }
+
+            if(type == "" || type == null){
+                alert("Please select Type (Primary / Secondary)");
+                isValid = false;
+                return false;
+            }
+
+            if(type == "Primary"){
+                primaryCount++;
+            }
+
+            if(remarks == "" || remarks == null){
+                alert("Delay Remarks is missing");
+                isValid = false;
+                return false;
+            }
+
+        });
+
+        // Validate Primary rule
+        if(primaryCount > 1){
+            alert("Only one delay can be marked as Primary.");
+            isValid = false;
+        }
+
+        if(primaryCount == 0){
+            alert("One delay must be marked as Primary.");
+            isValid = false;
+        }
+
+        if(isValid){
+
+            $("#divIndicator").show();
+
+            var url = "saveDelayDtls.action";
+
+            var formData = $("#delaytbl :input").serialize();
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: formData,
+
+                success: function(response){
+                    $("#divIndicator").hide();
+                    alert("Delay details saved successfully");
+                },
+
+                error: function(){
+                    $("#divIndicator").hide();
+                    alert("Error while saving delay details");
+                }
+            });
+
+        }
+
+    });
+
+});
