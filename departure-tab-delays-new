@@ -70,47 +70,62 @@ function showArrival(pathObj) {
 
 
 function addDelay(tag){
-    //alert('id = '+$(this).attr('id'));
-	var fltid = $(tag).attr('id').split("-")[1];
-	//alert('fltid = '+fltid);
-	var rowCount = $("#newDelayTable-"+fltid+" tr").length;
-	//alert('rowcount = '+rowCount);
-	if(rowCount > 1){
-	    $("#newDelayTable-"+fltid+" tr:last").removeClass("ui-state-highlight");
-	    var lastIndex = $("#newDelayTable-"+fltid+" tr:last").children(":nth-child(2)").children(":first").attr('name');
-	    //alert('lastIndex = ' +lastIndex);
-	    var newIndex = parseInt((lastIndex.split("[")[1]).split("]")[0]) + 1;
-	    //alert('newIndex = ' +newIndex);
-	    $("#newDelayTable-"+fltid+" tr:last").clone(true).insertAfter("#newDelayTable-"+fltid+" tr:last");
-	    //alert('inserted');
-	    $("#newDelayTable-"+fltid+" tr:last input").val("");
 
-	    $("#newDelayTable-"+fltid+" tr:last").children().each(function(index) {
-		$(this).children().each(function(ind){
-		    var id = $(this).attr('id');
-		    //alert('old id = '+id);
-		    var newId = id.replace(new RegExp("_[0-9]{1,2}_"), "_"+newIndex+"_");
-		    //alert('new id = '+newId);
-		    var name = $(this).attr('name');
-		    //alert('old name = '+name);
-		    var newName = name.replace(new RegExp("\\[[0-9]{1,2}\\]"), "["+newIndex+"]");
-		    //alert('new name = '+newName);
-		    $(this).attr('id', newId);
-		    $(this).attr('name', newName);
-                    if(newId == 'processes'){
-                        $(this).val(-1);
-                    }
-		});
-	    });
-	}else{
-	    var url = "delayDtlsNewFirstRow.action?flightId=" + <s:property value="flightId"/>;
-	    $.get(url, function(data){
-		$('#delays-'+<s:property value="flightId"/>).html(data).show();
-	    });
-	}
-	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(5)").text(" ");
-	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(6)").text(" ");
-	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(7)").children(":first").attr("id", "deleteDelay-0-0");
+    var fltid = $(tag).attr('id').split("-")[1];
+
+    var table = $("#newDelayTable-"+fltid);
+    var lastRow = table.find("tr:last");
+    var rowCount = table.find("tr").length - 1;
+
+    if(rowCount > 0){
+
+        var newRow = lastRow.clone(true);
+
+        var newIndex = rowCount;
+
+        newRow.find("input, select").each(function(){
+
+            var oldName = $(this).attr("name");
+            var oldId = $(this).attr("id");
+
+            if(oldName){
+                var newName = oldName.replace(/\[[0-9]+\]/, "["+newIndex+"]");
+                $(this).attr("name", newName);
+            }
+
+            if(oldId){
+
+                if(oldId.startsWith("process_")){
+                    $(this).attr("id","process_"+newIndex);
+                }
+
+                if(oldId.startsWith("reason_")){
+                    $(this).attr("id","reason_"+newIndex);
+                }
+
+                if(oldId.startsWith("stakeholder_")){
+                    $(this).attr("id","stakeholder_"+newIndex);
+                }
+
+                if(oldId.startsWith("delayCode_")){
+                    $(this).attr("id","delayCode_"+newIndex);
+                }
+
+                if(oldId.startsWith("type_")){
+                    $(this).attr("id","type_"+newIndex);
+                }
+            }
+
+            $(this).val("");
+        });
+
+        newRow.find("#process_"+newIndex).val(-1);
+        newRow.find("#reason_"+newIndex).html('<option value="-1">Select Reason</option>');
+        newRow.find("#stakeholder_"+newIndex).html('<option value="-1">Select Stakeholder</option>');
+
+        table.append(newRow);
+
+    }
 }
 
 function loadReasons(processId, rowIndex){
