@@ -70,35 +70,49 @@ function showArrival(pathObj) {
 
 
 function addDelay(tag){
+    //alert('id = '+$(this).attr('id'));
+	var fltid = $(tag).attr('id').split("-")[1];
+	//alert('fltid = '+fltid);
+	var rowCount = $("#newDelayTable-"+fltid+" tr").length;
+	//alert('rowcount = '+rowCount);
+	if(rowCount > 1){
+	    $("#newDelayTable-"+fltid+" tr:last").removeClass("ui-state-highlight");
+	    var lastIndex = $("#newDelayTable-"+fltid+" tr:last").children(":nth-child(2)").children(":first").attr('name');
+	    //alert('lastIndex = ' +lastIndex);
+	    var newIndex = parseInt((lastIndex.split("[")[1]).split("]")[0]) + 1;
+	    //alert('newIndex = ' +newIndex);
+	    $("#newDelayTable-"+fltid+" tr:last").clone(true).insertAfter("#newDelayTable-"+fltid+" tr:last");
+	    //alert('inserted');
+	    $("#newDelayTable-"+fltid+" tr:last input").val("");
 
-    var fltid = $(tag).attr('id').split("-")[1];
-
-    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
-
-    var url = "delayDtlsNewFirstRow.action";
-
-    $.ajax({
-
-        url : url,
-        type : "GET",
-
-        data : {
-            flightId : fltid,
-            rowIndex : rowCount
-        },
-
-        success : function(response){
-
-            $("#newDelayTable-"+fltid+" tbody").append(response);
-
-        },
-
-        error : function(){
-            alert("Unable to add new delay row");
-        }
-
-    });
+	    $("#newDelayTable-"+fltid+" tr:last").children().each(function(index) {
+		$(this).children().each(function(ind){
+		    var id = $(this).attr('id');
+		    //alert('old id = '+id);
+		    var newId = id.replace(new RegExp("_[0-9]{1,2}_"), "_"+newIndex+"_");
+		    //alert('new id = '+newId);
+		    var name = $(this).attr('name');
+		    //alert('old name = '+name);
+		    var newName = name.replace(new RegExp("\\[[0-9]{1,2}\\]"), "["+newIndex+"]");
+		    //alert('new name = '+newName);
+		    $(this).attr('id', newId);
+		    $(this).attr('name', newName);
+                    if(newId == 'processes'){
+                        $(this).val(-1);
+                    }
+		});
+	    });
+	}else{
+	    var url = "delayDtlsNewFirstRow.action?flightId=" + <s:property value="flightId"/>;
+	    $.get(url, function(data){
+		$('#delays-'+<s:property value="flightId"/>).html(data).show();
+	    });
+	}
+	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(5)").text(" ");
+	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(6)").text(" ");
+	$("#newDelayTable-"+fltid+" tr:last").children(":nth-child(7)").children(":first").attr("id", "deleteDelay-0-0");
 }
+
 function loadReasons(processId, rowIndex){
     var reasonSelect = $("#reason_" + rowIndex);
     console.log("Dropdown ID:", "#reason_"+rowIndex);
@@ -119,6 +133,7 @@ function loadReasons(processId, rowIndex){
             console.log("AJAX response:", response);  // Log response to browser console
             //alert("Response length: " + response);
             // Reset options first with default
+            reasonSelect.empty();
             reasonSelect.html('<option value="-1">Select Reason</option>');
             
             // Append returned options
@@ -151,6 +166,7 @@ function loadStakeholders(reasonId, rowIndex){
             console.log("AJAX response:", response);  // Log response to browser console
             //alert("Response length: " + response);
             // Reset options first with default
+            stakeholderSelect.empty();
             stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
             
             // Append returned options
@@ -158,7 +174,7 @@ function loadStakeholders(reasonId, rowIndex){
         },
         error: function(){
             alert("Unable to load stakeholders");
-            reasonSelect.html('<option value="-1">Select Stakeholder</option>'); // reset on error too
+            stakeholderSelect.html('<option value="-1">Select Stakeholder</option>'); // reset on error too
         }
     });
 }
