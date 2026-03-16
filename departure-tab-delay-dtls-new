@@ -47,296 +47,122 @@
 } 
 
 
-</style>   
+</style> 
 <script>
+$(document).ready(function(){
 
- <%--function updateTotalDelay(){
-    var tot=0;
-    $('*[name*=delayMinutes]').each(function() {
-         tot = tot+ parseInt($(this).val());
-    }); 
-     $('#delaySum').val(tot);
-    
-}
-$(document).ready(function() {
-//alert("ready");
-    updateTotalDelay();
-    
-       
-    
-        $("select[name^='delayDetails']").change(function () {
-            var str = "";
-            $(this).children().each(function () {
-                if($(this).attr('selected') == true){
-                    str = $(this).text();
-                }
-            });
-            if(str.substr(0,2) == '92' || str == '16B' || str =='16F'){
-                $(this).parent().next().next().children(":first").removeAttr("readonly");
-                $(this).parent().next().next().children(":first").val("");
-            }else{
-                $(this).parent().next().next().children(":first").val("");
-                $(this).parent().next().next().children(":first").attr("readonly", true);
+    $(".saveIcon").click(function(){
+
+        var isValid = true;
+        var primaryCount = 0;
+
+        var rowCount = $("#newDelayTable-<s:property value='flightId'/> tr").length - 1;
+
+        for(var i=0; i<rowCount; i++){
+
+            var process = $("#process_" + i).val();
+            var reason = $("#reason_" + i).val();
+            var stakeholder = $("#stakeholder_" + i).val();
+            var delayCode = $("#delayCode_" + i).val();
+            var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
+            var type = $("#newDelayTable-<s:property value='flightId'/> tr")
+            .eq(i+1)
+            .find("select[name$='.type']")
+            .val();
+            var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
+            console.log("Process:"+process);
+            console.log("reason:"+reason);
+            console.log("stakeholder:"+stakeholder);
+            console.log("delayCode:"+delayCode);
+            console.log("delayMinutes:"+delayMinutes);
+            console.log("type:"+type);
+            console.log("remarks:"+remarks);
+            if(process == "-1" || process == null){
+                alert("Please select Process in row " + (i+1));
+                $("#process_" + i).focus();
+                return false;
             }
-            /*if(str.substr(0,2) == '91'){
-                $(this).parent().next().next().children(":first").removeAttr("readonly");
-                $(this).parent().next().next().children(":first").val("");
-                $(this).parent().next().next().children(":first").attr("maxlength", "5");
-                //$(this).parent().next().next().next().children(":first").keydown(return validateTimeKey(event,this));
-                //$(this).parent().next().next().next().children(":first").blur(checkTimeFldFormat(this));
-            }else{
-                $(this).parent().next().next().children(":first").val("");
-                $(this).parent().next().next().children(":first").attr("readonly", true);
-                
-            }*/
+
+            if(reason == "-1" || reason == null){
+                alert("Please select Reason in row " + (i+1));
+                $("#reason_" + i).focus();
+                return false;
+            }
+
+            if(stakeholder == "-1" || stakeholder == null){
+                alert("Please select Stakeholder in row " + (i+1));
+                $("#stakeholder_" + i).focus();
+                return false;
+            }
+
+            if(delayCode == "" || delayCode == null){
+                alert("Delay Code is missing in row " + (i+1));
+                $("#delayCode_" + i).focus();
+                return false;
+            }
+
+            if(delayMinutes == "" || delayMinutes == null){
+                alert("Delay Minutes is missing in row " + (i+1));
+                return false;
+            }
+
+            if(isNaN(delayMinutes)){
+                alert("Delay Minutes must be numeric in row " + (i+1));
+                return false;
+            }
+
+            if(type == "" || type == null || type == undefined){
+                alert("Please select Type in row " + (i+1));
+                return false;
+            }
+
+            if(type == "Primary"){
+                primaryCount++;
+            }
+
+            if(remarks == "" || remarks == null){
+                alert("Delay Remarks is missing in row " + (i+1));
+                return false;
+            }
+        }
+
+        if(primaryCount > 1){
+            alert("Only one delay can be marked as Primary.");
+            return false;
+        }
+
+        if(primaryCount == 0){
+            alert("One delay must be marked as Primary.");
+            return false;
+        }
+
+        $("#divIndicator").show();
+
+        var formData = $("#delaytbl :input").serialize();
+
+        $.ajax({
+            type: "POST",
+            url: "saveDelayDtlsNew.action",
+            data: formData,
+
+            success: function(data){
+                $("#divIndicator").hide();
+                alert("Delay details saved successfully");
+            },
+
+            error: function(){
+                $("#divIndicator").hide();
+                alert("Error while saving delay details");
+            }
+
         });
-        
-        
-        $("input[id$='delayMinutes'],input[id$='ata']").keydown(function(event) {
-           if(event.shiftKey)
-           {
-                event.preventDefault();
-           }
-           if (event.keyCode == 46 || event.keyCode == 8)    {
-           }
-           else {
-                if (event.keyCode < 95) {
-                  if (event.keyCode < 48 || event.keyCode > 57) {
-                        event.preventDefault();
-                  }
-                }
-                else {
-                      if (event.keyCode < 96 || event.keyCode > 105) {
-                          event.preventDefault();
-                      }
-                }
-              }
-       });    
 
-        $(".saveIcon").click(function() {
-          // alert("ready"); 
-            //alert($(this).attr("id"));
-            var fltid = $(this).attr('id').split("-")[1];
-            var isValid = true;
-            //alert("delays-"+fltid);
-            updateTotalDelay();
-            
-            //$('select.foo').val();
-            
-            
-            $('#delayTable-'+<s:property value="flightId"/>).find("select[id$=delayCodes]").each(function() {
-                if($(this).val() == -1){
-                    alert("Select a valid delay code");
-                    $(this).focus(); // focus the element
-                    isValid = false;   
-                }
-
-            })            
-            
-            if (isValid){
-                $('#delayTable-'+<s:property value="flightId"/>).find("input[id$=delayMinutes]").each(function() {
-                    if($.trim($(this).val()) == '') {
-                        alert("Delay Minutes is missing!!");
-                        $(this).focus(); // focus the element
-                        isValid = false;
-                    }
-                })
-            }
-            
-            if (isValid){            
-                $('#delayTable-'+<s:property value="flightId"/>).find("input[id$=delayRemarks]").each(function() {
-                    if($.trim($(this).val()) == '') {
-                        alert("Delay Remarks is missing!!");
-                        $(this).focus(); // focus the element
-                        isValid = false;
-                    }else{
-                    	var delayRem= $(this).val();
-                    	delayRem=escape(delayRem);
-                    	var uniChars=$('#uniCodeHexChars').val();                            
-                    	var uniCharsSplit=uniChars.split(",");
-                		for(var i=0;i<uniCharsSplit.length;i++){
-                			var uniCharsSubSplit=uniCharsSplit[i].split("~");
-                			delayRem=delayRem.split('%'+uniCharsSubSplit[0]).join(uniCharsSubSplit[1]);        			
-                		}
-                		$(this).val(unescape(delayRem));
-                    }
-                })    
-            }
-            
-            if (isValid){            
-                var totdelay = parseInt($('#delaySum').val());
-                var actdelay = parseInt($("#totalDelay").val());
-                if(isNaN(totdelay)){
-                    totdelay=0;
-                    totdelay=parseInt(totdelay);
-                    //alert("IT IS NAN");
-                }else{
-                totdelay=parseInt(totdelay);
-                }
-               
-                if(isNaN(actdelay)){
-                    actdelay=0;
-                     actdelay=parseInt(actdelay);
-                    //alert("IT IS NAN");
-                }else{
-                 actdelay=parseInt(actdelay);
-                }
-             //alert(actdelay+"delays"+totdelay);
-                if(actdelay>0 || totdelay!=0){
-               // alert("if condition whent"+actdelay+">0 || tot"+totdelay+"!=0");
-                    if(totdelay != actdelay){
-                 //  alert("Total Delay Minutes is not matching with Actual Delay!!");
-                        alert("Total Delay Minutes is not matching with Actual Delay!!");
-                        isValid = false;
-                    }
-                }
-           }
-            
-            if(isValid){
-                $('#divIndicator').show();
-                var urlString =  serialiseDiv("delays-"+fltid);
-                //alert(urlString);
-                var url = "saveDelayDtls.action?flightId=" + <s:property value="flightId"/> + "&"+ urlString;
-                //alert(url);
-                $.get(url, function(data){
-                    $('#divIndicator').hide();
-                     if(data.indexOf("delayForm") > -1){
-                        $('#delays-'+<s:property value="flightId"/>).html(data).show();
-                    }else{
-                        alert(data);
-                    }            
-                    
-                });
-                updateTotalDelay();
-            }
-        });     
-        
-        
-        $(".saveRemIcon").click(function() {
-           var fltid = $(this).attr('id').split("-")[1];
-           $('#divIndicator').show();
-            var urlString =  serialiseDiv("delays-"+fltid);
-            
-            var find = '%u2022%09';
-            var re = new RegExp(find, 'g');
-            urlString = urlString.replace(re, '\n');
-            find='%uF0D8%09';
-            re= new RegExp(find, 'g');
-            urlString = urlString.replace(re, '\n');
-            find='%uF0FC%09';
-            re= new RegExp(find, 'g');
-            urlString = urlString.replace(re, '\n');
-            //alert(urlString);
-            var uniChars=$('#uniCodeHexChars').val();  		
-			var uniCharsSplit=uniChars.split(",");
-			for(var i=0;i<uniCharsSplit.length;i++){
-				var uniCharsSubSplit=uniCharsSplit[i].split("~");
-				urlString=urlString.split('%'+uniCharsSubSplit[0]).join(uniCharsSubSplit[1]);        			
-			}
-            var url = "saveDelayRemark.action?flightId=" + <s:property value="flightId"/> + "&"+ urlString;
-            //alert(url);
-           // document.getElementById().
-            $.get(url, function(data){
-                $('#divIndicator').hide();
-                 if(data.indexOf("delayForm") > -1){
-                    $('#delays-'+<s:property value="flightId"/>).html(data).show();
-                }else{
-                    alert(data);
-                }            
-            });        
-        });  
-        
-        $(".cancelIcon").click(function() {
-            $('#divIndicator').show();
-            var fltid = <s:property value="flightId"/>;
-            var url = "cancelDlyDtls.action?flightId=" + fltid;
-            var proceed = true;
-            if(!confirm('All unsaved changes will be lost! Do you want to continue?')){
-                proceed = false;
-                $('#divIndicator').hide();
-            }
-            if(proceed == true){
-                $.post(url, function(data){
-                    $('#divIndicator').hide();
-                    $('#delays-'+<s:property value="flightId"/>).html(data).show();
-                });
-                updateTotalDelay();
-            }
-        });    
+    });
 
 });
 
+ </script>
 
-</script> --%>
-
-<%-- <script type="text/javascript">
-
-function closepopup(id){
-
- var divbg = document.getElementById('bg'); 
-      divbg.style.visibility = "hidden"; 
-      var divobj = document.getElementById(id); 
-      divobj.style.visibility = "hidden";
-}
-
-function cancelpopup(id){
-
-var divbg = document.getElementById('bg'); 
-      divbg.style.visibility = "hidden"; 
-      var divobj = document.getElementById(id); 
-      divobj.style.visibility = "hidden";
-}
-
-</script> --%>
-
-<script type="text/javascript">
-
-
-
-function openpopup(id,delaycode,remarks,delayId)
-{ 
- $('#successPopUp').html('');
- var remid=delayId+'parentDelayRemarks';
- var dID=delayId+'ParentDelayCode';   
-   remarks= $('#'+remid).val();
-   delaycode=$('#'+dID).val();
-   document.getElementById('orDelayCode').value= delayId;
-      //Calculate Page width and height 
-      var pageWidth = window.innerWidth; 
-      var pageHeight = window.innerHeight; 
-      if (typeof pageWidth != "number"){ 
-      if (document.compatMode == "CSS1Compat"){ 
-            pageWidth = document.documentElement.clientWidth; 
-            pageHeight = document.documentElement.clientHeight; 
-      } else { 
-            pageWidth = document.body.clientWidth; 
-            pageHeight = document.body.clientHeight; 
-      } 
-      }  
-      //Make the background div tag visible... 
-      var divbg = document.getElementById('bg'); 
-      divbg.style.visibility = "visible"; 
-        $('#parentDelayRemarks').val(remarks);
-       $('#ORdelayCodes').val(delaycode); 
-      var divobj = document.getElementById(id);      
-      divobj.style.visibility = "visible"; 
-      if (navigator.appName=="Microsoft Internet Explorer") 
-      computedStyle = divobj.currentStyle; 
-      else computedStyle = document.defaultView.getComputedStyle(divobj, null); 
-      //Get Div width and height from StyleSheet 
-      var divWidth = computedStyle.width.replace('px', ''); 
-      var divHeight = computedStyle.height.replace('px', ''); 
-      var divLeft = (pageWidth - divWidth) / 2; 
-      var divTop = (pageHeight - divHeight) / 2; 
-      //Set Left and top coordinates for the div tag 
-      divobj.style.left = divLeft + "px"; 
-      divobj.style.top = divTop + "px"; 
-      if(divobj.innerHTML.indexOf("closepopup('" + id +"')") < 0 ) 
-      divobj.innerHTML = "<a href=\"#\" onclick=\"closepopup('" + id +"')\"><span class=\"close_button\"><font color=\"red\">X</font></span></a>" + divobj.innerHTML; 
-}
-
-
-</script>
 							<table width="100%" border="0">     
 								<tr>
 									<td>
