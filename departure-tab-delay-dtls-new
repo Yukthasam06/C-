@@ -187,8 +187,9 @@ $(document).ready(function(){
                                                                         <fieldset title="Delay Details">
 									<legend class="pax_Legend">&nbsp;Basic Details &nbsp;</legend>
 			
-                                                                        <DIV id=delaytbl>
-                                                                            <table align="center" id="newDelayTable-<s:property value='flightId'/>" width="100%"  class="pax_tblBG" border="0" cellpadding="0" cellspacing="1">
+                                                                         <DIV id=delaytbl>
+                                                                            <table align="center" id="newDelayTable-<s:property value='flightId'/>" width="100%"  class="pax_tblBG" border="0" cellpadding="0" cellspacing="1"> 
+                                                                            <thead>
                                                                             <tr class="pax_trHeading">
                                                                                 <th  colspan="1" width="9%">Process</th>
                                                                                 <th  width="5%">Reason</th>
@@ -214,7 +215,9 @@ $(document).ready(function(){
                                                                                     
                                                                                 </th>
                                                                             </tr>
-                                                                            <s:iterator value="delayDetailsNew">
+                                                                            </thead>
+                                                                            <tbody id="delayBody-<s:property value='flightId'/>">
+                                                                            <s:iterator value="delayDetailsNew"> 
                                                                             <tr>
 																			
 																			<td>
@@ -320,10 +323,11 @@ $(document).ready(function(){
 																			</td>
 																			
 																			</tr>
-																			</s:iterator>
                                                                             
-                                                                            </table>
-                                                                         </div>
+                                                                            </s:iterator> 
+                                                                            </tbody>
+                                                                             </table> 
+                                                                          </div> 
                         
                         
                         
@@ -352,5 +356,5 @@ $(document).ready(function(){
                      <div id="successPopUp" align="center" style="width:400;hight:200" ></div>
                       </div>
                      <div id="bg" class="popup_bg"></div> 
-                                                                                                          
+                                                     
                                                   
