@@ -51,6 +51,7 @@
 <script>
 $(document).ready(function(){
 
+	var fltid = "<s:property value='flightId'/>";
     $(".saveIcon").click(function(){
 
         var isValid = true;
@@ -138,23 +139,21 @@ $(document).ready(function(){
 
         $("#divIndicator").show();
 
-        var formData = $("#delaytbl :input").serialize();
-
-        $.ajax({
-            type: "POST",
-            url: "saveDelayDtlsNew.action",
-            data: formData,
-
-            success: function(data){
-                $("#divIndicator").hide();
-                alert("Delay details saved successfully");
-            },
-
-            error: function(){
-                $("#divIndicator").hide();
-                alert("Error while saving delay details");
-            }
-
+        //var formData = $("#delaytbl :input").serialize();
+        var urlString =  serialiseDiv("delays-"+fltid);
+        var url = "saveDelayDtlsNew.action?flightId=" + encodeURIComponent(fltid) + "&"+ urlString;
+        //alert(url);
+        $.get(url, function(data){
+            $('#divIndicator').hide();
+             if(data.indexOf("delayForm") > -1){
+                $('#delays-'+ fltid).html(data).show();
+            }else{
+                alert(data);
+            }            
+            
+        }).fail(function(){
+        	$('#divIndicator').hide();
+        	alert("Error while saving delay details");
         });
 
     });
@@ -162,7 +161,6 @@ $(document).ready(function(){
 });
 
  </script>
-
 							<table width="100%" border="0">     
 								<tr>
 									<td>
@@ -192,14 +190,14 @@ $(document).ready(function(){
                                                                             <thead>
                                                                             <tr class="pax_trHeading">
                                                                                 <th  colspan="1" width="9%">Process</th>
-                                                                                <th  width="5%">Reason</th>
-                                                                                <th  width="5%">Stakeholder</th>
-                                                                                <th  width="5%">Delay Code</th>
-                                                                                <th  width="5%">Delay minutes</th>
+                                                                                <th  width="9%">Reason</th>
+                                                                                <th  width="9%">Stakeholder</th>
+                                                                                <th  width="6%">Delay Code</th>
+                                                                                <th  width="6%">Delay minutes</th>
                                                                                 <th  width="5%">Type</th>
                                                                                 <th  width="5%">Remarks</th>
-                                                                                <th  width="5%">Last Modified By</th>
-                                                                                <th  width="5%">Last Modified On</th>
+                                                                                <th  width="12%">Last Modified By</th>
+                                                                                <th  width="14%">Last Modified On</th>
                                                                                 <th colspan="1"  width="8%">
                                                                                     
                                                                                     <s:if test="%{((freezeStatus == 3 ) && flightEditAccess)}">
@@ -217,114 +215,7 @@ $(document).ready(function(){
                                                                             </tr>
                                                                             </thead>
                                                                             <tbody id="delayBody-<s:property value='flightId'/>">
-                                                                            <s:iterator value="delayDetailsNew"> 
-                                                                            <tr>
-																			
-																			<td>
-																			
-																			<s:select
-																			name="delayDetailsNew[%{rowIndex}].processId"
-																			list="processes"
-																			listKey="id"
-																			listValue="value"
-																			headerKey="-1"
-																			headerValue="Select Process"
-																			cssClass="pax_inputSelect"
-																			id="process_%{rowIndex}"
-																			onchange="loadReasons(this.value,%{rowIndex})"
-																			/>
-																			
-																			</td>
-																			
-																			<td>
-																			
-																			<s:select
-																			name="delayDetailsNew[%{rowIndex}].reasonId"
-																			list="{}"
-																			headerKey="-1"
-																			headerValue="Select Reason"
-																			cssClass="pax_inputSelect"
-																			id="reason_%{rowIndex}"
-																			onchange="loadStakeholders(this.value,%{rowIndex})"
-																			/>
-																			
-																			</td>
-																			
-																			<td>
-																			
-																			<s:select
-																			name="delayDetailsNew[%{rowIndex}].stakeholderId"
-																			list="{}"
-																			headerKey="-1"
-																			headerValue="Select Stakeholder"
-																			cssClass="pax_inputSelect"
-																			id="stakeholder_%{rowIndex}"
-																			onchange="loadDelayCode(this.value,%{rowIndex})"
-																			/>
-																			
-																			</td>
-																			
-																			<td>
-																			
-																			<s:textfield
-																			name="delayDetailsNew[%{rowIndex}].delayCode"
-																			cssClass="pax_inputTextBox"
-																			id="delayCode_%{rowIndex}"
-																			readonly="true"
-																			/>
-																			
-																			</td>
-																			
-																			<td>
-																			
-																			<s:textfield
-																			name="delayDetailsNew[%{rowIndex}].delayMinutes"
-																			cssClass="pax_inputTextBox"
-																			/>
-																			
-																			</td>
-																			
-																			<td>
-																			
-																			<select
-																			name="delayDetailsNew[%{rowIndex}].type"
-																			class="pax_inputSelect"
-																			id="type_%{rowIndex}">
-																			
-																			<option value="">Select</option>
-																			<option value="Primary">Primary</option>
-																			<option value="Secondary">Secondary</option>
-																			
-																			</select>
-																			
-																			</td>
-																			
-																			<td>
-																			
-																			<s:textfield
-																			name="delayDetailsNew[%{rowIndex}].delayRemarks"
-																			cssClass="pax_inputTextBox"
-																			/>
-																			
-																			</td>
-																			
-																			<td></td>
-																			<td></td>
-																			
-																			<td>
-																			
-																			<img
-																			src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
-																			width="16"
-																			height="16"
-																			style="cursor:pointer"
-																			onclick="deleteDelay(this)">
-																			
-																			</td>
-																			
-																			</tr>
-                                                                            
-                                                                            </s:iterator> 
+                                                                    
                                                                             </tbody>
                                                                              </table> 
                                                                           </div> 
@@ -357,4 +248,4 @@ $(document).ready(function(){
                       </div>
                      <div id="bg" class="popup_bg"></div> 
                                                      
-                                                  
+                    
