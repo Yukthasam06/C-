@@ -71,100 +71,33 @@ function showArrival(pathObj) {
 
 function addDelay(tag){
 
-    var fltid = $(tag).attr('id').split("-")[1];
+    var fltid = $(tag).attr("id").split("-")[1];
 
-    var rowCount = $("#newDelayTable-"+fltid+" tr").length;
+    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
 
-    if(rowCount > 1){
+    $.ajax({
 
-        $("#newDelayTable-"+fltid+" tr:last").removeClass("ui-state-highlight");
+        url : "delayDtlsNewFirstRow.action",
 
-        var lastIndex = $("#newDelayTable-"+fltid+" tr:last")
-                        .children(":nth-child(2)")
-                        .children(":first")
-                        .attr('name');
+        type : "GET",
 
-        var newIndex = parseInt((lastIndex.split("[")[1]).split("]")[0]) + 1;
+        data : {
+            flightId : fltid,
+            rowIndex : rowCount
+        },
 
-        var newRow = $("#newDelayTable-"+fltid+" tr:last").clone(true);
+        success : function(response){
 
-        newRow.find("input").val("");
+            $("#newDelayTable-"+fltid).append(response);
 
-        newRow.find("select").each(function(){
+        },
 
-            var id = $(this).attr("id");
-            var name = $(this).attr("name");
+        error : function(){
+            alert("Unable to add new delay row");
+        }
 
-            if(id){
+    });
 
-                if(id.indexOf("process_") == 0)
-                    $(this).attr("id","process_"+newIndex);
-
-                if(id.indexOf("reason_") == 0)
-                    $(this).attr("id","reason_"+newIndex);
-
-                if(id.indexOf("stakeholder_") == 0)
-                    $(this).attr("id","stakeholder_"+newIndex);
-            }
-
-            if(name){
-                var newName = name.replace(/\[[0-9]+\]/,"["+newIndex+"]");
-                $(this).attr("name",newName);
-            }
-
-            $(this).val("-1");
-
-        });
-
-        newRow.find("input").each(function(){
-
-            var id = $(this).attr("id");
-            var name = $(this).attr("name");
-
-            if(id && id.indexOf("delayCode_") == 0){
-                $(this).attr("id","delayCode_"+newIndex);
-            }
-
-            if(name){
-                var newName = name.replace(/\[[0-9]+\]/,"["+newIndex+"]");
-                $(this).attr("name",newName);
-            }
-
-            $(this).val("");
-
-        });
-
-        newRow.find("#process_"+newIndex)
-              .attr("onchange","loadReasons(this.value,"+newIndex+")");
-
-        newRow.find("#reason_"+newIndex)
-              .attr("onchange","loadStakeholders(this.value,"+newIndex+")");
-
-        newRow.find("#stakeholder_"+newIndex)
-              .attr("onchange","loadDelayCode(this.value,"+newIndex+")");
-
-        $("#newDelayTable-"+fltid).append(newRow);
-
-    }else{
-
-        var url = "delayDtlsNewFirstRow.action?flightId=" + fltid;
-
-        $.get(url,function(data){
-            $('#delays-'+fltid).html(data).show();
-        });
-
-    }
-
-    $("#newDelayTable-"+fltid+" tr:last")
-        .children(":nth-child(5)").text(" ");
-
-    $("#newDelayTable-"+fltid+" tr:last")
-        .children(":nth-child(6)").text(" ");
-
-    $("#newDelayTable-"+fltid+" tr:last")
-        .children(":nth-child(7)")
-        .children(":first")
-        .attr("id","deleteDelay-0-0");
 }
 
 function loadReasons(processId, rowIndex){
