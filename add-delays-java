@@ -1,0 +1,15 @@
+public String delayDtlsNewFirstRow() {
+        setFlightId(getFlightId().split(",")[0]);
+        initPage();
+        try{
+        	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
+            ArrayList<DelayDetailNewTO> newDetailTOs = new ArrayList<DelayDetailNewTO>();
+            DelayDetailNewTO detailTO = new DelayDetailNewTO();
+            newDetailTOs.add(detailTO);
+            setDelayDetailsNew(newDetailTOs);
+            setFreezeStatus(getDelegate().getFreezeStatus(flightId));
+           // setCommonDlyDetails();            
+        } catch (OtpException e) {
+        }
+        return "success";
+    }
