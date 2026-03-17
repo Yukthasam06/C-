@@ -19,7 +19,13 @@ $(document).ready(function(){
             .find("select[name$='.type']")
             .val();
             var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
-
+            console.log("Process:"+process);
+            console.log("reason:"+reason);
+            console.log("stakeholder:"+stakeholder);
+            console.log("delayCode:"+delayCode);
+            console.log("delayMinutes:"+delayMinutes);
+            console.log("type:"+type);
+            console.log("remarks:"+remarks);
             if(process == "-1" || process == null){
                 alert("Please select Process in row " + (i+1));
                 $("#process_" + i).focus();
@@ -81,25 +87,114 @@ $(document).ready(function(){
 
         $("#divIndicator").show();
 
-        var formData = $("#delaytbl :input").serialize();
-
-        $.ajax({
-            type: "POST",
-            url: "saveDelayDtls.action",
-            data: formData,
-
-            success: function(data){
-                $("#divIndicator").hide();
-                alert("Delay details saved successfully");
-            },
-
-            error: function(){
-                $("#divIndicator").hide();
-                alert("Error while saving delay details");
-            }
-
+        //var formData = $("#delaytbl :input").serialize();
+        var urlString =  serialiseDiv("delays-"+fltid);
+        var url = "saveDelayDtlsNew.action?flightId=" + <s:property value="flightId"/> + "&"+ urlString;
+        //alert(url);
+        $.get(url, function(data){
+            $('#divIndicator').hide();
+             if(data.indexOf("delayForm") > -1){
+                $('#delays-'+<s:property value="flightId"/>).html(data).show();
+            }else{
+                alert(data);
+            }            
+            
         });
 
     });
 
 });
+public String saveDelayDtlsNew() {
+
+	    try {
+
+	        // Step 1: Prepare flightId
+	        setFlightId(getFlightId().split(",")[0]);
+
+	        if ("error".equals(initPage()) || !serverValidate()) {
+	            return "error";
+	        }
+
+	        ArrayList<DelayDetailNewTO> newList = getDelayDetailsNew();
+
+	        ArrayList<DelayDetailNewTO> existingList =
+	            (ArrayList<DelayDetailNewTO>) getDelegate()
+	                .getDelayDetailsNew(getFlightId());
+
+	        Map<String, DelayDetailNewTO> existingMap = new HashMap<>();
+
+	        for (DelayDetailNewTO old : existingList) {
+	            existingMap.put(old.getDelayId(), old);
+	        }
+
+	        List<DelayDetailNewTO> insertList = new ArrayList<>();
+	        List<DelayDetailNewTO> updateList = new ArrayList<>();
+	        Set<String> processedIds = new HashSet<>();
+
+	        for (DelayDetailNewTO dtl : newList) {
+
+	            if (dtl == null) continue;
+
+	            // Skip empty row
+	            /*if (dtl.getProcessId() == null || "-1".equals(dtl.getProcessId())) {
+	                continue;
+	            }*/
+
+	            dtl.setFlightId(getFlightId());
+
+	            // NEW ROW
+	            if (dtl.getDelayId() == null || dtl.getDelayId().trim().isEmpty()) {
+	                insertList.add(dtl);
+	            }
+
+	            // EXISTING ROW
+	            else {
+
+	                DelayDetailNewTO old = existingMap.get(dtl.getDelayId());
+
+	                if (old != null) {
+
+	                    processedIds.add(dtl.getDelayId());
+
+	                    // CHECK IF MODIFIED
+	                    if (isModified(dtl, old)) {
+
+	                        // Soft delete old
+	                        /*getDelegate().deleteNewDelay(
+	                                old.getDelayId(),
+	                                getUserTO().getUserId()
+	                        );*/
+
+	                        // Updated delays
+	                        updateList.add(dtl);
+	                    }
+	                }
+	            }
+	        }
+
+	        for (DelayDetailNewTO old : existingList) {
+
+	            if (!processedIds.contains(old.getDelayId())) {
+
+	                getDelegate().deleteNewDelay(
+	                        old.getDelayId(),
+	                        getUserTO().getUserId()
+	                );
+	            }
+	        }
+
+	        if (!insertList.isEmpty() || !updateList.isEmpty()) {
+	            getDelegate().saveDelayDetailsNew(getFlightId(), insertList, updateList, getUserTO());
+	        }
+
+
+	        // Step 6: Refresh data
+	        fetchDelays(getFlightId());
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "error";
+	    }
+
+	    return "success";
+	}
