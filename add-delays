@@ -48,36 +48,30 @@ function addDelay(tag){
 
 }
 
-function addDelay(tag){
-
-    var fltid = $(tag).attr("id").split("-")[1];
-
-    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
-
-    $.ajax({
-
-        url : "delayDtlsNewFirstRow.action",
-
-        type : "GET",
-
-        data : {
-            flightId : fltid,
-            rowIndex : rowCount
-        },
-
-        success : function(response){
-
-            $("#newDelayTable-"+fltid).append(response);
-
-        },
-
-        error : function(){
-            alert("Unable to add new delay row");
+public String delayDtlsNewFirstRow() {
+        setFlightId(getFlightId().split(",")[0]);
+        initPage();
+        try{
+        	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
+        	setReasons(new ArrayList<SelectionTO>());
+        	setStakeholders(new ArrayList<StakeholderTO>());
+            ArrayList<DelayDetailNewTO> newDetailTOs = new ArrayList<DelayDetailNewTO>();
+            DelayDetailNewTO detailTO = new DelayDetailNewTO();
+            detailTO.setProcessId("-1");
+            detailTO.setReasonId("-1");
+            detailTO.setStakeholderId("-1");
+            detailTO.setDelayCode("");
+            detailTO.setDelayMinutes("");
+            detailTO.setType("");
+            detailTO.setDelayRemarks("");
+            newDetailTOs.add(detailTO);
+            setDelayDetailsNew(newDetailTOs);
+            setFreezeStatus(getDelegate().getFreezeStatus(flightId));
+           // setCommonDlyDetails();            
+        } catch (OtpException e) {
         }
-
-    });
-
-}
+        return "success";
+    }
 
 private int rowIndex;
 
