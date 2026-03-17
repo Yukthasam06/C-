@@ -215,7 +215,92 @@ $(document).ready(function(){
                                                                             </tr>
                                                                             </thead>
                                                                             <tbody id="delayBody-<s:property value='flightId'/>">
-                                                                    
+
+																			<s:iterator value="delayDetailsNew" status="stat">
+																			
+																			<tr class="<s:if test='#stat.index % 2 == 0'>pax_tblBGWhite</s:if><s:else>pax_tblBGAlt</s:else>">
+																			
+																			<td>
+																			<s:hidden name="delayDetailsNew[%{#stat.index}].delayId" value="%{delayId}" />
+																			
+																			<s:select
+																			name="delayDetailsNew[%{#stat.index}].processId"
+																			list="processes"
+																			listKey="id"
+																			listValue="value"
+																			value="%{processId}"
+																			headerKey="-1"
+																			headerValue="Select Process"
+																			id="process_%{#stat.index}"
+																			onchange="loadReasons(this.value,%{#stat.index})"
+																			/>
+																			</td>
+																			
+																			<td>
+																			<s:select
+																			name="delayDetailsNew[%{#stat.index}].reasonId"
+																			list="{}"
+																			value="%{reasonId}"
+																			headerKey="-1"
+																			headerValue="Select Reason"
+																			id="reason_%{#stat.index}"
+																			onchange="loadStakeholders(this.value,%{#stat.index})"
+																			/>
+																			</td>
+																			
+																			<td>
+																			<s:select
+																			name="delayDetailsNew[%{#stat.index}].stakeholderId"
+																			list="{}"
+																			value="%{stakeholderId}"
+																			headerKey="-1"
+																			headerValue="Select Stakeholder"
+																			id="stakeholder_%{#stat.index}"
+																			onchange="loadDelayCode(this.value,%{#stat.index})"
+																			/>
+																			</td>
+																			
+																			<td>
+																			<s:textfield
+																			name="delayDetailsNew[%{#stat.index}].delayCode"
+																			value="%{delayCode}"
+																			id="delayCode_%{#stat.index}"
+																			readonly="true"
+																			/>
+																			</td>
+																			
+																			<td>
+																			<s:textfield
+																			name="delayDetailsNew[%{#stat.index}].delayMinutes"
+																			value="%{delayMinutes}"
+																			/>
+																			</td>
+																			
+																			<td>
+																			<select name="delayDetailsNew[%{#stat.index}].type" id="type_%{#stat.index}">
+																			<option value="">Select</option>
+																			<option value="Primary" <s:if test="type=='Primary'">selected</s:if>>Primary</option>
+																			<option value="Secondary" <s:if test="type=='Secondary'">selected</s:if>>Secondary</option>
+																			</select>
+																			</td>
+																			
+																			<td>
+																			<s:textfield
+																			name="delayDetailsNew[%{#stat.index}].delayRemarks"
+																			value="%{delayRemarks}"
+																			/>
+																			</td>
+																			
+																			<td><s:property value="lastModifiedBy"/></td>
+																			<td><s:property value="lastModifiedDate"/></td>
+																			
+																			<td>
+																			<img src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
+																			style="cursor:pointer"
+																			onclick="deleteDelay(this)">
+																			</td>
+																			
+																			</tr>
                                                                             </tbody>
                                                                              </table> 
                                                                           </div> 
