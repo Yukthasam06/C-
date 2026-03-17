@@ -1,0 +1,167 @@
+ArrayList<DelayDetailNewTO> newList = getDelayDetailsNew();
+
+ArrayList<DelayDetailNewTO> existingList =
+    (ArrayList<DelayDetailNewTO>) getDelegate()
+        .getDelayDetailsNew(getFlightId());
+
+Map<String, DelayDetailNewTO> existingMap = new HashMap<>();
+
+for (DelayDetailNewTO old : existingList) {
+    existingMap.put(old.getDelayId(), old);
+}
+
+List<DelayDetailNewTO> insertList = new ArrayList<>();
+List<DelayDetailNewTO> updateList = new ArrayList<>();
+Set<String> processedIds = new HashSet<>();
+
+for (DelayDetailNewTO dtl : newList) {
+
+    if (dtl == null) continue;
+
+    // Skip empty row
+    if (dtl.getProcessId() == null || "-1".equals(dtl.getProcessId())) {
+        continue;
+    }
+
+    dtl.setFlightId(getFlightId());
+
+    // NEW ROW
+    if (dtl.getDelayId() == null || dtl.getDelayId().trim().isEmpty()) {
+        insertList.add(dtl);
+    }
+
+    // EXISTING ROW
+    else {
+
+        DelayDetailNewTO old = existingMap.get(dtl.getDelayId());
+
+        if (old != null) {
+
+            processedIds.add(dtl.getDelayId());
+
+            // CHECK IF MODIFIED
+            if (isModified(dtl, old)) {
+
+                // Soft delete old
+                getDelegate().softDeleteDelay(
+                        getFlightId(),
+                        old.getDelayId(),
+                        getUserTO().getUserId()
+                );
+
+                // Insert new
+                insertList.add(dtl);
+            }
+        }
+    }
+}
+
+for (DelayDetailNewTO old : existingList) {
+
+    if (!processedIds.contains(old.getDelayId())) {
+
+        getDelegate().softDeleteDelay(
+                getFlightId(),
+                old.getDelayId(),
+                getUserTO().getUserId()
+        );
+    }
+}
+
+if (!insertList.isEmpty()) {
+    getDelegate().insertDelayDetailsNew(insertList, getUserTO());
+}
+
+private boolean isModified(DelayDetailNewTO newObj, DelayDetailNewTO oldObj) {
+
+    return !safeEquals(newObj.getProcessId(), oldObj.getProcessId()) ||
+           !safeEquals(newObj.getReasonId(), oldObj.getReasonId()) ||
+           !safeEquals(newObj.getStakeholderId(), oldObj.getStakeholderId()) ||
+           !safeEquals(newObj.getDelayCode(), oldObj.getDelayCode()) ||
+           !safeEquals(newObj.getDelayMinutes(), oldObj.getDelayMinutes()) ||
+           !safeEquals(newObj.getType(), oldObj.getType()) ||
+           !safeEquals(newObj.getDelayRemarks(), oldObj.getDelayRemarks());
+}
+
+private boolean safeEquals(String a, String b) {
+
+    if ((a == null || a.trim().isEmpty()) &&
+        (b == null || b.trim().isEmpty())) {
+        return true;
+    }
+
+    if (a == null || b == null) {
+        return false;
+    }
+
+    return a.equals(b);
+}
+
+
+
+//Wrong approach
+
+public String saveDelayDtlsNew() {
+
+    try {
+
+        // Step 1: Prepare flightId
+        setFlightId(getFlightId().split(",")[0]);
+
+        if ("error".equals(initPage()) || !serverValidate()) {
+            return "error";
+        }
+
+        // Step 2: Fetch existing delays
+        ArrayList<DelayDetailNewTO> existingDelays =
+                (ArrayList<DelayDetailNewTO>) getDelegate()
+                        .getDelayDetailsNew(getFlightId());
+
+        // Step 3: Soft delete ALL existing delays
+        if (existingDelays != null && !existingDelays.isEmpty()) {
+
+            for (DelayDetailNewTO old : existingDelays) {
+
+                if (old.getDelayId() != null) {
+
+                    getDelegate().softDeleteDelay(
+                            getFlightId(),
+                            old.getDelayId(),
+                            getUserTO().getUserId()
+                    );
+                }
+            }
+        }
+
+        // Step 4: Prepare new inserts
+        ArrayList<DelayDetailNewTO> insertList = new ArrayList<>();
+
+        for (DelayDetailNewTO dtl : getDelayDetailsNew()) {
+
+            if (dtl == null) continue;
+
+            // Skip empty rows
+            if (dtl.getProcessId() == null || "-1".equals(dtl.getProcessId())) {
+                continue;
+            }
+
+            dtl.setFlightId(getFlightId());
+
+            insertList.add(dtl);
+        }
+
+        // Step 5: Insert all new records
+        if (!insertList.isEmpty()) {
+            getDelegate().insertDelayDetailsNew(insertList, getUserTO());
+        }
+
+        // Step 6: Refresh data
+        fetchDelays(getFlightId());
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return "error";
+    }
+
+    return "success";
+}
