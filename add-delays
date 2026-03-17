@@ -190,3 +190,7 @@ onclick="deleteDelay(this)">
 
 </tr>
 
+<action name="delayDtlsNewFirstRow" method="delayDtlsNewFirstRow" class="aero.omanair.pax.otp.web.actions.FlightDelayNewAction">
+                <result name="success">/jsp/departure-tab-delays-dtls-new.jsp</result>
+                <result name="error">/jsp/flightsCreateError.jsp</result>                
+    </action> 
