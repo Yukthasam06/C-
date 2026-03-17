@@ -214,40 +214,114 @@ $(document).ready(function(){
                                                                                     
                                                                                 </th>
                                                                             </tr>
-                                                                            <s:iterator value="delayDetailsNew"  status="stat1">
-                                                                                <tr class="<s:if test="#stat1.odd == true">pax_tblBGWhite</s:if><s:else>pax_tblBGAlt</s:else>">
-                                                                                 
-                                                                                    <td width="8%" style="text-align:left">
-                                                                                        <s:select name="delayDetailsNew[%{#stat1.index}].processId" headerKey="-1" headerValue="Select Process" cssClass="pax_inputSelect" listValue="value" listKey="id" list="processes" id = "process_%{#stat1.index}" tabindex="4" onchange="loadReasons(this.value, %{#stat1.index})"/>
-                                                                                    </td>
-                                                                                    <td width="8%" style="text-align:left">
-                                                                                        <s:select name="delayDetailsNew[%{#stat1.index}].reasonId" headerKey="-1" headerValue="Select Reason" cssClass="pax_inputSelect" listValue="value" listKey="id" list="reasons" id = "reason_%{#stat1.index}" tabindex="4" onchange="loadStakeholders(this.value, %{#stat1.index})"/>
-                                                                                    </td>
-                                                                                    <td width="8%" style="text-align:left">
-                                                                                        <s:select name="delayDetailsNew[%{#stat1.index}].stakeholderId" headerKey="-1" headerValue="Select Stakeholder" cssClass="pax_inputSelect" list="stakeholders" id = "stakeholder_%{#stat1.index}" tabindex="4" onchange="loadDelayCode(this.value, %{#stat1.index})"/>
-                                                                                    </td>
-                                                                                    <td width="5%" style="text-align:center"><s:textfield name="delayDetailsNew[%{#stat1.index}].delayCode" size="5" cssClass="pax_inputTextBox" id = "delayCode_%{#stat1.index}" readonly="true"/></td>
-                                                                                    <td width="5%" style="text-align:center"><s:textfield name="delayDetailsNew[%{#stat1.index}].delayMinutes" size="5" maxlength="4" cssClass="pax_inputTextBox"/></td>
-                                                                                    <td width="5%" style="text-align:center">
-                                                                                    <select name="delayDetailsNew[%{#stat1.index}].type" class="pax_inputSelect">
-                                                                                        <option value="">Select</option>
-                                                                                        <option value="Primary">Primary</option>
-                                                                                        <option value="Secondary">Secondary</option>
-                                                                                    </select>
-                                                                                    </td>
-                                                                                    <td width="5%" style="text-align:center"><s:textfield name="delayDetailsNew[%{#stat1.index}].delayRemarks" size="10" cssClass="pax_inputTextBox"/></td>
-                                                                                    <td width="12%" style="text-align:center"><s:property value="lastModifiedBy"/></td>
-                                                                                    <td width="14%" style="text-align:center"><s:property value="lastModifiedDate"/></td>
-                                                                                    <td width="8%" style="text-align:center">
-                                                                                       <s:if test="%{freezeStatus == 3}"> 
-                                                                                            <img id="deleteDelay-<s:property value='flightId'/>-<s:property value='delayId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png" alt="Delete" width="16" height="16" border="0" name="delayImage" style='cursor:pointer' onclick="deleteDelay(this)"> 
-                                                                                       </s:if>
-                                                                                       <s:if test="%{freezeStatus == 6 || freezeStatus == 4}">
-                                                                                            <img src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelayDisabled.png" alt="Delete" width="16" height="16" border="0" name="delayImage" >                 
-                                                                                       </s:if>
-                                                                                    </td> 
-                                                                                </tr>
-                                                                            </s:iterator>
+                                                                            <s:iterator value="delayDetailsNew">
+                                                                            <tr>
+																			
+																			<td>
+																			
+																			<s:select
+																			name="delayDetailsNew[%{rowIndex}].processId"
+																			list="processes"
+																			listKey="id"
+																			listValue="value"
+																			headerKey="-1"
+																			headerValue="Select Process"
+																			cssClass="pax_inputSelect"
+																			id="process_%{rowIndex}"
+																			onchange="loadReasons(this.value,%{rowIndex})"
+																			/>
+																			
+																			</td>
+																			
+																			<td>
+																			
+																			<s:select
+																			name="delayDetailsNew[%{rowIndex}].reasonId"
+																			list="{}"
+																			headerKey="-1"
+																			headerValue="Select Reason"
+																			cssClass="pax_inputSelect"
+																			id="reason_%{rowIndex}"
+																			onchange="loadStakeholders(this.value,%{rowIndex})"
+																			/>
+																			
+																			</td>
+																			
+																			<td>
+																			
+																			<s:select
+																			name="delayDetailsNew[%{rowIndex}].stakeholderId"
+																			list="{}"
+																			headerKey="-1"
+																			headerValue="Select Stakeholder"
+																			cssClass="pax_inputSelect"
+																			id="stakeholder_%{rowIndex}"
+																			onchange="loadDelayCode(this.value,%{rowIndex})"
+																			/>
+																			
+																			</td>
+																			
+																			<td>
+																			
+																			<s:textfield
+																			name="delayDetailsNew[%{rowIndex}].delayCode"
+																			cssClass="pax_inputTextBox"
+																			id="delayCode_%{rowIndex}"
+																			readonly="true"
+																			/>
+																			
+																			</td>
+																			
+																			<td>
+																			
+																			<s:textfield
+																			name="delayDetailsNew[%{rowIndex}].delayMinutes"
+																			cssClass="pax_inputTextBox"
+																			/>
+																			
+																			</td>
+																			
+																			<td>
+																			
+																			<select
+																			name="delayDetailsNew[%{rowIndex}].type"
+																			class="pax_inputSelect"
+																			id="type_%{rowIndex}">
+																			
+																			<option value="">Select</option>
+																			<option value="Primary">Primary</option>
+																			<option value="Secondary">Secondary</option>
+																			
+																			</select>
+																			
+																			</td>
+																			
+																			<td>
+																			
+																			<s:textfield
+																			name="delayDetailsNew[%{rowIndex}].delayRemarks"
+																			cssClass="pax_inputTextBox"
+																			/>
+																			
+																			</td>
+																			
+																			<td></td>
+																			<td></td>
+																			
+																			<td>
+																			
+																			<img
+																			src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
+																			width="16"
+																			height="16"
+																			style="cursor:pointer"
+																			onclick="deleteDelay(this)">
+																			
+																			</td>
+																			
+																			</tr>
+																			</s:iterator>
+                                                                            
                                                                             </table>
                                                                          </div>
                         
@@ -278,5 +352,5 @@ $(document).ready(function(){
                      <div id="successPopUp" align="center" style="width:400;hight:200" ></div>
                       </div>
                      <div id="bg" class="popup_bg"></div> 
-                                                     
+                                                                                                          
                                                   
