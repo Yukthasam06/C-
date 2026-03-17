@@ -1,0 +1,87 @@
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+
+<tr class="<s:if test='rowIndex % 2 == 0'>pax_tblBGWhite</s:if><s:else>pax_tblBGAlt</s:else>">																			
+<!-- <tr> -->
+ 	<td width="9%">	
+		<s:select
+		name="delayDetailsNew[%{rowIndex}].processId"
+		list="processes"
+		listKey="id"
+		listValue="value"
+		headerKey="-1"
+		headerValue="Select Process"
+		style="width: 150px; max-width: 150px;"
+		cssClass="pax_inputSelect"
+		id="process_%{rowIndex}"
+		onchange="loadReasons(this.value,%{rowIndex})"
+		/>
+	</td>
+	<td width="9%">	
+		<s:select
+		name="delayDetailsNew[%{rowIndex}].reasonId"
+		list="{}"
+		headerKey="-1"
+		headerValue="Select Reason"
+		style="width: 150px; max-width: 150px; overflow: hidden; white-space: nowrap;"
+		cssClass="pax_inputSelect"
+		id="reason_%{rowIndex}"
+		onchange="loadStakeholders(this.value,%{rowIndex})"
+		/>
+	</td>
+	<td width="9%">
+		<s:select
+		name="delayDetailsNew[%{rowIndex}].stakeholderId"
+		list="{}"
+		headerKey="-1"
+		headerValue="Select Stakeholder"
+		style="width: 150px; max-width: 150px; overflow: hidden; white-space: nowrap;"
+		cssClass="pax_inputSelect"
+		id="stakeholder_%{rowIndex}"
+		onchange="loadDelayCode(this.value,%{rowIndex})"
+		/>
+	</td>
+	<td width="6%" style="text-align:center">
+		<s:textfield
+		name="delayDetailsNew[%{rowIndex}].delayCode"
+		style="width: 80px; max-width: 80px; overflow: hidden; white-space: nowrap;"
+		cssClass="pax_inputTextBox"
+		id="delayCode_%{rowIndex}"
+		readonly="true"
+		/>
+	</td>
+	<td width="6%" style="text-align:center">
+		<s:textfield
+		name="delayDetailsNew[%{rowIndex}].delayMinutes"
+		style="width: 80px; max-width: 80px; overflow: hidden; white-space: nowrap;"
+		cssClass="pax_inputTextBox"
+		/>
+	</td>
+	<td width="5%">
+		<select
+		name="delayDetailsNew[%{rowIndex}].type"
+		class="pax_inputSelect"
+		id="type_%{rowIndex}">
+			<option value="">Select</option>
+			<option value="Primary">Primary</option>
+			<option value="Secondary">Secondary</option>	
+		</select>
+	</td>
+	<td width="5%" style="text-align:center">
+		<s:textfield
+		name="delayDetailsNew[%{rowIndex}].delayRemarks"
+		cssClass="pax_inputTextBox"
+		/>
+	</td>
+	<td width="12%" style="text-align:center"><s:property value="lastModifiedBy"/></td>
+    <td width="14%" style="text-align:center"><s:property value="lastModifiedDate"/></td>
+	<td width="8%" style="text-align:center">
+		<img
+		src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
+		width="16"
+		height="16"
+		style="cursor:pointer"
+		onclick="deleteDelay(this)">
+	</td>			
+</tr>
