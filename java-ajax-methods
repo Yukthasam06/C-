@@ -1,0 +1,24 @@
+public String loadReasons() {
+		try {
+			reasons = (ArrayList<SelectionTO>)getDelegate().getReasons(processId);
+			System.out.println("Fetched reasons are "+ getReasons());
+			StringBuilder options = new StringBuilder();
+			for(SelectionTO reason : reasons) {
+				options.append("<option value=\"")
+				       .append(reason.getId())
+				       .append("\">")
+				       .append(reason.getValue())
+				       .append("</option>");
+			}
+			HttpServletResponse response = ServletActionContext.getResponse();
+			response.setContentType("text/html");
+			try {
+				response.getWriter().write(options.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (OtpException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
