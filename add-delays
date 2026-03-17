@@ -1,0 +1,198 @@
+//old code
+public String delayDtlsNewFirstRow() {
+        setFlightId(getFlightId().split(",")[0]);
+        initPage();
+        try{
+        	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
+            ArrayList<DelayDetailNewTO> newDetailTOs = new ArrayList<DelayDetailNewTO>();
+            DelayDetailNewTO detailTO = new DelayDetailNewTO();
+            newDetailTOs.add(detailTO);
+            setDelayDetailsNew(newDetailTOs);
+            setFreezeStatus(getDelegate().getFreezeStatus(flightId));
+           // setCommonDlyDetails();            
+        } catch (OtpException e) {
+        }
+        return "success";
+    }
+
+//new code
+
+function addDelay(tag){
+
+    var fltid = $(tag).attr("id").split("-")[1];
+
+    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
+
+    $.ajax({
+
+        url : "delayDtlsNewFirstRow.action",
+
+        type : "GET",
+
+        data : {
+            flightId : fltid,
+            rowIndex : rowCount
+        },
+
+        success : function(response){
+
+            $("#newDelayTable-"+fltid).append(response);
+
+        },
+
+        error : function(){
+            alert("Unable to add new delay row");
+        }
+
+    });
+
+}
+
+function addDelay(tag){
+
+    var fltid = $(tag).attr("id").split("-")[1];
+
+    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
+
+    $.ajax({
+
+        url : "delayDtlsNewFirstRow.action",
+
+        type : "GET",
+
+        data : {
+            flightId : fltid,
+            rowIndex : rowCount
+        },
+
+        success : function(response){
+
+            $("#newDelayTable-"+fltid).append(response);
+
+        },
+
+        error : function(){
+            alert("Unable to add new delay row");
+        }
+
+    });
+
+}
+
+private int rowIndex;
+
+public int getRowIndex() {
+    return rowIndex;
+}
+
+public void setRowIndex(int rowIndex) {
+    this.rowIndex = rowIndex;
+}
+
+
+<tr>
+
+<td>
+
+<s:select
+name="delayDetailsNew[%{rowIndex}].processId"
+list="processes"
+listKey="id"
+listValue="value"
+headerKey="-1"
+headerValue="Select Process"
+cssClass="pax_inputSelect"
+id="process_%{rowIndex}"
+onchange="loadReasons(this.value,%{rowIndex})"
+/>
+
+</td>
+
+<td>
+
+<s:select
+name="delayDetailsNew[%{rowIndex}].reasonId"
+list="{}"
+headerKey="-1"
+headerValue="Select Reason"
+cssClass="pax_inputSelect"
+id="reason_%{rowIndex}"
+onchange="loadStakeholders(this.value,%{rowIndex})"
+/>
+
+</td>
+
+<td>
+
+<s:select
+name="delayDetailsNew[%{rowIndex}].stakeholderId"
+list="{}"
+headerKey="-1"
+headerValue="Select Stakeholder"
+cssClass="pax_inputSelect"
+id="stakeholder_%{rowIndex}"
+onchange="loadDelayCode(this.value,%{rowIndex})"
+/>
+
+</td>
+
+<td>
+
+<s:textfield
+name="delayDetailsNew[%{rowIndex}].delayCode"
+cssClass="pax_inputTextBox"
+id="delayCode_%{rowIndex}"
+readonly="true"
+/>
+
+</td>
+
+<td>
+
+<s:textfield
+name="delayDetailsNew[%{rowIndex}].delayMinutes"
+cssClass="pax_inputTextBox"
+/>
+
+</td>
+
+<td>
+
+<select
+name="delayDetailsNew[%{rowIndex}].type"
+class="pax_inputSelect"
+id="type_%{rowIndex}">
+
+<option value="">Select</option>
+<option value="Primary">Primary</option>
+<option value="Secondary">Secondary</option>
+
+</select>
+
+</td>
+
+<td>
+
+<s:textfield
+name="delayDetailsNew[%{rowIndex}].delayRemarks"
+cssClass="pax_inputTextBox"
+/>
+
+</td>
+
+<td></td>
+<td></td>
+
+<td>
+
+<img
+src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
+width="16"
+height="16"
+style="cursor:pointer"
+onclick="deleteDelay(this)">
+
+</td>
+
+</tr>
+
