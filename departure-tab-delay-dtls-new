@@ -84,9 +84,10 @@ $(document).ready(function(){
             var stakeholder = $("#stakeholder_" + i).val();
             var delayCode = $("#delayCode_" + i).val();
             var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
-            console.log("Type val length: " + $("#type_0").length);
-            
-            var type = $("#type_" + i).val();
+            var type = $("#delayBody-"+fltid+" tr")
+              .eq(i)
+              .find("select[name$='.type']")
+              .val();
             /* var type = $("#newDelayTable-<s:property value='flightId'/> tr")
             .eq(i+1)
             .find("select[name$='.type']")
@@ -159,38 +160,22 @@ $(document).ready(function(){
         }
 
         $("#divIndicator").show();
+console.log($("#delaytbl :input").serialize());
+        $.ajax({
+    type: "POST",
+    url: "saveDelayDtlsNew.action",
+    data: $("#delaytbl :input").serialize(),
 
-        //var formData = $("#delaytbl :input").serialize();
-        var urlString =  serialiseDiv("delays-"+fltid);
-        var url = "saveDelayDtlsNew.action?flightId=" + encodeURIComponent(fltid) + "&"+ urlString;
-        //alert(url);
-        $.get(url, function(data){
-            $('#divIndicator').hide();
-            //Always refresh UI
-            $('#delays-'+ fltid).html(data).show();     
-            
-        });
-        /* .fail(function(){
-        	$('#divIndicator').hide();
-        	alert("Error while saving delay details");
-        }); */
-        /* $.ajax({
-            type: "POST",
-            url: "saveDelayDtlsNew.action",
-            data: formData,
-            console.log("Form data: "+formData);
-            success: function(data){
-            	console.log("Returned data: "+data);
-                $("#divIndicator").hide();
-                alert("Delay details saved successfully");
-            },
+    success: function(data){
+        $('#divIndicator').hide();
+        $('#delays-'+fltid).html(data).show();
+    },
 
-            error: function(){
-                $("#divIndicator").hide();
-                alert("Error while saving delay details");
-            }
-
-        }); */
+    error: function(){
+        $('#divIndicator').hide();
+        alert("Error while saving delay details");
+    }
+});
 
     });
 
