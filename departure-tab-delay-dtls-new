@@ -52,24 +52,45 @@
 $(document).ready(function(){
 
 	var fltid = "<s:property value='flightId'/>";
+	var rowCount = $("#delayBody-"+fltid+ " tr").length;
+	
+	for (var i=0; i<rowCount; i++){
+		var processId = $("#process_"+i).val();
+		
+		//Get existing value
+		//var reasonId = $("select[name='delayDetailsNew["+i+"].reasonId']").val();
+		var reasonId = $("#hidden_reason_"+i).val();
+		console.log("reasonId in js: "+reasonId);
+		var stakeholderId = $("#hidden_stakeholder_"+i).val();
+		console.log("stakeholderId in js: "+stakeholderId);
+		if(processId && processId != "-1"){
+			loadReasons(processId, i, reasonId);
+		}
+		if(reasonId && reasonId != "-1"){
+			loadStakeholders(reasonId, i, stakeholderId);
+		}
+	}
     $(".saveIcon").click(function(){
 
         var isValid = true;
         var primaryCount = 0;
 
-        var rowCount = $("#newDelayTable-<s:property value='flightId'/> tr").length - 1;
+        var rowCountVal = $("#delayBody-"+fltid+ " tr").length;
 
-        for(var i=0; i<rowCount; i++){
+        for(var i=0; i<rowCountVal; i++){
 
             var process = $("#process_" + i).val();
             var reason = $("#reason_" + i).val();
             var stakeholder = $("#stakeholder_" + i).val();
             var delayCode = $("#delayCode_" + i).val();
             var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
-            var type = $("#newDelayTable-<s:property value='flightId'/> tr")
+            console.log("Type val length: " + $("#type_0").length);
+            
+            var type = $("#type_" + i).val();
+            /* var type = $("#newDelayTable-<s:property value='flightId'/> tr")
             .eq(i+1)
             .find("select[name$='.type']")
-            .val();
+            .val(); */
             var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
             console.log("Process:"+process);
             console.log("reason:"+reason);
@@ -145,16 +166,31 @@ $(document).ready(function(){
         //alert(url);
         $.get(url, function(data){
             $('#divIndicator').hide();
-             if(data.indexOf("delayForm") > -1){
-                $('#delays-'+ fltid).html(data).show();
-            }else{
-                alert(data);
-            }            
+            //Always refresh UI
+            $('#delays-'+ fltid).html(data).show();     
             
-        }).fail(function(){
+        });
+        /* .fail(function(){
         	$('#divIndicator').hide();
         	alert("Error while saving delay details");
-        });
+        }); */
+        /* $.ajax({
+            type: "POST",
+            url: "saveDelayDtlsNew.action",
+            data: formData,
+            console.log("Form data: "+formData);
+            success: function(data){
+            	console.log("Returned data: "+data);
+                $("#divIndicator").hide();
+                alert("Delay details saved successfully");
+            },
+
+            error: function(){
+                $("#divIndicator").hide();
+                alert("Error while saving delay details");
+            }
+
+        }); */
 
     });
 
@@ -201,7 +237,7 @@ $(document).ready(function(){
                                                                                 <th colspan="1"  width="8%">
                                                                                     
                                                                                     <s:if test="%{((freezeStatus == 3 ) && flightEditAccess)}">
-                                                                                        <img id="addDelay-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_addDelay.png" class="addRow" alt="Add" width="16" height="16" border="0" style='cursor:pointer' onclick="addDelay(this)">
+                                                                                        <img id="addDelay-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_addDelay.png" class="addRow" alt="Add" width="16" height="16" border="0" style='cursor:pointer' onclick="addNewDelay(this)">
                                                                                         <img id="save-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_save.png" class="saveIcon" alt="Save" width="16" height="16" border="0" style='cursor:pointer' >
                                                                                         <img id="cancel-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_cancel.png" class="cancelIcon" alt="Cancel" width="16" height="16" border="0" style='cursor:pointer'  >
                                                                                     </s:if>
@@ -215,92 +251,98 @@ $(document).ready(function(){
                                                                             </tr>
                                                                             </thead>
                                                                             <tbody id="delayBody-<s:property value='flightId'/>">
-
-																			<s:iterator value="delayDetailsNew" status="stat">
-																			
-																			<tr class="<s:if test='#stat.index % 2 == 0'>pax_tblBGWhite</s:if><s:else>pax_tblBGAlt</s:else>">
-																			
-																			<td>
-																			<s:hidden name="delayDetailsNew[%{#stat.index}].delayId" value="%{delayId}" />
-																			
-																			<s:select
-																			name="delayDetailsNew[%{#stat.index}].processId"
-																			list="processes"
-																			listKey="id"
-																			listValue="value"
-																			value="%{processId}"
-																			headerKey="-1"
-																			headerValue="Select Process"
-																			id="process_%{#stat.index}"
-																			onchange="loadReasons(this.value,%{#stat.index})"
-																			/>
-																			</td>
-																			
-																			<td>
-																			<s:select
-																			name="delayDetailsNew[%{#stat.index}].reasonId"
-																			list="{}"
-																			value="%{reasonId}"
-																			headerKey="-1"
-																			headerValue="Select Reason"
-																			id="reason_%{#stat.index}"
-																			onchange="loadStakeholders(this.value,%{#stat.index})"
-																			/>
-																			</td>
-																			
-																			<td>
-																			<s:select
-																			name="delayDetailsNew[%{#stat.index}].stakeholderId"
-																			list="{}"
-																			value="%{stakeholderId}"
-																			headerKey="-1"
-																			headerValue="Select Stakeholder"
-																			id="stakeholder_%{#stat.index}"
-																			onchange="loadDelayCode(this.value,%{#stat.index})"
-																			/>
-																			</td>
-																			
-																			<td>
-																			<s:textfield
-																			name="delayDetailsNew[%{#stat.index}].delayCode"
-																			value="%{delayCode}"
-																			id="delayCode_%{#stat.index}"
-																			readonly="true"
-																			/>
-																			</td>
-																			
-																			<td>
-																			<s:textfield
-																			name="delayDetailsNew[%{#stat.index}].delayMinutes"
-																			value="%{delayMinutes}"
-																			/>
-																			</td>
-																			
-																			<td>
-																			<select name="delayDetailsNew[%{#stat.index}].type" id="type_%{#stat.index}">
-																			<option value="">Select</option>
-																			<option value="Primary" <s:if test="type=='Primary'">selected</s:if>>Primary</option>
-																			<option value="Secondary" <s:if test="type=='Secondary'">selected</s:if>>Secondary</option>
-																			</select>
-																			</td>
-																			
-																			<td>
-																			<s:textfield
-																			name="delayDetailsNew[%{#stat.index}].delayRemarks"
-																			value="%{delayRemarks}"
-																			/>
-																			</td>
-																			
-																			<td><s:property value="lastModifiedBy"/></td>
-																			<td><s:property value="lastModifiedDate"/></td>
-																			
-																			<td>
-																			<img src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
-																			style="cursor:pointer"
-																			onclick="deleteDelay(this)">
-																			</td>
-																			
+                                                                            <s:iterator value="delayDetailsNew" status="stat">
+                                                                            <tr class="<s:if test='#stat.index % 2 == 0'>pax_tblBGWhite</s:if><s:else>pax_tblBGAlt</s:else>">																			
+																			 	<td width="9%">	
+																			 	    <s:hidden name="delayDetailsNew[%{#stat.index}].delayId" value="%{delayId}" />
+																					<s:select
+																					name="delayDetailsNew[%{#stat.index}].processId"
+																					list="processes"
+																					listKey="id"
+																					listValue="value"
+																					value="%{processId}"
+																					headerKey="-1"
+																					headerValue="Select Process"
+																					style="width: 150px; max-width: 150px;"
+																					cssClass="pax_inputSelect"
+																					id="process_%{#stat.index}"
+																					onchange="loadReasons(this.value,%{#stat.index})"
+																					/>
+																				</td>
+																				<s:hidden name="delayDetailsNew[%{#stat.index}].reasonId" id="hidden_reason_%{#stat.index}" value="%{reasonId}" />
+																				<td width="9%">	
+																					<s:select
+																					name="delayDetailsNew[%{#stat.index}].reasonId"
+																					list="{}"
+																					value="%{reasonId}"
+																					headerKey="-1"
+																					headerValue="Select Reason"
+																					style="width: 150px; max-width: 150px; overflow: hidden; white-space: nowrap;"
+																					cssClass="pax_inputSelect"
+																					id="reason_%{#stat.index}"
+																					onchange="loadStakeholders(this.value,%{#stat.index})"
+																					/>
+																				</td>
+																				<s:hidden name="delayDetailsNew[%{#stat.index}].stakeholderId" id="hidden_stakeholder_%{#stat.index}" value="%{stakeholderId}" />
+																				<td width="9%">
+																					<s:select
+																					name="delayDetailsNew[%{#stat.index}].stakeholderId"
+																					list="{}"
+																					headerKey="-1"
+																					headerValue="Select Stakeholder"
+																					style="width: 150px; max-width: 150px; overflow: hidden; white-space: nowrap;"
+																					cssClass="pax_inputSelect"
+																					id="stakeholder_%{#stat.index}"
+																					onchange="loadDelayCode(this.value,%{#stat.index})"
+																					/>
+																				</td>
+																				<td width="6%" style="text-align:center">
+																					<s:textfield
+																					name="delayDetailsNew[%{#stat.index}].delayCode"
+																					value="%{delayCode}"
+																					style="width: 80px; max-width: 80px; overflow: hidden; white-space: nowrap;"
+																					cssClass="pax_inputTextBox"
+																					id="delayCode_%{#stat.index}"
+																					readonly="true"
+																					/>
+																				</td>
+																				<td width="6%" style="text-align:center">
+																					<s:textfield
+																					name="delayDetailsNew[%{#stat.index}].delayMinutes"
+																					value="%{delayMinutes}"
+																					style="width: 80px; max-width: 80px; overflow: hidden; white-space: nowrap;"
+																					cssClass="pax_inputTextBox"
+																					/>
+																				</td>
+																				<td width="5%">
+																					<select
+																					name="delayDetailsNew[%{#stat.index}].type"
+																					class="pax_inputSelect"
+																					id="type_%{#stat.index}">
+																						<option value="">Select</option>
+																						<option value="Primary" <s:if test="type=='Primary'">selected</s:if>>Primary</option>
+																			            <option value="Secondary" <s:if test="type=='Secondary'">selected</s:if>>Secondary</option>
+																					</select>
+																				</td>
+																				<td width="5%" style="text-align:center">
+																					<s:textfield
+																					name="delayDetailsNew[%{#stat.index}].delayRemarks"
+																					value="%{delayRemarks}"
+																					cssClass="pax_inputTextBox"
+																					/>
+																				</td>
+																				<td width="12%" style="text-align:center"><s:property value="lastModifiedBy"/></td>
+																			    <td width="14%" style="text-align:center"><s:property value="lastModifiedDate"/></td>
+																				<td width="8%" style="text-align:center">
+																					<img
+																					src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
+																					width="16"
+																					height="16"
+																					style="cursor:pointer"
+																					onclick="deleteDelay(this)">
+																				</td>			
 																			</tr>
+                                                                            </s:iterator>
                                                                             </tbody>
                                                                              </table> 
                                                                           </div> 
@@ -333,4 +375,4 @@ $(document).ready(function(){
                       </div>
                      <div id="bg" class="popup_bg"></div> 
                                                      
-                    
+                                                  
