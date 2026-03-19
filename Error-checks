@@ -31,3 +31,64 @@ function reindexRows() {
         });
     });
 }
+
+$("#delayBody-"+fltid+" tr").each(function(i){
+
+    var row = $(this);
+
+    var process = row.find("select[name$='.processId']").val();
+    var reason = row.find("select[name$='.reasonId']").val();
+    var stakeholder = row.find("select[name$='.stakeholderId']").val();
+    var delayCode = row.find("input[name$='.delayCode']").val();
+    var delayMinutes = row.find("input[name$='.delayMinutes']").val();
+    var type = row.find("select[name$='.type']").val();
+    var remarks = row.find("input[name$='.delayRemarks']").val();
+
+    console.log("Row:", i);
+    console.log("Process:", process);
+
+    if(process == "-1" || process == null){
+        alert("Please select Process in row " + (i+1));
+        row.find("select[name$='.processId']").focus();
+        return false;
+    }
+
+    if(reason == "-1" || reason == null){
+        alert("Please select Reason in row " + (i+1));
+        return false;
+    }
+
+    if(stakeholder == "-1" || stakeholder == null){
+        alert("Please select Stakeholder in row " + (i+1));
+        return false;
+    }
+
+    if(delayCode == "" || delayCode == null){
+        alert("Delay Code is missing in row " + (i+1));
+        return false;
+    }
+
+    if(delayMinutes == "" || delayMinutes == null){
+        alert("Delay Minutes is missing in row " + (i+1));
+        return false;
+    }
+
+    if(isNaN(delayMinutes)){
+        alert("Delay Minutes must be numeric in row " + (i+1));
+        return false;
+    }
+
+    if(type == "" || type == null){
+        alert("Please select Type in row " + (i+1));
+        return false;
+    }
+
+    if(type == "Primary"){
+        primaryCount++;
+    }
+
+    if(remarks == "" || remarks == null){
+        alert("Delay Remarks is missing in row " + (i+1));
+        return false;
+    }
+});
