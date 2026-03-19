@@ -1,0 +1,610 @@
+package aero.omanair.pax.otp.web.actions;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.interceptor.ServletRequestAware;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+import aero.omanair.pax.common.interfaces.PaxConstants;
+import aero.omanair.pax.common.to.DelayDetailNewTO;
+import aero.omanair.pax.common.to.DelayDetailTO;
+import aero.omanair.pax.common.to.FlightTO;
+import aero.omanair.pax.common.to.SelectionTO;
+import aero.omanair.pax.common.to.StakeholderTO;
+import aero.omanair.pax.otp.delegate.OtpDelegate;
+import aero.omanair.pax.otp.exceptions.OtpException;
+import aero.omanair.pax.uplift.exceptions.FlightUpliftException;
+import aero.omanair.pax.uplift.web.handlers.FlightUpliftHandler;
+import aero.omanair.security.privilege.interfaces.PrivileageConstants;
+import aero.omanair.security.to.UserPermissionTo;
+import aero.omanair.security.to.UserTO;
+
+public class FlightDelayNewAction extends ActionSupport implements ServletRequestAware {
+
+	private String errorMessage;
+	private String flightId;
+	private String upliftId;
+	private FlightTO inFlightTO;
+    private FlightTO outFlightTO;
+    private int rowIndex;
+
+    private int freezeStatus;
+    private String flightStatus;
+	private ArrayList<SelectionTO> stationFromList =
+	        new ArrayList<SelectionTO>();
+	private ArrayList<SelectionTO> stationToList =
+	        new ArrayList<SelectionTO>();
+	private int processId;
+	private int reasonId;
+	private int stakeholderId;
+	private String delayCode;
+	private String type;
+	
+	private ArrayList<SelectionTO> processes = new ArrayList<SelectionTO>();
+	private ArrayList<SelectionTO> reasons = new ArrayList<SelectionTO>();
+	private ArrayList<StakeholderTO> stakeholders = new ArrayList<StakeholderTO>();
+	
+	private ArrayList<DelayDetailNewTO> delayDetailsNew =
+	        new ArrayList<DelayDetailNewTO>();
+	private FlightUpliftHandler flightHandler;
+	private OtpDelegate delegate;
+	private HttpServletRequest servletRequest;
+
+    private UserTO userTO;
+	
+    private boolean flightEditAccess = false;
+    
+	public String showNewDelays() {
+        initPage();
+        try {        
+            getInboundAndOutboundDtls();
+            //setCommonDlyDetails();     
+            //setDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidDelayCodes(getFlightId()));
+            //setOrDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidDelayCodes(getFlightId()));
+            //setParentDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidParentDelayCodes(getFlightId()));
+            setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
+            
+            fetchDelays(getFlightId());
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>UPLIFT ID" + upliftId);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>FLIGHT ID" + flightId);
+        } catch (FlightUpliftException e) {
+            e.printStackTrace();
+            addActionMessage(e.getMessage());
+        }catch (Exception ex){
+            ex.printStackTrace();
+            addActionMessage(ex.getMessage());
+        }
+        return "success";
+    }
+	
+	public String delayDtlsNewFirstRow() {
+        setFlightId(getFlightId().split(",")[0]);
+        initPage();
+        try{
+        	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
+        	setReasons(new ArrayList<SelectionTO>());
+        	setStakeholders(new ArrayList<StakeholderTO>());
+            ArrayList<DelayDetailNewTO> newDetailTOs = new ArrayList<DelayDetailNewTO>();
+            DelayDetailNewTO detailTO = new DelayDetailNewTO();
+            detailTO.setProcessId("-1");
+            detailTO.setReasonId("-1");
+            detailTO.setStakeholderId("-1");
+            detailTO.setDelayCode("");
+            detailTO.setDelayMinutes("");
+            detailTO.setType("");
+            detailTO.setDelayRemarks("");
+            newDetailTOs.add(detailTO);
+            setDelayDetailsNew(newDetailTOs);
+            setFreezeStatus(getDelegate().getFreezeStatus(flightId));
+           // setCommonDlyDetails();            
+        } catch (OtpException e) {
+        }
+        return "success";
+    }
+	
+	public String loadReasons() {
+		try {
+			reasons = (ArrayList<SelectionTO>)getDelegate().getReasons(processId);
+			System.out.println("Fetched reasons are "+ getReasons());
+			StringBuilder options = new StringBuilder();
+			for(SelectionTO reason : reasons) {
+				options.append("<option value=\"")
+				       .append(reason.getId())
+				       .append("\">")
+				       .append(reason.getValue())
+				       .append("</option>");
+			}
+			HttpServletResponse response = ServletActionContext.getResponse();
+			response.setContentType("text/html");
+			try {
+				response.getWriter().write(options.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (OtpException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String loadStakeholders() {
+		 
+	    try {
+	        List<StakeholderTO> list = (ArrayList<StakeholderTO>)getDelegate().getStakeholders(reasonId);
+	        Map<String, List<StakeholderTO>> grouped = new LinkedHashMap<>();
+	 
+	        for (StakeholderTO s : list) {
+	            if (!grouped.containsKey(s.getStakeholderName())) {
+	                grouped.put(s.getStakeholderName(), new ArrayList<StakeholderTO>());
+	            }
+	            grouped.get(s.getStakeholderName()).add(s);
+	        }
+	        StringBuilder html = new StringBuilder();
+	        for (Map.Entry<String, List<StakeholderTO>> entry : grouped.entrySet()) {
+	 
+	            List<StakeholderTO> subList = entry.getValue();
+	            boolean hasSubgroup = subList.get(0).getStakeholderSubgroup() != null;
+	            if (hasSubgroup) {
+	                String stakeholderName = entry.getKey();
+	                if(stakeholderName.contains("-")) {
+	                	stakeholderName = stakeholderName.split("-")[1].trim();
+	                }
+	                html.append("<optgroup label=\"")
+	                    .append(stakeholderName)
+	                    .append("\">");
+	 
+	                for (StakeholderTO s : subList) {
+	                    html.append("<option value=\"")
+	                        .append(s.getStakeholderId())
+	                        .append("\">")
+	                        .append(s.getStakeholderSubgroup())
+	                        .append("</option>");
+	                }
+	 
+	                html.append("</optgroup>"); 
+	            } else {
+	                StakeholderTO s = subList.get(0);
+	 
+	                html.append("<option value=\"")
+	                    .append(s.getStakeholderId())
+	                    .append("\">")
+	                    .append(s.getStakeholderName())
+	                    .append("</option>");
+	            }
+	        }
+	 
+	        HttpServletResponse response = ServletActionContext.getResponse();
+	        response.setContentType("text/html");
+	        response.getWriter().write(html.toString());
+	 
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }	 
+	    return null;
+	}
+	 
+	public String loadDelayCode() {
+		try {
+			delayCode = getDelegate().getDelayCode(stakeholderId);
+			
+			HttpServletResponse response = ServletActionContext.getResponse();
+			response.setContentType("text/plain");
+			try {
+				response.getWriter().write(delayCode);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (OtpException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String saveDelayDtlsNew() {
+
+	    try {
+
+	        //Prepare flightId
+	        setFlightId(getFlightId().split(",")[0]);
+
+	        if ("error".equals(initPage()) || !serverValidate()) {
+	            return "error";
+	        }
+
+	        ArrayList<DelayDetailNewTO> newList = getDelayDetailsNew();
+
+	        ArrayList<DelayDetailNewTO> existingList =
+	            (ArrayList<DelayDetailNewTO>) getDelegate()
+	                .getDelayDetailsNew(getFlightId());
+
+	        Map<String, DelayDetailNewTO> existingMap = new HashMap<>();
+
+	        for (DelayDetailNewTO old : existingList) {
+	            existingMap.put(old.getDelayId(), old);
+	        }
+
+	        List<DelayDetailNewTO> insertList = new ArrayList<>();
+	        List<DelayDetailNewTO> updateList = new ArrayList<>();
+	        Set<String> processedIds = new HashSet<>();
+
+	        for (DelayDetailNewTO dtl : newList) {
+
+	            if (dtl == null) continue;
+
+	            // Skip empty row
+	            /*if (dtl.getProcessId() == null || "-1".equals(dtl.getProcessId())) {
+	                continue;
+	            }*/
+
+	            dtl.setFlightId(getFlightId());
+
+	            // NEW ROW
+	            if (dtl.getDelayId() == null || dtl.getDelayId().trim().isEmpty()) {
+	                insertList.add(dtl);
+	            }
+
+	            // EXISTING ROW
+	            else {
+
+	                DelayDetailNewTO old = existingMap.get(dtl.getDelayId());
+
+	                if (old != null) {
+
+	                    processedIds.add(dtl.getDelayId());
+
+	                    // CHECK IF MODIFIED
+	                    if (isModified(dtl, old)) {
+
+	                        // Soft delete old
+	                        /*getDelegate().deleteNewDelay(
+	                                old.getDelayId(),
+	                                getUserTO().getUserId()
+	                        );*/
+
+	                        // Updated delays
+	                        updateList.add(dtl);
+	                    }
+	                }
+	            }
+	        }
+
+	        for (DelayDetailNewTO old : existingList) {
+
+	            if (!processedIds.contains(old.getDelayId())) {
+
+	                getDelegate().deleteNewDelay(
+	                        old.getDelayId(),
+	                        getUserTO().getUserId()
+	                );
+	            }
+	        }
+
+	        if (!insertList.isEmpty() || !updateList.isEmpty()) {
+	            getDelegate().saveDelayDetailsNew(getFlightId(), insertList, updateList, getUserTO());
+	        }
+            System.out.println("NewDelayDetails: "+existingList.toString());
+
+            //Refresh data
+            setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());  
+	        fetchDelays(getFlightId());
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "error";
+	    }
+
+	    return "success";
+	}
+	
+	private boolean isModified(DelayDetailNewTO newObj, DelayDetailNewTO oldObj) {
+
+	    return !safeEquals(newObj.getProcessId(), oldObj.getProcessId()) ||
+	           !safeEquals(newObj.getReasonId(), oldObj.getReasonId()) ||
+	           !safeEquals(newObj.getStakeholderId(), oldObj.getStakeholderId()) ||
+	           !safeEquals(newObj.getDelayCode(), oldObj.getDelayCode()) ||
+	           !safeEquals(newObj.getDelayMinutes(), oldObj.getDelayMinutes()) ||
+	           !safeEquals(newObj.getType(), oldObj.getType()) ||
+	           !safeEquals(newObj.getDelayRemarks(), oldObj.getDelayRemarks());
+	}
+	
+	private boolean safeEquals(String a, String b) {
+
+	    if ((a == null || a.trim().isEmpty()) &&
+	        (b == null || b.trim().isEmpty())) {
+	        return true;
+	    }
+
+	    if (a == null || b == null) {
+	        return false;
+	    }
+
+	    return a.equals(b);
+	}
+	
+	private void fetchDelays(String flightId) throws OtpException, 
+                                                     FileNotFoundException, 
+                                                     IOException {
+		ArrayList<DelayDetailNewTO> delayTOs = 
+	    (ArrayList<DelayDetailNewTO>)getDelegate().getFlightDelaysNew(flightId);
+		
+		setDelayDetailsNew(delayTOs);
+		
+		setFreezeStatus(getDelegate().getFreezeStatus(flightId));
+	}
+	
+	private boolean serverValidate() throws OtpException {
+        boolean valid = true;
+
+        //check for duplicate delay codes
+        HashSet<String> set = new HashSet<String>();
+        for(DelayDetailNewTO to : getDelayDetailsNew()) {
+	        if(to!=null){        
+	            boolean val = set.add(to.getDelayCode());
+	            if (val == false) {
+	                setErrorMessage("Multiple entries for the delay code "+to.getDelayCode()+ " exists!!");
+	                return false;
+	            }
+            }
+        }
+        return valid;
+    }
+	
+	private String initPage() {
+        try {
+            setUserTO((UserTO)servletRequest.getSession().getAttribute(PaxConstants.ATTR_USER_TO));
+            if (getUserTO() != null) {
+                UserPermissionTo userPermissionTo = 
+                    getUserTO().getUserPermissionTo();
+
+                ArrayList<String> pFromStations = 
+                    (ArrayList<String>)userPermissionTo.getFilterValues(PrivileageConstants.PAX_TRG_FLIGHT, 
+                                                                        PrivileageConstants.PAX_ACT_VIEW, 
+                                                                        PrivileageConstants.PAX_FLTR_FROM_STATION);
+                for (String station: pFromStations) {
+                    getStationFromList().add(new SelectionTO(station, 
+                                                             station));
+                    getStationToList().add(new SelectionTO(station, station));
+                }
+
+                //setDelayCodes((ArrayList<SelectionTO>)getDelegate().getDelayCodes());
+                flightEditAccess = userPermissionTo.hasPermission(PrivileageConstants.PAX_TRG_UPLIFT,PrivileageConstants.PAX_ACT_EDIT);
+                
+               // System.out.println(" FLIGHT EDIT ACCESS ^^^^^^^^^^^^^^ "+flightEditAccess);
+                
+                
+            } else {
+                return "error";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "success";
+    }
+	
+	private void getInboundAndOutboundDtls() throws FlightUpliftException {
+	       // System.out.println(" Get Inbound and Outbound");
+	        ArrayList<FlightTO> flightTOs;
+	        /* retrieving inbound and outbound */
+	        flightTOs = (ArrayList<FlightTO>)getFlightHandler().getUpliftFlightInfo(flightId);
+	        //System.out.println(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ");
+	        //System.out.println(" Flight count "+flightTOs.size());
+	        
+	        outFlightTO = flightTOs.get(0);
+	        if(flightTOs.size() == 2) {
+	            inFlightTO = flightTOs.get(1);
+	        }
+	        flightStatus = outFlightTO.getStatus();
+	        //System.out.println(" FLIGHT STATUS ^^^^^^^^^^^^^^ "+flightStatus);
+	        if(!PaxConstants.FLIGHT_STATUS_OPEN.equals(flightStatus))
+	            flightEditAccess = false;
+	}    
+	
+	private  FlightUpliftHandler getFlightHandler() {
+        if(flightHandler==null) {
+            return new  FlightUpliftHandler();
+        }
+        else {
+            return flightHandler;
+        }
+    }
+	
+	public OtpDelegate getDelegate() {
+        if (this.delegate == null) {
+            this.delegate = new OtpDelegate();
+            return delegate;
+        } else {
+            return delegate;
+        }
+    } 
+	
+	public void setServletRequest(HttpServletRequest httpServletRequest) {
+        this.servletRequest = httpServletRequest;
+    }
+
+    public HttpServletRequest getServletRequest() {
+        return servletRequest;
+    }
+    
+    public void setUserTO(UserTO userTO) {
+        this.userTO = userTO;
+    }
+
+    public UserTO getUserTO() {
+        return userTO;
+    }
+    
+    public void setStationFromList(ArrayList<SelectionTO> stationFromList) {
+        this.stationFromList = stationFromList;
+    }
+
+    public ArrayList<SelectionTO> getStationFromList() {
+        return stationFromList;
+    }
+
+    public void setStationToList(ArrayList<SelectionTO> stationToList) {
+        this.stationToList = stationToList;
+    }
+
+    public ArrayList<SelectionTO> getStationToList() {
+        return stationToList;
+    } 
+    
+    public void setProcesses(ArrayList<SelectionTO> processes) {
+        this.processes = processes;
+    }
+
+    public ArrayList<SelectionTO> getProcesses() {
+        return processes;
+    }
+    
+    public void setReasons(ArrayList<SelectionTO> reasons) {
+        this.reasons = reasons;
+    }
+
+    public ArrayList<SelectionTO> getReasons() {
+        return reasons;
+    }
+    
+    public void setStakeholders(ArrayList<StakeholderTO> stakeholders) {
+        this.stakeholders = stakeholders;
+    }
+
+    public ArrayList<StakeholderTO> getStakeholders() {
+        return stakeholders;
+    }
+    
+    public void setFlightId(String flightId) {
+        this.flightId = flightId;
+    }
+
+    public String getFlightId() {
+        return flightId;
+    }
+    
+    public void setUpliftId(String upliftId) {
+        this.upliftId = upliftId;
+    }
+
+    public String getUpliftId() {
+        return upliftId;
+    }
+    
+    public void setFlightEditAccess(boolean flightEditAccess) {
+        this.flightEditAccess = flightEditAccess;
+    }
+
+    public boolean isFlightEditAccess() {
+        return flightEditAccess;
+    }
+    
+    public void setDelayDetailsNew(ArrayList<DelayDetailNewTO> delayDetailsNew) {
+        this.delayDetailsNew = delayDetailsNew;
+    }
+
+    public ArrayList<DelayDetailNewTO> getDelayDetailsNew() {
+        return delayDetailsNew;
+    }
+
+    public void setInFlightTO(FlightTO inFlightTO) {
+        this.inFlightTO = inFlightTO;
+    }
+
+    public FlightTO getInFlightTO() {
+        return inFlightTO;
+    }
+
+    public void setOutFlightTO(FlightTO outFlightTO) {
+        this.outFlightTO = outFlightTO;
+    }
+
+    public FlightTO getOutFlightTO() {
+        return outFlightTO;
+    }
+    
+    public void setFreezeStatus(int freezeStatus) {
+        this.freezeStatus = freezeStatus;
+    }
+
+    public int getFreezeStatus() {
+        return freezeStatus;
+    }
+    
+    public void setFlightStatus(String flightStatus) {
+        this.flightStatus = flightStatus;
+    }
+
+    public String getFlightStatus() {
+        return flightStatus;
+    }
+    
+    public void setProcessId(int processId) {
+        this.processId = processId;
+    }
+
+    public int getProcessId() {
+        return processId;
+    }
+
+    public void setReasonId(int reasonId) {
+        this.reasonId = reasonId;
+    }
+
+    public int getReasonId() {
+        return reasonId;
+    }
+    
+    public void setStakeholderId(int stakeholderId) {
+        this.stakeholderId = stakeholderId;
+    }
+
+    public int getStakeholderId() {
+        return stakeholderId;
+    }
+    
+    public void setDelayCode(String delayCode) {
+        this.delayCode = delayCode;
+    }
+
+    public String getDelayCode() {
+        return delayCode;
+    }
+    
+    public int getRowIndex() {
+        return rowIndex;
+    }
+
+    public void setRowIndex(int rowIndex) {
+        this.rowIndex = rowIndex;
+    }
+    
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+    
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+    
+}
