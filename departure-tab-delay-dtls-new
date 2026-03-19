@@ -83,7 +83,6 @@ $(document).ready(function(){
             var stakeholder = $("#stakeholder_" + i).val();
             var delayCode = $("#delayCode_" + i).val();
             var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
-            
             var type = $("#delayBody-"+fltid+" tr")
             .eq(i)
             .find("select[name$='.type']")
@@ -156,18 +155,25 @@ $(document).ready(function(){
         }
 
         $("#divIndicator").show();
-        var urlString =  serialiseDiv("delays-"+fltid);
-        console.log("urlString: "+urlString);
-        var url = "saveDelayDtlsNew.action?flightId=" + encodeURIComponent(fltid) + "&"+ urlString;
-        $.get(url, function(data){
-            $('#divIndicator').hide();
-            //Always refresh UI
-            $('#delays-'+ fltid).html(data).show();     
-            
-        }); 
 
+        console.log($("#delaytbl :input").serialize()+ "&flightId=" + encodeURIComponent(fltid));
+        $.ajax({
+		    type: "POST",
+		    url: "saveDelayDtlsNew.action",
+		    data: $("#delaytbl :input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
+		
+		    success: function(data){
+		        $('#divIndicator').hide();
+		        $('#delays-'+fltid).html(data).show();
+		        alert("Delay Details Saved Successfully");
+		    },
+		
+		    error: function(){
+		        $('#divIndicator').hide();
+		        alert("Error while saving delay details");
+		    }
+		});
     });
-
 });
 
  </script>
@@ -243,7 +249,7 @@ $(document).ready(function(){
 																					onchange="loadReasons(this.value,%{#stat.index})"
 																					/>
 																				</td>
-																				<s:hidden name="delayDetailsNew[%{#stat.index}].reasonId" id="hidden_reason_%{#stat.index}" value="%{reasonId}" />
+																				<s:hidden id="hidden_reason_%{#stat.index}" value="%{reasonId}" />
 																				<td width="9%">	
 																					<s:select
 																					name="delayDetailsNew[%{#stat.index}].reasonId"
@@ -257,7 +263,7 @@ $(document).ready(function(){
 																					onchange="loadStakeholders(this.value,%{#stat.index})"
 																					/>
 																				</td>
-																				<s:hidden name="delayDetailsNew[%{#stat.index}].stakeholderId" id="hidden_stakeholder_%{#stat.index}" value="%{stakeholderId}" />
+																				<s:hidden id="hidden_stakeholder_%{#stat.index}" value="%{stakeholderId}" />
 																				<td width="9%">
 																					<s:select
 																					name="delayDetailsNew[%{#stat.index}].stakeholderId"
