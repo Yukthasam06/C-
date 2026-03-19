@@ -66,41 +66,28 @@ function showArrival(pathObj) {
 	alert('Hi');
 }
 
-
-
-
-function addDelay(tag){
-
+function addNewDelay(tag){
     var fltid = $(tag).attr("id").split("-")[1];
-
-    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
-
+    var rowCount = $("#delayBody-"+fltid+" tr").length;
+    console.log("Row count: "+rowCount);
     $.ajax({
-
         url : "delayDtlsNewFirstRow.action",
-
         type : "GET",
-
         data : {
             flightId : fltid,
             rowIndex : rowCount
         },
-
         success : function(response){
-
-            $("#newDelayTable-"+fltid).append(response);
-
+            console.log(response);
+            $("#delayBody-"+fltid).append(response);
         },
-
         error : function(){
             alert("Unable to add new delay row");
         }
-
     });
-
 }
 
-function loadReasons(processId, rowIndex){
+function loadReasons(processId, rowIndex, selectedReasonId){
     var reasonSelect = $("#reason_" + rowIndex);
     console.log("Dropdown ID:", "#reason_"+rowIndex);
     if(processId == -1){
@@ -116,15 +103,16 @@ function loadReasons(processId, rowIndex){
             processId: processId
         },
         success: function(response){
-            // Expecting response = options markup like <option value="1">Reason 1</option>...
-            console.log("AJAX response:", response);  // Log response to browser console
-            //alert("Response length: " + response);
             // Reset options first with default
             reasonSelect.empty();
             reasonSelect.html('<option value="-1">Select Reason</option>');
-            
             // Append returned options
             reasonSelect.append(response);
+            console.log("selectedReasonId: "+selectedReasonId);
+            //Set selected value after loading
+            if(selectedReasonId){
+            	reasonSelect.val(selectedReasonId);
+            }
         },
         error: function(){
             alert("Unable to load reasons");
@@ -133,7 +121,7 @@ function loadReasons(processId, rowIndex){
     });
 }
 
-function loadStakeholders(reasonId, rowIndex){
+function loadStakeholders(reasonId, rowIndex, selectedStakeholderId){
     var stakeholderSelect = $("#stakeholder_" + rowIndex);
     console.log("Dropdown ID:", "#stakeholder_"+rowIndex);
     console.log("ReasonId: "+reasonId);
@@ -150,14 +138,15 @@ function loadStakeholders(reasonId, rowIndex){
             reasonId: reasonId
         },
         success: function(response){
-            console.log("AJAX response:", response);  // Log response to browser console
-            //alert("Response length: " + response);
-            // Reset options first with default
             stakeholderSelect.empty();
             stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
             
             // Append returned options
             stakeholderSelect.append(response);
+          //Set selected value after loading
+            if(selectedStakeholderId){
+            	stakeholderSelect.val(selectedStakeholderId);
+            }
         },
         error: function(){
             alert("Unable to load stakeholders");
@@ -186,7 +175,6 @@ function loadDelayCode(stakeholderId, rowIndex) {
         }
     });
 }
-
 function deleteDelay(tag){
     //$(this).parent().remove(); 
    // alert(tag.id);
@@ -200,7 +188,6 @@ function deleteDelay(tag){
         updateTotalDelay();
     }
 }
-
 function serialiseDiv(div) {
     if(!div) {
             return;
@@ -235,8 +222,6 @@ function serialiseDiv(div) {
 <input type="hidden" name="command" />
 			<br>
 			<table width="100%" border="0" align="center" cellpadding="4" cellspacing="1" class="pax_tblBorder">
-
-		
 				<tr class="pax_trHeading">
 					<td valign="center">
                                         <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -255,19 +240,14 @@ function serialiseDiv(div) {
 								</tr>
 							</tbody>
 						</table></td>
-				</tr>
-				
-			
-				
+				</tr>	
 				<tr>
 					<td colspan="3"><fieldset title="Outbound">
 						<legend class="pax_Legend">&nbsp;Outbound&nbsp;</legend>
 						<table width="100%" border="0" cellpadding="2" cellspacing="2">		
 						
                                                         <s:if test="outFlightTO != null">
-                                                        <s:set name="outTail"><%=outTail.toString()%></s:set>
-                                                        
-                                                        
+                                                        <s:set name="outTail"><%=outTail.toString()%></s:set>                                   
                                                             <tr>
                                                                     <td nowrap="nowrap"><s:textfield name="outAircraft" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="8" readonly="true" value="%{outTail}" title="%{outFlightTO.flightType}" /></td>
                                                                     <td nowrap="nowrap"><s:textfield name="flightNo" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="3" readonly="true" value="%{outFlightTO.flightNo}" /></td>
@@ -294,9 +274,7 @@ function serialiseDiv(div) {
                                                         </s:else>
 						</table>
 						</fieldset></td>
-				</tr>		
-				
-				
+				</tr>			
 				<tr>
 					<td colspan="3"><fieldset title="Inbound">
 						<legend class="pax_Legend">&nbsp;Inbound&nbsp;</legend>
@@ -332,8 +310,6 @@ function serialiseDiv(div) {
 						</fieldset></td>
 				</tr>	
 				<tr><td>
- 
-
 				 <div id="protabbercontent_main"><jsp:include page="departures_tabs.jsp">
 						
 						<jsp:param name="current" value="newDelays" />
@@ -354,8 +330,6 @@ function serialiseDiv(div) {
 
                                 </td>
 				</tr>
-                                   
-
 			</table>
 			<br>
 </s:form>			
