@@ -83,10 +83,10 @@ $(document).ready(function(){
             var stakeholder = $("#stakeholder_" + i).val();
             var delayCode = $("#delayCode_" + i).val();
             var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
-            var type = $("#delayBody-"+fltid+" tr")
+             var type = $("#delayBody-"+fltid+" tr")
             .eq(i)
             .find("select[name$='.type']")
-            .val();
+            .val(); 
             var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
             console.log("Process:"+process);
             console.log("reason:"+reason);
@@ -172,8 +172,9 @@ $(document).ready(function(){
 		        $('#divIndicator').hide();
 		        alert("Error while saving delay details");
 		    }
-		});
+		}); 
     });
+
 });
 
  </script>
