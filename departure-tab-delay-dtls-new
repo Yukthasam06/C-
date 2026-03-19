@@ -58,7 +58,6 @@ $(document).ready(function(){
 		var processId = $("#process_"+i).val();
 		
 		//Get existing value
-		//var reasonId = $("select[name='delayDetailsNew["+i+"].reasonId']").val();
 		var reasonId = $("#hidden_reason_"+i).val();
 		console.log("reasonId in js: "+reasonId);
 		var stakeholderId = $("#hidden_stakeholder_"+i).val();
@@ -84,14 +83,11 @@ $(document).ready(function(){
             var stakeholder = $("#stakeholder_" + i).val();
             var delayCode = $("#delayCode_" + i).val();
             var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
+            
             var type = $("#delayBody-"+fltid+" tr")
-              .eq(i)
-              .find("select[name$='.type']")
-              .val();
-            /* var type = $("#newDelayTable-<s:property value='flightId'/> tr")
-            .eq(i+1)
+            .eq(i)
             .find("select[name$='.type']")
-            .val(); */
+            .val();
             var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
             console.log("Process:"+process);
             console.log("reason:"+reason);
@@ -160,22 +156,15 @@ $(document).ready(function(){
         }
 
         $("#divIndicator").show();
-console.log($("#delaytbl :input").serialize());
-        $.ajax({
-    type: "POST",
-    url: "saveDelayDtlsNew.action",
-    data: $("#delaytbl :input").serialize(),
-
-    success: function(data){
-        $('#divIndicator').hide();
-        $('#delays-'+fltid).html(data).show();
-    },
-
-    error: function(){
-        $('#divIndicator').hide();
-        alert("Error while saving delay details");
-    }
-});
+        var urlString =  serialiseDiv("delays-"+fltid);
+        console.log("urlString: "+urlString);
+        var url = "saveDelayDtlsNew.action?flightId=" + encodeURIComponent(fltid) + "&"+ urlString;
+        $.get(url, function(data){
+            $('#divIndicator').hide();
+            //Always refresh UI
+            $('#delays-'+ fltid).html(data).show();     
+            
+        }); 
 
     });
 
