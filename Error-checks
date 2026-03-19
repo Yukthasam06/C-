@@ -1,1 +1,33 @@
-delayDetailsNew%5B0%5D.delayId=6&delayDetailsNew%5B0%5D.processId=1&delayDetailsNew%5B0%5D.reasonId=2&delayDetailsNew%5B0%5D.reasonId=2&delayDetailsNew%5B0%5D.stakeholderId=16&delayDetailsNew%5B0%5D.stakeholderId=16&delayDetailsNew%5B0%5D.delayCode=ABB&delayDetailsNew%5B0%5D.delayMinutes=3&delayDetailsNew%5B%25%7B%23stat.index%7D%5D.type=Primary&delayDetailsNew%5B0%5D.delayRemarks=test&flightId=1096691
+function deleteDelay(tag){
+    if(confirm('Are you sure you want to delete?')){
+        $('#divIndicator').show();
+
+        var currRow = $(tag).closest("tr");
+        currRow.remove();
+
+        // 🔥 REINDEX AFTER DELETE
+        reindexRows();
+
+        $('#divIndicator').hide();
+        updateTotalDelay();
+    }
+}
+
+function reindexRows() {
+    $("#delayBody-" + fltid + " tr").each(function(index){
+
+        // Update IDs
+        $(this).find("[id^='process_']").attr("id", "process_" + index);
+        $(this).find("[id^='reason_']").attr("id", "reason_" + index);
+        $(this).find("[id^='stakeholder_']").attr("id", "stakeholder_" + index);
+        $(this).find("[id^='delayCode_']").attr("id", "delayCode_" + index);
+        $(this).find("[id^='type_']").attr("id", "type_" + index);
+
+        // Update NAME attributes
+        $(this).find("[name*='delayDetailsNew']").each(function(){
+            var name = $(this).attr("name");
+            name = name.replace(/delayDetailsNew\[\d+\]/, "delayDetailsNew[" + index + "]");
+            $(this).attr("name", name);
+        });
+    });
+}
