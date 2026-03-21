@@ -11,6 +11,33 @@ private String formatDropdownValue(String value) {
     return bigChar + rest;
 }
 
+
+//NEW
+
+private String formatDropdownValue(String value) {
+    if (value == null || value.isEmpty()) return value;
+
+    // Extract first letter
+    char firstChar = Character.toUpperCase(value.charAt(0));
+
+    // Convert to FULL-WIDTH Unicode (visually bigger)
+    char bigChar = (char)(firstChar + 65248);
+
+    String cleanedValue;
+
+    // Case 1: If value is like "A - aircraft..."
+    if (value.length() > 3 && value.charAt(1) == ' ' && value.charAt(2) == '-') {
+        cleanedValue = value.substring(3).trim(); // remove "A -"
+    } 
+    // Case 2: If value is like "Aaircraft..." or normal text
+    else {
+        cleanedValue = value.substring(1).trim();
+    }
+
+    // ✅ Add space after big letter
+    return bigChar + " " + cleanedValue;
+}
+
 ArrayList<SelectionTO> processList = (ArrayList<SelectionTO>) getDelegate().getProcesses();
 
 for (SelectionTO s : processList) {
