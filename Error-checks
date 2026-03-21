@@ -1,94 +1,20 @@
-function deleteDelay(tag){
-    if(confirm('Are you sure you want to delete?')){
-        $('#divIndicator').show();
+private String formatDropdownValue(String value) {
+    if (value == null || value.isEmpty()) return value;
 
-        var currRow = $(tag).closest("tr");
-        currRow.remove();
+    char firstChar = Character.toUpperCase(value.charAt(0));
 
-        // 🔥 REINDEX AFTER DELETE
-        reindexRows();
+    // Convert to FULL-WIDTH Unicode (visually bigger)
+    char bigChar = (char)(firstChar + 65248);
 
-        $('#divIndicator').hide();
-        updateTotalDelay();
-    }
+    String rest = value.substring(1);
+
+    return bigChar + rest;
 }
 
-function reindexRows() {
-    $("#delayBody-" + fltid + " tr").each(function(index){
+ArrayList<SelectionTO> processList = (ArrayList<SelectionTO>) getDelegate().getProcesses();
 
-        // Update IDs
-        $(this).find("[id^='process_']").attr("id", "process_" + index);
-        $(this).find("[id^='reason_']").attr("id", "reason_" + index);
-        $(this).find("[id^='stakeholder_']").attr("id", "stakeholder_" + index);
-        $(this).find("[id^='delayCode_']").attr("id", "delayCode_" + index);
-        $(this).find("[id^='type_']").attr("id", "type_" + index);
-
-        // Update NAME attributes
-        $(this).find("[name*='delayDetailsNew']").each(function(){
-            var name = $(this).attr("name");
-            name = name.replace(/delayDetailsNew\[\d+\]/, "delayDetailsNew[" + index + "]");
-            $(this).attr("name", name);
-        });
-    });
+for (SelectionTO s : processList) {
+    s.setValue(formatDropdownValue(s.getValue()));
 }
 
-$("#delayBody-"+fltid+" tr").each(function(i){
-
-    var row = $(this);
-
-    var process = row.find("select[name$='.processId']").val();
-    var reason = row.find("select[name$='.reasonId']").val();
-    var stakeholder = row.find("select[name$='.stakeholderId']").val();
-    var delayCode = row.find("input[name$='.delayCode']").val();
-    var delayMinutes = row.find("input[name$='.delayMinutes']").val();
-    var type = row.find("select[name$='.type']").val();
-    var remarks = row.find("input[name$='.delayRemarks']").val();
-
-    console.log("Row:", i);
-    console.log("Process:", process);
-
-    if(process == "-1" || process == null){
-        alert("Please select Process in row " + (i+1));
-        row.find("select[name$='.processId']").focus();
-        return false;
-    }
-
-    if(reason == "-1" || reason == null){
-        alert("Please select Reason in row " + (i+1));
-        return false;
-    }
-
-    if(stakeholder == "-1" || stakeholder == null){
-        alert("Please select Stakeholder in row " + (i+1));
-        return false;
-    }
-
-    if(delayCode == "" || delayCode == null){
-        alert("Delay Code is missing in row " + (i+1));
-        return false;
-    }
-
-    if(delayMinutes == "" || delayMinutes == null){
-        alert("Delay Minutes is missing in row " + (i+1));
-        return false;
-    }
-
-    if(isNaN(delayMinutes)){
-        alert("Delay Minutes must be numeric in row " + (i+1));
-        return false;
-    }
-
-    if(type == "" || type == null){
-        alert("Please select Type in row " + (i+1));
-        return false;
-    }
-
-    if(type == "Primary"){
-        primaryCount++;
-    }
-
-    if(remarks == "" || remarks == null){
-        alert("Delay Remarks is missing in row " + (i+1));
-        return false;
-    }
-});
+setProcesses(processList);
