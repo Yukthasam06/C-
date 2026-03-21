@@ -22,6 +22,8 @@ import com.opensymphony.xwork2.ActionSupport;
 import aero.omanair.pax.common.interfaces.PaxConstants;
 import aero.omanair.pax.common.to.DelayDetailNewTO;
 import aero.omanair.pax.common.to.DelayDetailTO;
+import aero.omanair.pax.common.to.DelayTO;
+import aero.omanair.pax.common.to.FlightDepTimeTO;
 import aero.omanair.pax.common.to.FlightTO;
 import aero.omanair.pax.common.to.SelectionTO;
 import aero.omanair.pax.common.to.StakeholderTO;
@@ -51,8 +53,9 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
 	private int processId;
 	private int reasonId;
 	private int stakeholderId;
-	private String delayCode;
-	private String type;
+	private String newDelayCode;
+	private DelayTO delayCommonTO;
+	private FlightDepTimeTO depTimeDtl;
 	
 	private ArrayList<SelectionTO> processes = new ArrayList<SelectionTO>();
 	private ArrayList<SelectionTO> reasons = new ArrayList<SelectionTO>();
@@ -72,12 +75,14 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
         initPage();
         try {        
             getInboundAndOutboundDtls();
+            setDepTimeDtl((FlightDepTimeTO)getDelegate().getFlightDepTime(getFlightId()));
             //setCommonDlyDetails();     
             //setDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidDelayCodes(getFlightId()));
             //setOrDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidDelayCodes(getFlightId()));
             //setParentDelayCodes((ArrayList<SelectionTO>)getDelegate().getValidParentDelayCodes(getFlightId()));
             setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
             
+            setCommonDlyDetails();
             fetchDelays(getFlightId());
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>UPLIFT ID" + upliftId);
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>FLIGHT ID" + flightId);
@@ -95,6 +100,7 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
         setFlightId(getFlightId().split(",")[0]);
         initPage();
         try{
+        	setDepTimeDtl((FlightDepTimeTO)getDelegate().getFlightDepTime(getFlightId()));
         	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
         	setReasons(new ArrayList<SelectionTO>());
         	setStakeholders(new ArrayList<StakeholderTO>());
@@ -103,15 +109,29 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
             detailTO.setProcessId("-1");
             detailTO.setReasonId("-1");
             detailTO.setStakeholderId("-1");
-            detailTO.setDelayCode("");
-            detailTO.setDelayMinutes("");
+            detailTO.setNewDelayCode("");
+            detailTO.setNewDelayMinutes("");
             detailTO.setType("");
-            detailTO.setDelayRemarks("");
+            detailTO.setNewDelayRemarks("");
             newDetailTOs.add(detailTO);
             setDelayDetailsNew(newDetailTOs);
             setFreezeStatus(getDelegate().getFreezeStatus(flightId));
-           // setCommonDlyDetails();            
+            setCommonDlyDetails();            
         } catch (OtpException e) {
+        }
+        return "success";
+    }
+	
+	public String cancelNewDlyDtls() throws FileNotFoundException, IOException {
+        try {
+            initPage();
+            setDepTimeDtl((FlightDepTimeTO)getDelegate().getFlightDepTime(getFlightId()));
+            setCommonDlyDetails(); 
+            setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
+            fetchDelays(getFlightId());
+        } catch (OtpException e) {
+             e.printStackTrace();
+             return "error";
         }
         return "success";
     }
@@ -199,12 +219,12 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
 	 
 	public String loadDelayCode() {
 		try {
-			delayCode = getDelegate().getDelayCode(stakeholderId);
+			newDelayCode = getDelegate().getDelayCode(stakeholderId);
 			
 			HttpServletResponse response = ServletActionContext.getResponse();
 			response.setContentType("text/plain");
 			try {
-				response.getWriter().write(delayCode);
+				response.getWriter().write(newDelayCode);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -234,7 +254,7 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
 	        Map<String, DelayDetailNewTO> existingMap = new HashMap<>();
 
 	        for (DelayDetailNewTO old : existingList) {
-	            existingMap.put(old.getDelayId(), old);
+	            existingMap.put(old.getNewDelayId(), old);
 	        }
 
 	        List<DelayDetailNewTO> insertList = new ArrayList<>();
@@ -253,18 +273,18 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
 	            dtl.setFlightId(getFlightId());
 
 	            // NEW ROW
-	            if (dtl.getDelayId() == null || dtl.getDelayId().trim().isEmpty()) {
+	            if (dtl.getNewDelayId() == null || dtl.getNewDelayId().trim().isEmpty()) {
 	                insertList.add(dtl);
 	            }
 
 	            // EXISTING ROW
 	            else {
 
-	                DelayDetailNewTO old = existingMap.get(dtl.getDelayId());
+	                DelayDetailNewTO old = existingMap.get(dtl.getNewDelayId());
 
 	                if (old != null) {
 
-	                    processedIds.add(dtl.getDelayId());
+	                    processedIds.add(dtl.getNewDelayId());
 
 	                    // CHECK IF MODIFIED
 	                    if (isModified(dtl, old)) {
@@ -284,10 +304,10 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
 
 	        for (DelayDetailNewTO old : existingList) {
 
-	            if (!processedIds.contains(old.getDelayId())) {
+	            if (!processedIds.contains(old.getNewDelayId())) {
 
 	                getDelegate().deleteNewDelay(
-	                        old.getDelayId(),
+	                        old.getNewDelayId(),
 	                        getUserTO().getUserId()
 	                );
 	            }
@@ -299,7 +319,9 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
             System.out.println("NewDelayDetails: "+existingList.toString());
 
             //Refresh data
-            setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());  
+            setDepTimeDtl((FlightDepTimeTO)getDelegate().getFlightDepTime(getFlightId()));
+            setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses()); 
+            setCommonDlyDetails();
 	        fetchDelays(getFlightId());
 
 	    } catch (Exception e) {
@@ -315,10 +337,10 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
 	    return !safeEquals(newObj.getProcessId(), oldObj.getProcessId()) ||
 	           !safeEquals(newObj.getReasonId(), oldObj.getReasonId()) ||
 	           !safeEquals(newObj.getStakeholderId(), oldObj.getStakeholderId()) ||
-	           !safeEquals(newObj.getDelayCode(), oldObj.getDelayCode()) ||
-	           !safeEquals(newObj.getDelayMinutes(), oldObj.getDelayMinutes()) ||
+	           !safeEquals(newObj.getNewDelayCode(), oldObj.getNewDelayCode()) ||
+	           !safeEquals(newObj.getNewDelayMinutes(), oldObj.getNewDelayMinutes()) ||
 	           !safeEquals(newObj.getType(), oldObj.getType()) ||
-	           !safeEquals(newObj.getDelayRemarks(), oldObj.getDelayRemarks());
+	           !safeEquals(newObj.getNewDelayRemarks(), oldObj.getNewDelayRemarks());
 	}
 	
 	private boolean safeEquals(String a, String b) {
@@ -353,9 +375,9 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
         HashSet<String> set = new HashSet<String>();
         for(DelayDetailNewTO to : getDelayDetailsNew()) {
 	        if(to!=null){        
-	            boolean val = set.add(to.getDelayCode());
+	            boolean val = set.add(to.getNewDelayCode());
 	            if (val == false) {
-	                setErrorMessage("Multiple entries for the delay code "+to.getDelayCode()+ " exists!!");
+	                setErrorMessage("Multiple entries for the delay code "+to.getNewDelayCode()+ " exists!!");
 	                return false;
 	            }
             }
@@ -380,11 +402,7 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
                     getStationToList().add(new SelectionTO(station, station));
                 }
 
-                //setDelayCodes((ArrayList<SelectionTO>)getDelegate().getDelayCodes());
-                flightEditAccess = userPermissionTo.hasPermission(PrivileageConstants.PAX_TRG_UPLIFT,PrivileageConstants.PAX_ACT_EDIT);
-                
-               // System.out.println(" FLIGHT EDIT ACCESS ^^^^^^^^^^^^^^ "+flightEditAccess);
-                
+                flightEditAccess = userPermissionTo.hasPermission(PrivileageConstants.PAX_TRG_UPLIFT,PrivileageConstants.PAX_ACT_EDIT);                
                 
             } else {
                 return "error";
@@ -393,6 +411,15 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
             e.printStackTrace();
         }
         return "success";
+    }
+	
+	private void setCommonDlyDetails(){
+
+        try {
+            delayCommonTO = getDelegate().getDelayCommonRemarks(getFlightId());
+        } catch (OtpException e) {
+            e.printStackTrace();
+        }
     }
 	
 	private void getInboundAndOutboundDtls() throws FlightUpliftException {
@@ -575,12 +602,12 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
         return stakeholderId;
     }
     
-    public void setDelayCode(String delayCode) {
-        this.delayCode = delayCode;
+    public void setNewDelayCode(String newDelayCode) {
+        this.newDelayCode = newDelayCode;
     }
 
-    public String getDelayCode() {
-        return delayCode;
+    public String getNewDelayCode() {
+        return newDelayCode;
     }
     
     public int getRowIndex() {
@@ -599,12 +626,20 @@ public class FlightDelayNewAction extends ActionSupport implements ServletReques
         return errorMessage;
     }
     
-    public void setType(String type) {
-        this.type = type;
+    public void setDelayCommonTO(DelayTO delayCommonTO) {
+        this.delayCommonTO = delayCommonTO;
     }
 
-    public String getType() {
-        return type;
+    public DelayTO getDelayCommonTO() {
+        return delayCommonTO;
+    }
+    
+    public void setDepTimeDtl(FlightDepTimeTO depTimeDtl) {
+        this.depTimeDtl = depTimeDtl;
+    }
+
+    public FlightDepTimeTO getDepTimeDtl() {
+        return depTimeDtl;
     }
     
 }
