@@ -50,7 +50,7 @@
 </style> 
 <script>
 $(document).ready(function(){
-
+	updateTotalNewDelay();
 	var fltid = "<s:property value='flightId'/>";
 	var rowCount = $("#delayBody-"+fltid+ " tr").length;
 	
@@ -58,6 +58,7 @@ $(document).ready(function(){
 		var processId = $("#process_"+i).val();
 		
 		//Get existing value
+		//var reasonId = $("select[name='delayDetailsNew["+i+"].reasonId']").val();
 		var reasonId = $("#hidden_reason_"+i).val();
 		console.log("reasonId in js: "+reasonId);
 		var stakeholderId = $("#hidden_stakeholder_"+i).val();
@@ -69,113 +70,168 @@ $(document).ready(function(){
 			loadStakeholders(reasonId, i, stakeholderId);
 		}
 	}
-    $(".saveIcon").click(function(){
+	
+	 $(".cancelNewDelayIcon").click(function() {
+        $('#divIndicator').show();
+        var fltid = <s:property value="flightId"/>;
+        var url = "cancelNewDlyDtls.action?flightId=" + fltid;
+        var proceed = true;
+        if(!confirm('All unsaved changes will be lost! Do you want to continue?')){
+            proceed = false;
+            $('#divIndicator').hide();
+        }
+        if(proceed == true){
+            $.post(url, function(data){
+                $('#divIndicator').hide();
+                $('#newDelays-'+<s:property value="flightId"/>).html(data).show();
+            });
+            updateTotalNewDelay();
+        }
+    });   
+    $(".saveNewDelayIcon").click(function(){
 
         var isValid = true;
         var primaryCount = 0;
 
         var rowCountVal = $("#delayBody-"+fltid+ " tr").length;
-
-        for(var i=0; i<rowCountVal; i++){
-
-            var process = $("#process_" + i).val();
-            var reason = $("#reason_" + i).val();
-            var stakeholder = $("#stakeholder_" + i).val();
-            var delayCode = $("#delayCode_" + i).val();
-            var delayMinutes = $("input[name='delayDetailsNew["+i+"].delayMinutes']").val();
-             var type = $("#delayBody-"+fltid+" tr")
-            .eq(i)
-            .find("select[name$='.type']")
-            .val(); 
-            var remarks = $("input[name='delayDetailsNew["+i+"].delayRemarks']").val();
-            console.log("Process:"+process);
-            console.log("reason:"+reason);
-            console.log("stakeholder:"+stakeholder);
-            console.log("delayCode:"+delayCode);
-            console.log("delayMinutes:"+delayMinutes);
-            console.log("type:"+type);
-            console.log("remarks:"+remarks);
-            if(process == "-1" || process == null){
-                alert("Please select Process in row " + (i+1));
-                $("#process_" + i).focus();
-                return false;
-            }
-
-            if(reason == "-1" || reason == null){
-                alert("Please select Reason in row " + (i+1));
-                $("#reason_" + i).focus();
-                return false;
-            }
-
-            if(stakeholder == "-1" || stakeholder == null){
-                alert("Please select Stakeholder in row " + (i+1));
-                $("#stakeholder_" + i).focus();
-                return false;
-            }
-
-            if(delayCode == "" || delayCode == null){
-                alert("Delay Code is missing in row " + (i+1));
-                $("#delayCode_" + i).focus();
-                return false;
-            }
-
-            if(delayMinutes == "" || delayMinutes == null){
-                alert("Delay Minutes is missing in row " + (i+1));
-                return false;
-            }
-
-            if(isNaN(delayMinutes)){
-                alert("Delay Minutes must be numeric in row " + (i+1));
-                return false;
-            }
-
-            if(type == "" || type == null || type == undefined){
-                alert("Please select Type in row " + (i+1));
-                return false;
-            }
-
-            if(type == "Primary"){
-                primaryCount++;
-            }
-
-            if(remarks == "" || remarks == null){
-                alert("Delay Remarks is missing in row " + (i+1));
-                return false;
-            }
-        }
-
+	 $("#delayBody-"+fltid+" tr").each(function(i){
+	
+		    var row = $(this);
+	
+		    var process = row.find("select[name$='.processId']").val();
+		    var reason = row.find("select[name$='.reasonId']").val();
+		    var stakeholder = row.find("select[name$='.stakeholderId']").val();
+		    var newDelayCode = row.find("input[name$='.newDelayCode']").val();
+		    var newDelayMinutes = row.find("input[name$='.newDelayMinutes']").val();
+		    var type = row.find("select[name$='.type']").val();
+		    var newDelayRemarks = row.find("input[name$='.newDelayRemarks']").val();
+		    if(process == "-1" || process == null){
+		        alert("Please select Process in row " + (i+1));
+		        row.find("select[name$='.processId']").focus();
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(reason == "-1" || reason == null){
+		        alert("Please select Reason in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(stakeholder == "-1" || stakeholder == null){
+		        alert("Please select Stakeholder in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(newDelayCode == "" || newDelayCode == null){
+		        alert("Delay Code is missing in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(newDelayMinutes == "" || newDelayMinutes == null){
+		        alert("Delay Minutes is missing in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(isNaN(newDelayMinutes)){
+		        alert("Delay Minutes must be numeric in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(type == "" || type == null){
+		        alert("Please select Type in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(type == "Primary"){
+		        primaryCount++;
+		    }
+	
+		    if(newDelayRemarks == "" || newDelayRemarks == null){
+		        alert("Delay Remarks is missing in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+		});
         if(primaryCount > 1){
             alert("Only one delay can be marked as Primary.");
+            isValid = false;
             return false;
         }
 
         if(primaryCount == 0){
             alert("One delay must be marked as Primary.");
+            isValid = false;
             return false;
         }
-
-        $("#divIndicator").show();
-
-        console.log($("#delaytbl :input").serialize()+ "&flightId=" + encodeURIComponent(fltid));
-        $.ajax({
-		    type: "POST",
-		    url: "saveDelayDtlsNew.action",
-		    data: $("#delaytbl :input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
-		
-		    success: function(data){
-		        $('#divIndicator').hide();
-		        $('#delays-'+fltid).html(data).show();
-		        alert("Delay Details Saved Successfully");
-		    },
-		
-		    error: function(){
-		        $('#divIndicator').hide();
-		        alert("Error while saving delay details");
-		    }
-		}); 
+        
+        if (isValid){            
+            var totNewDelay = parseInt($('#newDelaySum').val());
+            var actNewDelay = parseInt($("#totalDelay").val());
+            if(isNaN(totNewDelay)){
+            	totNewDelay=0;
+            	totNewDelay=parseInt(totNewDelay);
+                //alert("IT IS NAN");
+            }else{
+            	totNewDelay=parseInt(totNewDelay);
+            }
+           
+            if(isNaN(actNewDelay)){
+            	actNewDelay=0;
+            	actNewDelay=parseInt(actNewDelay);
+                //alert("IT IS NAN");
+            }else{
+            	actNewDelay=parseInt(actNewDelay);
+            }
+            if(actNewDelay>0 || totNewDelay!=0){
+                if(totNewDelay != actNewDelay){
+                    alert("Total Delay Minutes is not matching with Actual Delay!!");
+                    isValid = false;
+                    return false;
+                }
+            }
+       }
+        
+        if(isValid){
+	        $("#divIndicator").show();
+	
+	        var payload = $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid);
+	        console.log("Payload: " + payload);
+	        $.ajax({
+			    type: "POST",
+			    url: "saveDelayDtlsNew.action",
+			    data: $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
+			
+			    success: function(data){
+			        $('#divIndicator').hide();
+			        $('#newDelays-'+fltid).html(data).show();
+			        alert("Delay Details Saved Successfully");
+			    },
+			
+			    error: function(){
+			        $('#divIndicator').hide();
+			        alert("Error while saving delay details");
+			    }
+			}); 
+	        updateTotalNewDelay();
+        }
     });
 
 });
+
+function updateTotalNewDelay(){
+    var tot=0;
+    $('*[name*=newDelayMinutes]').each(function() {
+         tot = tot+ parseInt($(this).val());
+    }); 
+     $('#newDelaySum').val(tot);
+    
+}
 
  </script>
 							<table width="100%" border="0">     
@@ -196,13 +252,29 @@ $(document).ready(function(){
                                                                             <img id="img1" src="<%=request.getContextPath()%>/images/loading.gif" alt="Loading...." />
                                                                             </div>
 									</td>
-								</tr>							
+								</tr>	
+								<tr>
+                                   <td align="left">
+                                   <table align="left" border="0" cellpadding="3" cellspacing="4">
+                                       <tr>
+	                                       <td>STD </td>
+	                                       <td style="padding-right: 18px;"><s:textfield name="flightSTD" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="4" readonly="true" value="%{depTimeDtl.std}" /></td>
+	                                       <td>ATD </td>
+	                                       <td style="padding-right: 18px;"><s:textfield name="flightATD" tabindex="1" cssClass="pax_inputTextBox_disabled" size="4" readonly="true"  value="%{depTimeDtl.atd}"/></td>
+                                           <td>Total Delay</td>
+                                           <td style="padding-right: 18px;"><s:textfield name="newDelaySum"  id="newDelaySum" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="6" readonly="true" /></td>
+                                           <td>Actual Delay</td>
+                                           <td style="padding-right: 18px;"><s:textfield name="delayCommonTO.totalDelay"  id="totalDelay" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="6" readonly="true" /></td>
+                                       </tr>                                                                        
+                                    </table>   
+                                   </td>
+                               </tr>						
 								<tr>
 									<td valign="top" width="100%">
                                                                         <fieldset title="Delay Details">
 									<legend class="pax_Legend">&nbsp;Basic Details &nbsp;</legend>
-			
-                                                                         <DIV id=delaytbl>
+			                                             <form id="newDelayForm">
+                                                                         <div id=newDelaytbl>
                                                                             <table align="center" id="newDelayTable-<s:property value='flightId'/>" width="100%"  class="pax_tblBG" border="0" cellpadding="0" cellspacing="1"> 
                                                                             <thead>
                                                                             <tr class="pax_trHeading">
@@ -218,9 +290,9 @@ $(document).ready(function(){
                                                                                 <th colspan="1"  width="8%">
                                                                                     
                                                                                     <s:if test="%{((freezeStatus == 3 ) && flightEditAccess)}">
-                                                                                        <img id="addDelay-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_addDelay.png" class="addRow" alt="Add" width="16" height="16" border="0" style='cursor:pointer' onclick="addNewDelay(this)">
-                                                                                        <img id="save-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_save.png" class="saveIcon" alt="Save" width="16" height="16" border="0" style='cursor:pointer' >
-                                                                                        <img id="cancel-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_cancel.png" class="cancelIcon" alt="Cancel" width="16" height="16" border="0" style='cursor:pointer'  >
+                                                                                        <img id="addNewDelay-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_addDelay.png" class="addNewRow" alt="Add" width="16" height="16" border="0" style='cursor:pointer' onclick="addNewDelay(this)">
+                                                                                        <img id="saveNewDelay-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_save.png" class="saveNewDelayIcon" alt="Save" width="16" height="16" border="0" style='cursor:pointer' >
+                                                                                        <img id="cancel-<s:property value='flightId'/>" src="<%=request.getContextPath()%>/images/icons/ico_16x16_cancel.png" class="cancelNewDelayIcon" alt="Cancel" width="16" height="16" border="0" style='cursor:pointer'  >
                                                                                     </s:if>
                                                                                     <s:if test="%{(freezeStatus == 6 || freezeStatus == 4) && !flightEditAccess}">
                                                                                         <img src="<%=request.getContextPath()%>/images/icons/ico_16x16_addDelayDisabled.png" class="addRow" alt="Add" width="16" height="16" border="0"/>
@@ -235,7 +307,7 @@ $(document).ready(function(){
                                                                             <s:iterator value="delayDetailsNew" status="stat">
                                                                             <tr class="<s:if test='#stat.index % 2 == 0'>pax_tblBGWhite</s:if><s:else>pax_tblBGAlt</s:else>">																			
 																			 	<td width="9%">	
-																			 	    <s:hidden name="delayDetailsNew[%{#stat.index}].delayId" value="%{delayId}" />
+																			 	    <s:hidden name="delayDetailsNew[%{#stat.index}].newDelayId" value="%{newDelayId}" />
 																					<s:select
 																					name="delayDetailsNew[%{#stat.index}].processId"
 																					list="processes"
@@ -279,36 +351,44 @@ $(document).ready(function(){
 																				</td>
 																				<td width="6%" style="text-align:center">
 																					<s:textfield
-																					name="delayDetailsNew[%{#stat.index}].delayCode"
-																					value="%{delayCode}"
+																					name="delayDetailsNew[%{#stat.index}].newDelayCode"
+																					value="%{newDelayCode}"
 																					style="width: 80px; max-width: 80px; overflow: hidden; white-space: nowrap;"
 																					cssClass="pax_inputTextBox"
-																					id="delayCode_%{#stat.index}"
+																					id="newDelayCode_%{#stat.index}"
 																					readonly="true"
 																					/>
 																				</td>
 																				<td width="6%" style="text-align:center">
 																					<s:textfield
-																					name="delayDetailsNew[%{#stat.index}].delayMinutes"
-																					value="%{delayMinutes}"
+																					name="delayDetailsNew[%{#stat.index}].newDelayMinutes"
+																					value="%{newDelayMinutes}"
 																					style="width: 80px; max-width: 80px; overflow: hidden; white-space: nowrap;"
 																					cssClass="pax_inputTextBox"
+																					onchange="updateTotalNewDelay()"
 																					/>
 																				</td>
 																				<td width="5%">
-																					<select
+																				    <s:select
+																					name="delayDetailsNew[%{#stat.index}].type"
+																					list="#{'Primary':'Primary','Secondary':'Secondary'}"
+																					headerKey=""
+																					headerValue="Select"
+																					cssClass="pax_inputSelect"
+																					id="type_%{#stat.index}" />
+																					<%-- <select
 																					name="delayDetailsNew[%{#stat.index}].type"
 																					class="pax_inputSelect"
 																					id="type_%{#stat.index}">
 																						<option value="">Select</option>
 																						<option value="Primary" <s:if test="type=='Primary'">selected</s:if>>Primary</option>
 																			            <option value="Secondary" <s:if test="type=='Secondary'">selected</s:if>>Secondary</option>
-																					</select>
+																					</select> --%>
 																				</td>
 																				<td width="5%" style="text-align:center">
 																					<s:textfield
-																					name="delayDetailsNew[%{#stat.index}].delayRemarks"
-																					value="%{delayRemarks}"
+																					name="delayDetailsNew[%{#stat.index}].newDelayRemarks"
+																					value="%{newDelayRemarks}"
 																					cssClass="pax_inputTextBox"
 																					/>
 																				</td>
@@ -320,40 +400,22 @@ $(document).ready(function(){
 																					width="16"
 																					height="16"
 																					style="cursor:pointer"
-																					onclick="deleteDelay(this)">
+																					onclick="deleteNewDelay(this)">
 																				</td>			
 																			</tr>
                                                                             </s:iterator>
                                                                             </tbody>
                                                                              </table> 
-                                                                          </div> 
+                                                                          </div>
+                                                                          </form> 
                         
                         
                         
 									</fieldset></td>
 
 								</tr>
-                                                                <tr>
-                                                                    <td align="left">
-                                                                    <table align="left" border="0" cellpadding="0" cellspacing="1">
-                                                                        <tr align="left">
-                                                                            <td>Total Delay</td>
-                                                                            <td><s:textfield name="delaySum"  id="delaySum" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="6" readonly="true" /></td>
-                                                                        </tr>
-                                                                        <tr align="left">
-                                                                            <td>Actual Delay</td>
-                                                                            <td><s:textfield name="delayCommonTO.totalDelay"  id="totalDelay" tabindex="-1" cssClass="pax_inputTextBox_disabled" size="6" readonly="true" /></td>
-                                                                        </tr>                                                                        
-                                                                     </table>   
-                                                                    </td>
-                                                                </tr>
-							</table>
-                                                        
-                                                        
-                                                        
+							</table>                           
                       <div id="popDiv" class="popup" align="left" style="width:400;hight:200" >
                      <div id="successPopUp" align="center" style="width:400;hight:200" ></div>
                       </div>
-                     <div id="bg" class="popup_bg"></div> 
-                                                     
-                                                  
+                     <div id="bg" class="popup_bg"></div>
