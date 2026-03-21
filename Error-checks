@@ -47,34 +47,29 @@ for (SelectionTO s : processList) {
 setProcesses(processList);
 
 
-private String getStyledLetter(char c) {
-    switch (Character.toUpperCase(c)) {
-        case 'A': return "🅐";
-        case 'B': return "🅑";
-        case 'C': return "🅒";
-        case 'D': return "🅓";
-        case 'E': return "🅔";
-        case 'F': return "🅕";
-        case 'G': return "🅖";
-        case 'H': return "🅗";
-        case 'I': return "🅘";
-        case 'J': return "🅙";
-        case 'K': return "🅚";
-        case 'L': return "🅛";
-        case 'M': return "🅜";
-        case 'N': return "🅝";
-        case 'O': return "🅞";
-        case 'P': return "🅟";
-        case 'Q': return "🅠";
-        case 'R': return "🅡";
-        case 'S': return "🅢";
-        case 'T': return "🅣";
-        case 'U': return "🅤";
-        case 'V': return "🅥";
-        case 'W': return "🅦";
-        case 'X': return "🅧";
-        case 'Y': return "🅨";
-        case 'Z': return "🅩";
-        default: return String.valueOf(c);
+private String formatDropdownValue(String value) {
+    if (value == null || value.isEmpty()) return value;
+
+    char firstChar = value.charAt(0);
+
+    String cleanedValue;
+
+    // Remove "A - " pattern if present
+    if (value.length() > 3 && value.charAt(1) == ' ' && value.charAt(2) == '-') {
+        cleanedValue = value.substring(3).trim();
+    } else {
+        cleanedValue = value.substring(1).trim();
     }
+
+    return getFullWidthLetter(firstChar) + " " + cleanedValue;
+}
+
+private String getFullWidthLetter(char c) {
+    if (c >= 'A' && c <= 'Z') {
+        return String.valueOf((char)(c + 65248));
+    }
+    if (c >= 'a' && c <= 'z') {
+        return String.valueOf((char)(Character.toUpperCase(c) + 65248));
+    }
+    return String.valueOf(c);
 }
