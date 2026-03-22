@@ -1,3 +1,45 @@
+if(isValid){
+                $('#divIndicator').show();
+                var urlString =  serialiseDiv("delays-"+fltid);
+                //alert(urlString);
+                var url = "saveDelayDtls.action?flightId=" + <s:property value="flightId"/> + "&"+ urlString;
+                //alert(url);
+                $.get(url, function(data){
+                    $('#divIndicator').hide();
+                     if(data.indexOf("delayForm") > -1){
+                        $('#delays-'+<s:property value="flightId"/>).html(data).show();
+                    }else{
+                        alert(data);
+                    }            
+                    
+                });
+                updateTotalDelay();
+            }
+
+if(isValid){
+	        $("#divIndicator").show();
+	        reindexRows(fltid);
+	        var payload = $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid);
+	        console.log("Payload: " + payload);
+	        $.ajax({
+			    type: "POST",
+			    url: "saveDelayDtlsNew.action",
+			    data: $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
+			
+			    success: function(data){
+			        $('#divIndicator').hide();
+			        $('#newDelays-'+fltid).html(data).show();
+			        alert("Delay Details Saved Successfully");
+			    },
+			
+			    error: function(){
+			        $('#divIndicator').hide();
+			        alert("Error while saving delay details");
+			    }
+			}); 
+	        updateTotalNewDelay();
+        }
+
 if ("error".equals(initPage()) || !serverValidate()) {
 	            return "error";
 	        }
