@@ -73,3 +73,80 @@ private String getFullWidthLetter(char c) {
     }
     return String.valueOf(c);
 }
+
+
+///////////////////////////
+
+$("#delayBody-"+fltid+" tr").each(function(){
+    var row = $(this);
+
+    var processId = row.find("select[name$='.processId']").val();
+    var reasonId = row.find("input[id^='hidden_reason']").val();
+    var stakeholderId = row.find("input[id^='hidden_stakeholder']").val();
+
+    if(processId && processId != "-1"){
+        loadReasonsOnLoad(row, processId, reasonId, stakeholderId);
+    }
+});
+
+function loadReasonsOnLoad(row, processId, selectedReasonId, selectedStakeholderId){
+
+    var reasonSelect = row.find("select[name$='.reasonId']");
+
+    $.ajax({
+        url: "loadReasons.action",
+        type: "GET",
+        data: { processId: processId },
+        success: function(response){
+
+            reasonSelect.empty();
+            reasonSelect.html('<option value="-1">Select Reason</option>');
+            reasonSelect.append(response);
+
+            if(selectedReasonId){
+                reasonSelect.val(selectedReasonId);
+
+                // Now load stakeholders also
+                loadStakeholdersOnLoad(row, selectedReasonId, selectedStakeholderId);
+            }
+        }
+    });
+}
+
+function loadStakeholdersOnLoad(row, reasonId, selectedStakeholderId){
+
+    var stakeholderSelect = row.find("select[name$='.stakeholderId']");
+
+    $.ajax({
+        url: "loadStakeholders.action",
+        type: "GET",
+        data: { reasonId: reasonId },
+        success: function(response){
+
+            stakeholderSelect.empty();
+            stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
+            stakeholderSelect.append(response);
+
+            if(selectedStakeholderId){
+                stakeholderSelect.val(selectedStakeholderId);
+
+                // Optional: load delay code
+                loadDelayCodeOnLoad(row, selectedStakeholderId);
+            }
+        }
+    });
+}
+
+function loadDelayCodeOnLoad(row, stakeholderId){
+
+    var delayCodeField = row.find("input[name$='.newDelayCode'], input[name$='.delayCode']");
+
+    $.ajax({
+        url: "loadDelayCode.action",
+        type: "GET",
+        data: { stakeholderId: stakeholderId },
+        success: function(response){
+            delayCodeField.val(response);
+        }
+    });
+}
