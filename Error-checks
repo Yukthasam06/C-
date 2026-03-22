@@ -1,3 +1,159 @@
+if ("error".equals(initPage()) || !serverValidate()) {
+	            return "error";
+	        }
+
+$(".saveNewDelayIcon").click(function(){
+
+        var isValid = true;
+        var primaryCount = 0;
+
+        var rowCountVal = $("#delayBody-"+fltid+ " tr").length;
+	 $("#delayBody-"+fltid+" tr").each(function(i){
+	
+		    var row = $(this);
+	
+		    var process = row.find("select[name$='.processId']").val();
+		    var reason = row.find("select[name$='.reasonId']").val();
+		    var stakeholder = row.find("select[name$='.stakeholderId']").val();
+		    var newDelayCode = row.find("input[name$='.newDelayCode']").val();
+		    var newDelayMinutes = row.find("input[name$='.newDelayMinutes']").val();
+		    var type = row.find("select[name$='.type']").val();
+		    var newDelayRemarks = row.find("input[name$='.newDelayRemarks']").val();
+	
+		    console.log("ROW:", i);
+		    console.log("Process:", process);
+		    console.log("reason:"+reason);
+            console.log("stakeholder:"+stakeholder);
+            console.log("newDelayCode:"+newDelayCode);
+            console.log("newDelayMinutes:"+newDelayMinutes);
+            console.log("type:"+type);
+            console.log("newDelayRemarks:"+newDelayRemarks);
+		    if(process == "-1" || process == null){
+		        alert("Please select Process in row " + (i+1));
+		        row.find("select[name$='.processId']").focus();
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(reason == "-1" || reason == null){
+		        alert("Please select Reason in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(stakeholder == "-1" || stakeholder == null){
+		        alert("Please select Stakeholder in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(newDelayCode == "" || newDelayCode == null){
+		        alert("Delay Code is missing in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(newDelayMinutes == "" || newDelayMinutes == null){
+		        alert("Delay Minutes is missing in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(isNaN(newDelayMinutes)){
+		        alert("Delay Minutes must be numeric in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(type == "" || type == null){
+		        alert("Please select Type in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+	
+		    if(type == "Primary"){
+		        primaryCount++;
+		    }
+	
+		    if(newDelayRemarks == "" || newDelayRemarks == null){
+		        alert("Delay Remarks is missing in row " + (i+1));
+		        isValid = false;
+		        return false;
+		    }
+		});
+        if(primaryCount > 1){
+            alert("Only one delay can be marked as Primary.");
+            isValid = false;
+            return false;
+        }
+
+        if(primaryCount == 0){
+            alert("One delay must be marked as Primary.");
+            isValid = false;
+            return false;
+        }
+        
+        if (isValid){            
+            var totNewDelay = parseInt($('#newDelaySum').val());
+            var actNewDelay = parseInt($("#totalDelay").val());
+            if(isNaN(totNewDelay)){
+            	totNewDelay=0;
+            	totNewDelay=parseInt(totNewDelay);
+                //alert("IT IS NAN");
+            }else{
+            	totNewDelay=parseInt(totNewDelay);
+            }
+           
+            if(isNaN(actNewDelay)){
+            	actNewDelay=0;
+            	actNewDelay=parseInt(actNewDelay);
+                //alert("IT IS NAN");
+            }else{
+            	actNewDelay=parseInt(actNewDelay);
+            }
+            if(actNewDelay>0 || totNewDelay!=0){
+                if(totNewDelay != actNewDelay){
+                    alert("Total Delay Minutes is not matching with Actual Delay!!");
+                    isValid = false;
+                    return false;
+                }
+            }
+       }
+        
+        if(isValid){
+	        $("#divIndicator").show();
+	        reindexRows(fltid);
+	        var payload = $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid);
+	        console.log("Payload: " + payload);
+	        $.ajax({
+			    type: "POST",
+			    url: "saveDelayDtlsNew.action",
+			    data: $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
+			
+			    success: function(data){
+			        $('#divIndicator').hide();
+			        $('#newDelays-'+fltid).html(data).show();
+			        alert("Delay Details Saved Successfully");
+			    },
+			
+			    error: function(){
+			        $('#divIndicator').hide();
+			        alert("Error while saving delay details");
+			    }
+			}); 
+	        updateTotalNewDelay();
+        }
+    });
+
+});
+
+<action name="saveDelayDtlsNew" method="saveDelayDtlsNew" class="aero.omanair.pax.otp.web.actions.FlightDelayNewAction">
+                <result name="success">/jsp/departure-tab-delays-dtls-new.jsp</result>
+                <result name="error">/jsp/flightsCreateError.jsp</result>                
+    </action> 
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 Modify the List Data (Recommended Struts Approach): The most reliable method is to format the strings in the Java action class before they are passed to the s:select tag. You can wrap the first letter of each string in an HTML <span> tag with a specific CSS class.
 In your Java Action: When populating the list (e.g., an ArrayList of strings or objects), modify the display name to include a <span>.
 java
