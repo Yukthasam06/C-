@@ -17,28 +17,50 @@ if(isValid){
             }
 
 if(isValid){
-	        $("#divIndicator").show();
-	        reindexRows(fltid);
-	        var payload = $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid);
-	        console.log("Payload: " + payload);
-	        $.ajax({
-			    type: "POST",
-			    url: "saveDelayDtlsNew.action",
-			    data: $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
-			
-			    success: function(data){
-			        $('#divIndicator').hide();
-			        $('#newDelays-'+fltid).html(data).show();
-			        alert("Delay Details Saved Successfully");
-			    },
-			
-			    error: function(){
-			        $('#divIndicator').hide();
-			        alert("Error while saving delay details");
-			    }
-			}); 
-	        updateTotalNewDelay();
+
+    $("#divIndicator").show();
+
+    reindexRows(fltid);
+
+    var payload = $("#newDelaytbl").find(":input").serialize() 
+                  + "&flightId=" + encodeURIComponent(fltid);
+
+    console.log("Payload: " + payload);
+
+    $.ajax({
+        type: "POST",
+        url: "saveDelayDtlsNew.action",
+        data: payload,
+
+        success: function(data){
+
+            $('#divIndicator').hide();
+
+            // 🔥 SAME LOGIC AS OLD CODE
+            if(data.indexOf("newDelayTable") > -1 || data.indexOf("delayBody") > -1){
+
+                // success → render updated table
+                $('#newDelays-'+fltid).html(data).show();
+
+                alert("Delay Details Saved Successfully");
+
+            } else {
+
+                // 🔴 backend error message
+                alert(data);
+            }
+        },
+
+        error: function(){
+
+            $('#divIndicator').hide();
+
+            alert("Error while saving delay details");
         }
+    });
+
+    updateTotalNewDelay();
+}
 
 if ("error".equals(initPage()) || !serverValidate()) {
 	            return "error";
