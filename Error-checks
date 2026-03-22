@@ -1,3 +1,23 @@
+Modify the List Data (Recommended Struts Approach): The most reliable method is to format the strings in the Java action class before they are passed to the s:select tag. You can wrap the first letter of each string in an HTML <span> tag with a specific CSS class.
+In your Java Action: When populating the list (e.g., an ArrayList of strings or objects), modify the display name to include a <span>.
+java
+// Example with raw strings
+List<String> options = new ArrayList<>();
+options.add("<span class='first-letter'>A</span>pple");
+options.add("<span class='first-letter'>B</span>anana");
+// ... getters and setters
+In your JSP: Add the escape="false" attribute to your s:select tag to ensure the browser renders the HTML tags instead of treating them as plain text.
+jsp
+<s:select list="options" name="selectedOption" escape="false" />
+In your CSS: Define the style for the first-letter class.
+css
+.first-letter {
+  font-size: 1.2em; /* Make the first letter bigger */
+  font-weight: bold;
+  /* Add any other desired styles */
+}
+
+
 private String formatDropdownValue(String value) {
     if (value == null || value.isEmpty()) return value;
 
