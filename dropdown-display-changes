@@ -95,3 +95,34 @@ $(document).on("click", ".dropdown-option", function(){
     loadReasons(row.find("input[name$='.processId']")[0]);
 
 });
+
+
+<input type="hidden"
+       name="delayDetailsNew[%{#stat.index}].processId"
+       id="process_%{#stat.index}"
+       value="%{processId}" />
+
+$("#delayBody-"+fltid+" tr").each(function(){
+
+    var row = $(this);
+
+    var processId = row.find("input[name$='.processId']").val();
+
+    if(processId && processId != "-1"){
+
+        var dropdown = row.find(".custom-dropdown");
+        var option = dropdown.find(".dropdown-option[data-value='" + processId + "']");
+
+        if(option.length){
+
+            // Set display text
+            dropdown.find(".dropdown-selected").html(option.html());
+
+            // 🔥 Load dependent dropdowns
+            var reasonId = row.find("input[id^='hidden_reason']").val();
+            var stakeholderId = row.find("input[id^='hidden_stakeholder']").val();
+
+            loadReasonsOnLoad(row, processId, reasonId, stakeholderId);
+        }
+    }
+});
