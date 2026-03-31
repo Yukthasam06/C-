@@ -1,0 +1,1082 @@
+PROCEDURE REVALIDATE_DT_PROCESSES (P_PROCESS_ID         IN NUMBER,
+                                      P_STAFF_REFRESH_YN      VARCHAR2)
+   IS
+      v_First_Auth                VARCHAR2 (10);
+      v_Requesters                VARCHAR2 (500);
+      v_UG                        VARCHAR2 (10);
+      v_Chairman                  VARCHAR2 (10) := '1000';
+      v_Password                  VARCHAR2 (100) := 'GlFNUQNW3ZI=';
+      v_ROLE_CATEGORY             NUMBER := 82;                     -- FOR DTS
+      v_Application_Id            NUMBER := 14;
+      v_App_Flow_Id               NUMBER := 2;
+      v_Draft_Activity            NUMBER := 5;
+      v_Max_Activity_Order        NUMBER := 6; -- For Advance Auth/Aprv actions
+      v_default_profile_role      NUMBER := 58;
+      v_OverSeasTrainingFlow      NUMBER := 3;
+      v_OverSeasTrainingProcess   NUMBER := 0;
+      v_OverSeasTrainingRole      NUMBER := 0;
+      v_Default_Email             VARCHAR2 (50) := 'default@omanair.com';
+      v_Current                   VARCHAR2 (10) := 'CURRENT';
+      v_HR                        VARCHAR2 (10) := 'HR';
+      v_Count                     NUMBER;
+      v_Varience                  NUMBER;
+      v_Auth_Level_Change         NUMBER;
+      v_New_Process_YN            VARCHAR2 (10) := 'N';
+      v_Process_Id                NUMBER;
+   BEGIN
+      DBMS_OUTPUT.put_line ('In Re Validate as process : ' || P_PROCESS_ID);
+
+      --GET CURRENT PROCESS REQUESTERS;
+      IF P_PROCESS_ID IS NOT NULL
+      THEN
+         BEGIN
+            SELECT FIRST_AUTH, USER_GROUP_CODE
+              INTO v_First_Auth, v_UG
+              FROM BPF_PROCESSES
+             WHERE PROCESS_ID = P_PROCESS_ID;
+         EXCEPTION
+            WHEN NO_DATA_FOUND
+            THEN
+               RAISE_APPLICATION_ERROR (
+                  -20053,
+                     'Error!! Cannnot Re Validate as process does not exist: '
+                  || P_PROCESS_ID);
+         END;
+
+         DELETE FROM TEMP_STAFF_ROLE;
+
+         -- INSERT  REQUESTERS OF CURRENT PROCESS
+         INSERT INTO TEMP_STAFF_ROLE (LEVEL_ID,
+                                      ROLE_ID,
+                                      STAFFID,
+                                      TYPE)
+            SELECT DISTINCT 0 LEVEL_ID,
+                            A.ROLE_ID,
+                            C.STAFF_NUMBER,
+                            v_Current
+              FROM BPF_TRANS_VIEW A,
+                   bpf_user_roles B,
+                   IPR_USERS C,
+                   BPF_USER_PROCESSES D
+             WHERE     A.ROLE_ID = B.ROLE_ID
+                   AND B.USER_ID = C.USER_ID
+                   AND ROLE_CATEG_ID = v_ROLE_CATEGORY
+                   AND ACTIVITY_TO = v_Draft_Activity
+                   AND A.PROCESS_ID = D.PROCESS_ID
+                   AND C.USER_ID = D.USER_ID
+                   AND A.PROCESS_ID = P_PROCESS_ID;
+
+         -- INSERT  AUTH/APRVs OF CURRENT PROCESS
+         INSERT INTO TEMP_STAFF_ROLE (LEVEL_ID,
+                                      ROLE_ID,
+                                      STAFFID,
+                                      TYPE)
+            SELECT ROWNUM LEVEL_ID,
+                   ROLE_ID,
+                   STAFF_NUMBER,
+                   v_Current
+              FROM (  SELECT A.ROLE_ID, C.STAFF_NUMBER, TO_ACTIVITY_SO
+                        FROM (SELECT DISTINCT ROLE_ID, TO_ACTIVITY_SO
+                                FROM BPF_TRANS_VIEW
+                               WHERE     ROLE_CATEG_ID = v_ROLE_CATEGORY
+                                     AND TRANS_YN = 1
+                                     AND TO_ACTIVITY_SO < v_Max_Activity_Order
+                                     AND PROCESS_ID = P_PROCESS_ID) A,
+                             bpf_user_roles B,
+                             IPR_USERS C
+                       WHERE A.ROLE_ID = B.ROLE_ID AND B.USER_ID = C.USER_ID
+                    ORDER BY TO_ACTIVITY_SO);
+
+
+         INSERT INTO TEMP_STAFF_ROLE (LEVEL_ID, STAFFID, TYPE)
+            SELECT 0, STAFFID, v_HR
+              FROM XXDT_EMPLOYEE_UG_VIEW
+             WHERE     SUPERVISOR_EMP_NUM = v_First_Auth
+                   AND USER_GROUP_CODE = v_UG;
+
+         INSERT INTO TEMP_STAFF_ROLE (LEVEL_ID, STAFFID, TYPE)
+            SELECT APRV_ORDER, STAFFID, v_HR
+              FROM (  SELECT A.STAFFID,
+                             FULLNAME,
+                             DESIGNATION,
+                             DEPT,
+                             APRV_ORDER,
+                             AUTH_LEVEL,
+                             APRV_ORDER * AUTH_LEVEL AL,
+                             MIN (
+                                APRV_ORDER * AUTH_LEVEL)
+                             OVER (ORDER BY AUTH_LEVEL
+                                   RANGE UNBOUNDED PRECEDING)
+                                AS MIN_AL
+                        FROM (           SELECT STAFFID,
+                                                FULLNAME,
+                                                DESIGNATION,
+                                                DEPT,
+                                                LEVEL APRV_ORDER
+                                           FROM XXDT_EMPLOYEE_VIEW
+                                     START WITH STAFFID = v_First_Auth
+                                     CONNECT BY     PRIOR SUPERVISOR_EMP_NUM = STAFFID
+                                                AND staffid <> v_Chairman
+                              ORDER SIBLINGS BY FULLNAME) A,
+                             (SELECT STAFFID, AUTH_LEVEL
+                                FROM BPF_APPROVAL_POLICY_AUTH_VIEW
+                               WHERE     PATH_REF = 'TRAVEL'
+                                     AND USER_GROUP_CODE = v_UG) B
+                       WHERE A.STAFFID = B.STAFFID(+)
+                    ORDER BY APRV_ORDER, B.AUTH_LEVEL)
+             WHERE NVL (MIN_AL, 0) >= NVL (AL, 0);
+
+         SELECT COUNT (*)
+           INTO v_Varience
+           FROM (SELECT v_HR, P.*
+                   FROM (SELECT STAFFID, LEVEL_ID
+                           FROM TEMP_STAFF_ROLE
+                          WHERE TYPE = v_HR
+                         MINUS
+                         SELECT STAFFID, LEVEL_ID
+                           FROM TEMP_STAFF_ROLE
+                          WHERE TYPE = v_Current) P
+                 UNION ALL
+                 SELECT v_Current, Q.*
+                   FROM (SELECT STAFFID, LEVEL_ID
+                           FROM TEMP_STAFF_ROLE
+                          WHERE TYPE = v_Current
+                         MINUS
+                         SELECT STAFFID, LEVEL_ID
+                           FROM TEMP_STAFF_ROLE
+                          WHERE TYPE = v_HR) Q);
+
+         IF v_Varience = 0
+         THEN              -- CHECKING ANY REQUESTER / AUTH HEIRARCHY CHANGEED
+            DBMS_OUTPUT.put_line (
+                  'NO CHANGE DETECTED IN HR SYSTEM HEIRARCHY WITH CURRENT PROCESS : #'
+               || P_PROCESS_ID);
+         ELSE
+            -- to get change on no of auth levels.
+            SELECT ABS (A.LEVELS - B.LEVELS)
+              INTO v_Auth_Level_Change
+              FROM (SELECT COUNT (LEVEL_ID) LEVELS
+                      FROM TEMP_STAFF_ROLE
+                     WHERE TYPE = 'HR' AND LEVEL_ID > 0) A,
+                   (SELECT COUNT (LEVEL_ID) LEVELS
+                      FROM TEMP_STAFF_ROLE
+                     WHERE TYPE = 'CURRENT' AND LEVEL_ID > 0) B
+             WHERE 1 = 1;
+
+            DBMS_OUTPUT.put_line (
+               'Auth_Level_Change: ' || v_Auth_Level_Change);
+
+            IF v_Auth_Level_Change = 0
+            THEN                         -- Number of Auth levels not changed.
+               -- check FIrst Auth staff is changed
+               SELECT COUNT (*)
+                 INTO v_Count
+                 FROM TEMP_STAFF_ROLE A, TEMP_STAFF_ROLE B
+                WHERE     A.TYPE = 'HR'
+                      AND B.TYPE = 'CURRENT'
+                      AND A.LEVEL_ID = B.LEVEL_ID
+                      AND A.LEVEL_ID = 1
+                      AND A.STAFFID = B.STAFFID;
+
+               IF v_Count = 1
+               THEN                                   -- NO FIRSTH AUTH CHANGE
+                  DBMS_OUTPUT.put_line (
+                     'No First Auth Level Change detected.');
+
+                  -- add relevant staffs to ipr_users
+                  INSERT INTO IPR_USERS (USER_ID,
+                                         PASSWORD,
+                                         STAFF_NUMBER,
+                                         ACTIVE_YN,
+                                         EMAIL_ADDRESS)
+                     SELECT STAFFID,
+                            v_Password,
+                            STAFFID,
+                            1,
+                            v_Default_Email
+                       FROM (SELECT STAFFID
+                               FROM TEMP_STAFF_ROLE
+                              WHERE TYPE = 'HR'
+                             MINUS
+                             SELECT STAFF_NUMBER || '' FROM IPR_USERS);
+
+                  -- add new users to  v_default_profile_role
+                  INSERT INTO IPR_USERROLES (USERID, ROLEID)
+                     SELECT USER_ID, ROLEID
+                       FROM (SELECT B.USER_ID, v_default_profile_role ROLEID
+                               FROM TEMP_STAFF_ROLE A, IPR_USERS B
+                              WHERE     TYPE = 'HR'
+                                    AND A.STAFFID = B.STAFF_NUMBER
+                             MINUS
+                             SELECT USERID, ROLEID
+                               FROM IPR_USERROLES
+                              WHERE ROLEID = v_default_profile_role);
+
+                  -- Map Overseas Training Process and role to requesters
+                  SELECT PROCESS_ID
+                    INTO v_OverSeasTrainingProcess
+                    FROM BPF_PROCESSES
+                   WHERE APP_FLOW_ID = v_OverSeasTrainingFlow;
+
+                  SELECT ROLE_ID
+                    INTO v_OverSeasTrainingRole
+                    FROM BPF_TRANSITIONS
+                   WHERE     PROCESS_ID = v_OverSeasTrainingProcess
+                         AND ACTIVITY_FROM IS NULL
+                         AND ACTIVITY_TO = v_Draft_Activity;
+
+                  INSERT INTO BPF_USER_PROCESSES (ACTIVE_YN,
+                                                  USER_ID,
+                                                  PROCESS_ID,
+                                                  APPLICATION_ID,
+                                                  FLOW_ID)
+                     SELECT 1,
+                            USER_ID,
+                            v_OverSeasTrainingProcess,
+                            v_Application_Id,
+                            v_OverSeasTrainingFlow
+                       FROM (SELECT B.USER_ID
+                               FROM TEMP_STAFF_ROLE A, IPR_USERS B
+                              WHERE     TYPE = 'HR'
+                                    AND A.STAFFID = B.STAFF_NUMBER
+                                    AND LEVEL_ID = 0
+                             MINUS
+                             SELECT USER_ID
+                               FROM BPF_USER_PROCESSES
+                              WHERE PROCESS_ID = v_OverSeasTrainingProcess);
+
+                  INSERT INTO BPF_USER_ROLES (USER_ROLE_ID, ROLE_ID, USER_ID)
+                     SELECT SEQ_BPF_USERROLE.NEXTVAL,
+                            v_OverSeasTrainingRole,
+                            USER_ID
+                       FROM (SELECT B.USER_ID
+                               FROM TEMP_STAFF_ROLE A, IPR_USERS B
+                              WHERE     TYPE = 'HR'
+                                    AND A.STAFFID = B.STAFF_NUMBER
+                                    AND LEVEL_ID = 0
+                             MINUS
+                             SELECT USER_ID
+                               FROM BPF_USER_ROLES
+                              WHERE ROLE_ID = v_OverSeasTrainingRole);
+
+                  -- to get user change at all auth levels > 0 AND INSERT USERS TO ROLES
+                  INSERT INTO BPF_USER_ROLES (USER_ROLE_ID, ROLE_ID, USER_ID)
+                     SELECT SEQ_BPF_USERROLE.NEXTVAL, ROLE_ID, USER_ID
+                       FROM (SELECT Q.ROLE_ID, R.USER_ID
+                               FROM (SELECT STAFFID, LEVEL_ID
+                                       FROM TEMP_STAFF_ROLE
+                                      WHERE TYPE = 'HR' AND LEVEL_ID > 0
+                                     MINUS
+                                     SELECT STAFFID, LEVEL_ID
+                                       FROM TEMP_STAFF_ROLE
+                                      WHERE TYPE = 'CURRENT' AND LEVEL_ID > 0)
+                                    P,
+                                    TEMP_STAFF_ROLE Q,
+                                    IPR_USERS R
+                              WHERE     P.LEVEL_ID = Q.LEVEL_ID
+                                    AND Q.TYPE = 'CURRENT'
+                                    AND P.STAFFID = R.STAFF_NUMBER
+                             MINUS
+                             SELECT ROLE_ID, USER_ID FROM BPF_USER_ROLES);
+
+                  --                 INSERT INTO BPF_USER_ROLES(USER_ROLE_ID, ROLE_ID, USER_ID)
+                  --                 SELECT SEQ_BPF_USERROLE.NEXTVAL,Q.ROLE_ID, R.USER_ID FROM
+                  --                 (SELECT STAFFID,LEVEL_ID FROM TEMP_STAFF_ROLE WHERE TYPE='HR' and  LEVEL_ID>0
+                  --                  MINUS
+                  --                  SELECT STAFFID,LEVEL_ID FROM TEMP_STAFF_ROLE WHERE TYPE='CURRENT' and  LEVEL_ID>0) P, TEMP_STAFF_ROLE Q, IPR_USERS R
+                  --                  WHERE P.LEVEL_ID=Q.LEVEL_ID AND Q.TYPE='CURRENT' AND P.STAFFID=R.STAFF_NUMBER
+                  --                  AND  NOT EXISTS (SELECT 1
+                  --                                      FROM BPF_USER_ROLES , IPR_USERS
+                  --                                      WHERE P.STAFFID = IPR_USERS.STAFF_NUMBER);
+                  --
+
+                  -- REMOVE CHANGED AUTHS FROM BPF_USER_ROLES.
+                  DELETE FROM BPF_USER_ROLES
+                        WHERE USER_ROLE_ID IN (SELECT S.USER_ROLE_ID
+                                                 FROM (SELECT STAFFID,
+                                                              LEVEL_ID
+                                                         FROM TEMP_STAFF_ROLE
+                                                        WHERE     TYPE =
+                                                                     'CURRENT'
+                                                              AND LEVEL_ID >
+                                                                     0
+                                                       MINUS
+                                                       SELECT STAFFID,
+                                                              LEVEL_ID
+                                                         FROM TEMP_STAFF_ROLE
+                                                        WHERE     TYPE = 'HR'
+                                                              AND LEVEL_ID >
+                                                                     0) P,
+                                                      TEMP_STAFF_ROLE Q,
+                                                      IPR_USERS R,
+                                                      BPF_USER_ROLES S
+                                                WHERE     P.LEVEL_ID =
+                                                             Q.LEVEL_ID
+                                                      AND Q.TYPE = 'CURRENT'
+                                                      AND P.STAFFID =
+                                                             R.STAFF_NUMBER
+                                                      AND Q.ROLE_ID =
+                                                             S.ROLE_ID
+                                                      AND R.USER_ID =
+                                                             S.USER_ID);
+
+                  -- ADD NEW USERS at reqst level = 0 TO ROLES
+
+                  INSERT INTO BPF_USER_ROLES (USER_ROLE_ID, ROLE_ID, USER_ID)
+                     SELECT SEQ_BPF_USERROLE.NEXTVAL, ROLE_ID, USER_ID
+                       FROM (SELECT Q.ROLE_ID, R.USER_ID
+                               FROM (SELECT STAFFID
+                                       FROM TEMP_STAFF_ROLE
+                                      WHERE TYPE = 'HR' AND LEVEL_ID = 0
+                                     MINUS
+                                     SELECT STAFFID
+                                       FROM TEMP_STAFF_ROLE
+                                      WHERE TYPE = 'CURRENT' AND LEVEL_ID = 0)
+                                    P,
+                                    (SELECT ROLE_ID
+                                       FROM TEMP_STAFF_ROLE
+                                      WHERE     TYPE = 'CURRENT'
+                                            AND LEVEL_ID = 0
+                                            AND ROWNUM = 1) Q,
+                                    IPR_USERS R
+                              WHERE P.STAFFID = R.STAFF_NUMBER
+                             MINUS
+                             SELECT a.ROLE_ID, a.USER_ID
+                               FROM BPF_USER_ROLES a,
+                                    (SELECT ROLE_ID
+                                       FROM TEMP_STAFF_ROLE
+                                      WHERE     TYPE = 'CURRENT'
+                                            AND LEVEL_ID = 0
+                                            AND ROWNUM = 1) b
+                              WHERE a.role_id = B.role_id);
+
+
+
+                  -- ADD NEW USERS AT reqst level = 0 TO USER PROCESSES ; FIRST DELETE THEIRE OLD MAPPING
+
+                  DELETE FROM BPF_USER_PROCESSES
+                        WHERE     FLOW_ID = v_App_Flow_Id
+                              AND USER_ID IN (SELECT Q.USER_ID
+                                                FROM (SELECT STAFFID,
+                                                             LEVEL_ID
+                                                        FROM TEMP_STAFF_ROLE
+                                                       WHERE     TYPE = 'HR'
+                                                             AND LEVEL_ID = 0
+                                                      MINUS
+                                                      SELECT STAFFID,
+                                                             LEVEL_ID
+                                                        FROM TEMP_STAFF_ROLE
+                                                       WHERE     TYPE =
+                                                                    'CURRENT'
+                                                             AND LEVEL_ID = 0)
+                                                     P,
+                                                     IPR_USERS Q
+                                               WHERE P.STAFFID =
+                                                        Q.STAFF_NUMBER);
+
+                  INSERT INTO BPF_USER_PROCESSES (ACTIVE_YN,
+                                                  USER_ID,
+                                                  PROCESS_ID,
+                                                  APPLICATION_ID,
+                                                  FLOW_ID)
+                     SELECT 1,
+                            USER_ID,
+                            A.PROCESS_ID,
+                            A.APPLICATION_ID,
+                            A.APP_FLOW_ID
+                       FROM BPF_PROCESSES A,
+                            IPR_USERS B,
+                            (SELECT STAFFID, LEVEL_ID
+                               FROM TEMP_STAFF_ROLE
+                              WHERE TYPE = 'HR' AND LEVEL_ID = 0
+                             MINUS
+                             SELECT STAFFID, LEVEL_ID
+                               FROM TEMP_STAFF_ROLE
+                              WHERE TYPE = 'CURRENT' AND LEVEL_ID = 0) C
+                      WHERE     A.PROCESS_ID = P_PROCESS_ID
+                            AND C.STAFFID = B.STAFF_NUMBER;
+
+
+                  -- REMOVE CHANGED requesters FROM BPF_USER_ROLES.
+                  DELETE FROM BPF_USER_ROLES
+                        WHERE USER_ROLE_ID IN (SELECT S.USER_ROLE_ID
+                                                 FROM (SELECT STAFFID,
+                                                              LEVEL_ID
+                                                         FROM TEMP_STAFF_ROLE
+                                                        WHERE     TYPE =
+                                                                     'CURRENT'
+                                                              AND LEVEL_ID =
+                                                                     0
+                                                       MINUS
+                                                       SELECT STAFFID,
+                                                              LEVEL_ID
+                                                         FROM TEMP_STAFF_ROLE
+                                                        WHERE     TYPE = 'HR'
+                                                              AND LEVEL_ID =
+                                                                     0) P,
+                                                      TEMP_STAFF_ROLE Q,
+                                                      IPR_USERS R,
+                                                      BPF_USER_ROLES S
+                                                WHERE     P.LEVEL_ID =
+                                                             Q.LEVEL_ID
+                                                      AND Q.TYPE = 'CURRENT'
+                                                      AND P.STAFFID =
+                                                             R.STAFF_NUMBER
+                                                      AND Q.ROLE_ID =
+                                                             S.ROLE_ID
+                                                      AND R.USER_ID =
+                                                             S.USER_ID);
+
+                  -- REMOVE INVALID requesters FROM USER PROCESS.
+                  DELETE FROM BPF_USER_PROCESSES
+                        WHERE     FLOW_ID = v_App_Flow_Id
+                              AND PROCESS_ID = P_PROCESS_ID
+                              AND USER_ID IN (SELECT Q.USER_ID
+                                                FROM (SELECT STAFFID,
+                                                             LEVEL_ID
+                                                        FROM TEMP_STAFF_ROLE
+                                                       WHERE     TYPE =
+                                                                    'CURRENT'
+                                                             AND LEVEL_ID = 0
+                                                      MINUS
+                                                      SELECT STAFFID,
+                                                             LEVEL_ID
+                                                        FROM TEMP_STAFF_ROLE
+                                                       WHERE     TYPE = 'HR'
+                                                             AND LEVEL_ID = 0)
+                                                     P,
+                                                     IPR_USERS Q
+                                               WHERE P.STAFFID =
+                                                        Q.STAFF_NUMBER);
+
+                  -- UPDATE PENDING ACTION QUE TO REFLECT CHANGES
+                  INSERT INTO TEMP_BPF_ID (PROCESS_INSTANCE_ID)
+                     SELECT PROCESS_INSTANCE_ID
+                       FROM BPF_PROCESS_INSTANCES
+                      WHERE PROCESS_ID = P_PROCESS_ID;
+               ELSE             -- FIRST aUTH CHANGED.. SO CREATE NEW PROCESS.
+                  DBMS_OUTPUT.put_line (
+                     'First Auth Level Change detected. Creating New Process.');
+                  v_New_Process_YN := 'Y';
+               END IF;
+            ELSE              -- Auth Levels CHANGED .. SO CREATE NEW PROCESS.
+               DBMS_OUTPUT.put_line (
+                  'Auth Levels Change detected.  Creating New Process.');
+               v_New_Process_YN := 'Y';
+            END IF;
+
+            IF v_New_Process_YN = 'Y' and v_First_Auth is not null
+            THEN
+               -- add new process
+               --                 SELECT LISTAGG(A.STAFFID,',') WITHIN GROUP (ORDER BY A.STAFFID) INTO v_Requesters
+               --                FROM XXDT_EMPLOYEE_VIEW A, XXDT_EMPLOYEE_UG_VIEW B
+               --                WHERE A.STAFFID=B.STAFFID AND A.SUPERVISOR_EMP_NUM =v_First_Auth AND USER_GROUP_CODE=v_UG;
+               CREATE_NEW_DT_PROCESSES (v_App_Flow_Id,
+                                        v_UG,
+                                        v_First_Auth,
+                                        '');
+
+               SELECT MAX (PROCESS_ID)
+                 INTO v_Process_Id
+                 FROM BPF_PROCESSES
+                WHERE     APP_FLOW_ID = v_App_Flow_Id
+                      AND FIRST_AUTH = v_First_Auth
+                      AND USER_GROUP_CODE = v_UG;
+
+               DBMS_OUTPUT.put_line (
+                     'CHANGES DETECTED IN HR SYSTEM HEIRARCHY WITH CURRENT PROCESS : #'
+                  || P_PROCESS_ID
+                  || '. New Process creatd successfully - #'
+                  || v_Process_Id);
+            END IF;
+         END IF;
+      END IF;
+   END;
+
+
+PROCEDURE CREATE_NEW_DT_PROCESSES (P_APP_FLOW_ID   IN NUMBER,
+                                      P_UG               VARCHAR2,
+                                      P_FIRST_AUTH       VARCHAR2,
+                                      P_REQUESTERS       VARCHAR2)
+   IS
+      v_Count                     NUMBER;
+      v_Sql                       VARCHAR2 (500);
+      v_UG                        VARCHAR2 (10);
+      v_First_Auth                VARCHAR2 (10);
+      v_Process_Id                NUMBER;
+      v_Process_Name              VARCHAR2 (240);
+      v_Password                  VARCHAR2 (100) := 'GlFNUQNW3ZI=';
+      v_Chairman                  VARCHAR2 (10) := '1000';
+      v_ROLE_CATEGORY             NUMBER := 82;                     -- FOR DTS
+      v_Application_Id            NUMBER := 14;
+      v_Treasury_Role             NUMBER := 44;
+      v_Draft_Activity            NUMBER := 5;
+      v_OverSeasTrainingFlow      NUMBER := 3;
+      v_OverSeasTrainingProcess   NUMBER := 0;
+      v_OverSeasTrainingRole      NUMBER := 0;
+      v_Default_Email             VARCHAR2 (50) := 'default@omanair.com';
+      v_Claim_APRV_Level          NUMBER;
+      v_Travel_APRV_Level         NUMBER;
+      v_TEMP                      VARCHAR2 (4000);
+      wy_payroll                   NUMBER;
+   BEGIN
+      VALIDATE_DT_PROCESS_INPUTS (P_APP_FLOW_ID,
+                                  P_UG,
+                                  P_FIRST_AUTH,
+                                  P_REQUESTERS,
+                                  v_UG,
+                                  v_FIRST_AUTH);
+      DBMS_OUTPUT.put_line (
+            'CALLED VALIDATE_DT_PROCESS_INPUTS. v_UG:'
+         || v_UG
+         || ', v_FIRST_AUTH:'
+         || v_FIRST_AUTH);
+
+      SELECT PROCESS_ID
+        INTO v_OverSeasTrainingProcess
+        FROM BPF_PROCESSES
+       WHERE APP_FLOW_ID = v_OverSeasTrainingFlow;
+
+
+      DELETE FROM TEMP_PROCESS;
+
+      --INSERT AUTH/APRV ROLES N USERS TO TEMP_STAFF AS TEMP ROLE TYPE
+
+      INSERT INTO TEMP_STAFF (LEVEL_ID, ROLE_TYPE, STAFFID)
+         SELECT APRV_ORDER, 'TEMP', STAFFID
+           FROM (  SELECT A.STAFFID,
+                          FULLNAME,
+                          DESIGNATION,
+                          DEPT,
+                          APRV_ORDER,
+                          AUTH_LEVEL,
+                          APRV_ORDER * AUTH_LEVEL AL,
+                          MIN (APRV_ORDER * AUTH_LEVEL)
+                          OVER (ORDER BY AUTH_LEVEL RANGE UNBOUNDED PRECEDING)
+                             AS MIN_AL
+                     FROM (           SELECT STAFFID,
+                                             FULLNAME,
+                                             DESIGNATION,
+                                             DEPT,
+                                             LEVEL APRV_ORDER
+                                        FROM XXDT_EMPLOYEE_VIEW
+                                  START WITH STAFFID = v_First_Auth
+                                  CONNECT BY     PRIOR SUPERVISOR_EMP_NUM = STAFFID
+                                             AND staffid <> v_Chairman
+                           ORDER SIBLINGS BY FULLNAME) A,
+                          (SELECT STAFFID, AUTH_LEVEL
+                             FROM BPF_APPROVAL_POLICY_AUTH_VIEW
+                            WHERE     PATH_REF = 'TRAVEL'
+                                  AND USER_GROUP_CODE = v_UG) B
+                    WHERE A.STAFFID = B.STAFFID(+)
+                 ORDER BY APRV_ORDER, B.AUTH_LEVEL)
+          WHERE NVL (MIN_AL, 0) >= NVL (AL, 0);
+
+      -- CHECK  ANY INVALID STAFF NUMBERS IN requesters or approvers level
+      SELECT COUNT (*)
+        INTO v_Count
+        FROM TEMP_STAFF
+       WHERE     1 = 1
+             AND (CASE
+                     WHEN TRIM (TRANSLATE (STAFFID, '0123456789', ' '))
+                             IS NULL
+                     THEN
+                        'numeric'
+                     ELSE
+                        'alpha'
+                  END) = 'alpha';
+
+      IF v_Count > 0
+      THEN
+         RAISE_APPLICATION_ERROR (
+            -20055,
+               'Error Invalid Staff Number exist in requesters or approvers level. Found '
+            || v_Count
+            || ' invalid staffs!!');
+      END IF;
+
+      -- GET CLAIM APPROVAL LEVEL
+      SELECT MAX (APRV_ORDER)
+        INTO v_Claim_APRV_Level
+        FROM (SELECT APRV_ORDER
+                FROM (  SELECT A.STAFFID,
+                               FULLNAME,
+                               DESIGNATION,
+                               DEPT,
+                               APRV_ORDER,
+                               AUTH_LEVEL,
+                               APRV_ORDER * AUTH_LEVEL AL,
+                               MIN (
+                                  APRV_ORDER * AUTH_LEVEL)
+                               OVER (ORDER BY  APRV_ORDER * AUTH_LEVEL
+                                     RANGE UNBOUNDED PRECEDING)
+                                  AS MIN_AL
+                          FROM (           SELECT STAFFID,
+                                                  FULLNAME,
+                                                  DESIGNATION,
+                                                  DEPT,
+                                                  LEVEL APRV_ORDER
+                                             FROM XXDT_EMPLOYEE_VIEW
+                                       START WITH STAFFID = v_First_Auth
+                                       CONNECT BY     PRIOR SUPERVISOR_EMP_NUM =
+                                                         STAFFID
+                                                  AND staffid <> v_Chairman
+                                ORDER SIBLINGS BY FULLNAME) A,
+                               (SELECT STAFFID, AUTH_LEVEL
+                                  FROM BPF_APPROVAL_POLICY_AUTH_VIEW
+                                 WHERE     PATH_REF = 'CLAIM'
+                                       AND USER_GROUP_CODE = v_UG) B
+                         WHERE A.STAFFID = B.STAFFID(+)
+                      ORDER BY APRV_ORDER, B.AUTH_LEVEL)
+               WHERE NVL (MIN_AL, 0) >= NVL (AL, 0));
+
+
+      -- INSERTS ROLE_ID s for request and AUTH/APROVAL ROLES WITH  ROLE TYPE as ROLE_ID
+      INSERT INTO TEMP_STAFF (ROLE_ID, LEVEL_ID, ROLE_TYPE)
+         SELECT SEQ_BPF_ROLE.NEXTVAL, 0, 'ROLE_ID' FROM DUAL;
+
+      INSERT INTO TEMP_STAFF (ROLE_ID, LEVEL_ID, ROLE_TYPE)
+         SELECT SEQ_BPF_ROLE.NEXTVAL, LEVEL_ID, 'ROLE_ID'
+           FROM TEMP_STAFF
+          WHERE LEVEL_ID > 0;
+
+      -- INSERTS ROLE_IDs with correct role types
+      INSERT INTO TEMP_STAFF (STAFFID,
+                              ROLE_TYPE,
+                              ROLE_ID,
+                              LEVEL_ID)
+           SELECT A.STAFFID,
+                  NVL (C.ROLE_TYPE, 'RQST'),
+                  B.ROLE_ID,
+                  A.LEVEL_ID
+             FROM (SELECT STAFFID, ROLE_ID, LEVEL_ID
+                     FROM TEMP_STAFF
+                    WHERE ROLE_TYPE = 'TEMP') A,
+                  (SELECT STAFFID, ROLE_ID, LEVEL_ID
+                     FROM TEMP_STAFF
+                    WHERE ROLE_TYPE = 'ROLE_ID') B,
+                  (SELECT ROWNUM LEVEL_ID, ROLE_TYPE, APRV_ORDER
+                     FROM (  SELECT *
+                               FROM BPF_REF_ROLE_TYPE_VIEW
+                              WHERE APPROVEL_LEVEL =
+                                       (SELECT MAX (LEVEL_ID) FROM TEMP_STAFF)
+                           ORDER BY APRV_ORDER)) C
+            WHERE A.LEVEL_ID = B.LEVEL_ID AND A.LEVEL_ID = C.LEVEL_ID(+)
+         ORDER BY 1;
+
+      -- removes all temp roles
+      DELETE TEMP_STAFF
+       WHERE ROLE_TYPE IN ('TEMP', 'ROLE_ID');
+
+      SELECT MAX (LEVEL_ID) INTO v_Travel_APRV_Level FROM TEMP_STAFF;
+
+      -- adding new process
+      v_Process_Name := v_UG || '_PROCESS_' || v_First_Auth;
+
+      SELECT SEQ_BPF_PROCESSES.NEXTVAL INTO v_Process_Id FROM DUAL;
+
+      INSERT INTO BPF_PROCESSES (PROCESS_ID,
+                                 NAME,
+                                 DESCRIPTION,
+                                 APPLICATION_ID,
+                                 APP_FLOW_ID,
+                                 FIRST_AUTH,
+                                 USER_GROUP_CODE,
+                                 IS_ACTIVE,
+                                 FIRST_PASS_LEVEL,
+                                 SECOND_PASS_LEVEL)
+         SELECT v_Process_Id, 
+                v_UG || '_PROCESS_' || v_First_Auth,
+                v_UG || '_PROCESS_' || v_First_Auth,
+                v_Application_Id,
+                P_APP_FLOW_ID,
+                v_First_Auth,
+                v_UG,
+                1,
+                v_Travel_APRV_Level,
+                v_Claim_APRV_Level
+           FROM DUAL;
+
+      UPDATE BPF_PROCESSES
+         SET IS_ACTIVE = 0
+       WHERE     APP_FLOW_ID = P_APP_FLOW_ID
+             AND FIRST_AUTH = v_First_Auth
+             AND USER_GROUP_CODE = v_UG
+             AND PROCESS_ID != v_Process_Id;
+
+      DBMS_OUTPUT.put_line ('INSERTING PROCESSES  > 0 :' || v_Process_Id);
+
+      --     SELECT LISTAGG( STAFFID||' / ' || ROLE_TYPE||' / ' ||ROLE_ID||' / ' ||LEVEL_ID, ',') WITHIN GROUP (ORDER BY 1D) INTO v_TEMP FROM   TEMP_STAFF;
+      --     dbms_output.put_line('TEMP_STAFF TABLE >>: ' || v_TEMP);
+
+      -- add relevant staffs to ipr_users
+
+      INSERT INTO IPR_USERS (USER_ID,
+                             PASSWORD,
+                             STAFF_NUMBER,
+                             ACTIVE_YN,
+                             EMAIL_ADDRESS)
+         SELECT STAFFID,
+                v_Password,
+                STAFFID,
+                1,
+                v_Default_Email
+           FROM (SELECT STAFFID FROM TEMP_STAFF
+                 MINUS
+                 SELECT STAFF_NUMBER || '' FROM IPR_USERS);
+
+
+
+      -- add  roleS
+      INSERT INTO BPF_ROLES (ROLE_ID,
+                             NAME,
+                             DESCRIPTION,
+                             ROLE_CATEG_ID,
+                             TRANS_YN)
+         SELECT ROLE_ID,
+                v_Process_Name || '_' || ROLE_TYPE,
+                v_Process_Name || '_' || ROLE_TYPE,
+                v_ROLE_CATEGORY,
+                0
+           FROM TEMP_STAFF
+          WHERE LEVEL_ID = 0 AND ROWNUM = 1;
+
+      INSERT INTO BPF_ROLES (ROLE_ID,
+                             NAME,
+                             DESCRIPTION,
+                             ROLE_CATEG_ID,
+                             TRANS_YN)
+         SELECT ROLE_ID,
+                v_Process_Name || '_' || ROLE_TYPE,
+                v_Process_Name || '_' || ROLE_TYPE,
+                v_ROLE_CATEGORY,
+                1
+           FROM TEMP_STAFF
+          WHERE LEVEL_ID > 0;
+
+      -- add  USERS TO roleS
+      INSERT INTO BPF_USER_ROLES (USER_ROLE_ID, ROLE_ID, USER_ID)
+         SELECT SEQ_BPF_USERROLE.NEXTVAL, ROLE_ID, B.USER_ID
+           FROM (  SELECT ROLE_ID, STAFFID
+                     FROM TEMP_STAFF
+                 ORDER BY ROLE_ID) A,
+                IPR_USERS B
+          WHERE A.STAFFID = B.STAFF_NUMBER;
+
+      -- ADD TRANSITIONS ; FIRST ADD TREASURY ROLE IN TEMP_STAFF
+      INSERT INTO TEMP_STAFF (ROLE_ID, LEVEL_ID, ROLE_TYPE)
+         SELECT v_Treasury_Role, -1, 'TREASURY' FROM DUAL;
+
+
+
+      -- VAL Type=1 >> Transition is INVALID if a given previous transition exist. (APRV-GRANT CLAIM by CEO becomes INVALID if APRV-GRANT ADV happened)
+      -- VAL Type=2 >> Transition is INVALID if a given previous transition don't exist. (APRV-FIN CLAIM by Treasury becomes INVALID if APRV-GRANT ADV don't happened)
+
+
+      -- ADD TRANSITIONS ; Both Travel and Claim transitions with Travel approval level;
+      --    CLaim transitions for direct claim where approval will be as per Trave as well as if both Travel and Claim approval levels are same..
+
+
+
+      INSERT INTO BPF_TRANSITIONS (TRANSITION_ID,
+                                   NAME,
+                                   ACTIVITY_FROM,
+                                   ACTIVITY_TO,
+                                   PROCESS_ID,
+                                   ROLE_ID)
+         SELECT SEQ_BPF_TRANS.NEXTVAL,
+                TRANS_NAME,
+                ACTIVITY_FROM,
+                ACTIVITY_TO,
+                v_Process_Id,
+                A.ROLE_ID
+           FROM TEMP_STAFF_ROLE_VIEW A,
+                (  SELECT *
+                     FROM BPF_REF_TRANSITIONS_VIEW
+                    WHERE     NORMAL_FLOW_YN = 1
+                          AND (   APPROVEL_LEVEL = v_Travel_APRV_Level
+                               OR APPROVEL_LEVEL IN (-1, 9))
+                 ORDER BY TRANS_ORDER) B
+          WHERE A.ROLE_TYPE = B.ROLE_TYPE;
+
+
+
+      DBMS_OUTPUT.put_line (
+            'approval levels:v_Travel_APRV_Level-'
+         || v_Travel_APRV_Level
+         || ' v_Claim_APRV_Level-'
+         || v_Claim_APRV_Level);
+
+      IF v_Travel_APRV_Level > v_Claim_APRV_Level
+      THEN
+         -- Add RULE to invalidate[VAL Type=1] CLAIM transitions with same approval level of TRAVEL if Travel Approval(8) eists.
+         -- VAL Type=1 >> Transition is INVALID if a given previous transition exist.
+         INSERT INTO BPF_TRANS_RULES (VAL_TYPE, PREV_TRANS, PARENT_TRANS)
+            SELECT 1, Y.PREV_TRANS, Z.CURRNT_TRANS
+              FROM (SELECT TRANSITION_ID PREV_TRANS
+                      FROM BPF_TRANSITIONS
+                     WHERE PROCESS_ID = v_Process_Id AND ACTIVITY_TO = 8) Y,
+                   (SELECT TRANSITION_ID CURRNT_TRANS
+                      FROM BPF_TRANSITIONS A, BPF_REF_TRANSITIONS_VIEW B
+                     WHERE     A.PROCESS_ID = v_Process_Id
+                           AND A.ACTIVITY_FROM = B.ACTIVITY_FROM
+                           AND A.ACTIVITY_TO = B.ACTIVITY_TO
+                           AND B.APPROVEL_LEVEL = v_Travel_APRV_Level
+                           AND B.TYPE = 'CLAIM') Z
+             WHERE 1 = 1;
+
+         -- ADD TRANSITIONS ; Claim transitions with Claim approval level;
+
+
+         INSERT INTO BPF_TRANSITIONS (TRANSITION_ID,
+                                      NAME,
+                                      ACTIVITY_FROM,
+                                      ACTIVITY_TO,
+                                      PROCESS_ID,
+                                      ROLE_ID)
+            SELECT SEQ_BPF_TRANS.NEXTVAL,
+                   TRANS_NAME,
+                   ACTIVITY_FROM,
+                   ACTIVITY_TO,
+                   v_Process_Id,
+                   A.ROLE_ID
+              FROM TEMP_STAFF_ROLE_VIEW A,
+                   (  SELECT *
+                        FROM BPF_REF_TRANSITIONS_VIEW
+                       WHERE     TYPE = 'CLAIM'
+                             AND NORMAL_FLOW_YN = 1
+                             AND APPROVEL_LEVEL = v_Claim_APRV_Level
+                    ORDER BY TRANS_ORDER) B
+             WHERE A.LEVEL_ID = B.ROLE_TYPE_LEVEL;
+
+
+          
+
+         -- Add RULE to invalidate [VAL Type=2] CLAIM transitions having the approval level of Claim.
+         -- VAL Type=2 >> Transition is INVALID if a given previous transition don't exist
+         INSERT INTO BPF_TRANS_RULES (VAL_TYPE, PREV_TRANS, PARENT_TRANS)
+            SELECT 2, Y.PREV_TRANS, Z.CURRNT_TRANS
+              FROM (SELECT TRANSITION_ID PREV_TRANS
+                      FROM BPF_TRANSITIONS
+                     WHERE PROCESS_ID = v_Process_Id AND ACTIVITY_TO = 8) Y,
+                   (SELECT TRANSITION_ID CURRNT_TRANS
+                      FROM (SELECT A.ACTIVITY_FROM,
+                                   A.ACTIVITY_TO,
+                                   A.ROLE_ID,
+                                   a.TRANSITION_ID,
+                                   FIRST_VALUE (
+                                      a.TRANSITION_ID)
+                                   OVER (
+                                      PARTITION BY A.ACTIVITY_FROM,
+                                                   A.ACTIVITY_TO,
+                                                   A.ROLE_ID
+                                      ORDER BY a.TRANSITION_ID DESC)
+                                      FV_TRANSITION_ID
+                              FROM BPF_TRANSITIONS A,
+                                   BPF_REF_TRANSITIONS_VIEW B
+                             WHERE     A.PROCESS_ID = v_Process_Id
+                                   AND A.ACTIVITY_FROM = B.ACTIVITY_FROM
+                                   AND A.ACTIVITY_TO = B.ACTIVITY_TO
+                                   AND B.APPROVEL_LEVEL = v_Claim_APRV_Level
+                                   AND B.TYPE = 'CLAIM')
+                     WHERE TRANSITION_ID = FV_TRANSITION_ID) Z
+             WHERE 1 = 1;
+      --               INSERT INTO BPF_TRANS_RULES(VAL_TYPE,    PREV_TRANS,    PARENT_TRANS)
+      --                SELECT 2,Y.PREV_TRANS , Z.CURRNT_TRANS FROM
+      --             (SELECT TRANSITION_ID PREV_TRANS FROM BPF_TRANSITIONS WHERE PROCESS_ID=v_Process_Id and  ACTIVITY_TO= 8 ) Y,
+      --             (SELECT TRANSITION_ID CURRNT_TRANS FROM BPF_TRANSITIONS A,BPF_REF_TRANSITIONS_VIEW B WHERE
+      --             A.PROCESS_ID=v_Process_Id AND A.ACTIVITY_FROM=B.ACTIVITY_FROM AND A.ACTIVITY_TO=B.ACTIVITY_TO
+      --             AND B.APPROVEL_LEVEL=v_Claim_APRV_Level AND B.TYPE='CLAIM'
+      --              ) Z where 1=1 ;
+      --
+
+      END IF;
+
+      -- END IF;
+
+      -- MAP USERS TO BPF_PROCESS ; FIRST DELETE AFTER MOVING TO HISTORY
+
+      DELETE FROM TEMP_PROCESS;
+
+      INSERT INTO TEMP_PROCESS (USER_ID, PROCESS_ID)
+         SELECT USER_ID, PROCESS_ID
+           FROM BPF_USER_PROCESSES
+          WHERE     FLOW_ID = P_APP_FLOW_ID
+                AND USER_ID IN (SELECT B.USER_ID
+                                  FROM TEMP_STAFF A, IPR_USERS B
+                                 WHERE     A.STAFFID = B.STAFF_NUMBER
+                                       AND A.LEVEL_ID = 0);
+
+       --check WY payrolls then insert
+      
+      SELECT COUNT(*) INTO wy_payroll
+        FROM (
+          SELECT DISTINCT e.payrollid
+          FROM xxdt_employee_view e
+          WHERE e.staffid IN (
+            SELECT staff_number
+            FROM ipr_users
+            WHERE UPPER(user_id) IN (SELECT UPPER(user_id) FROM temp_process)
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM bpf_dts_payroll_treasury_map m
+            WHERE m.payroll_id = e.payrollid
+          )
+        ) t;
+      
+      IF wy_payroll > 0 THEN
+        INSERT INTO BPF_TRANSITIONS (TRANSITION_ID,NAME,ACTIVITY_TO,PROCESS_ID,ROLE_ID)
+              VALUES (SEQ_BPF_TRANS.NEXTVAL,'A_HR_APRV',87,v_Process_Id,45);
+       
+        INSERT INTO BPF_TRANSITIONS (TRANSITION_ID,NAME,ACTIVITY_TO,PROCESS_ID,ROLE_ID)
+              VALUES (SEQ_BPF_TRANS.NEXTVAL,'A_HR_REJ',9, v_Process_Id,45);
+
+      END IF;
+
+      INSERT INTO BPF_USER_PROCESSES_HIS (DATED,
+                                          USER_ID,
+                                          PROCESS_ID,
+                                          FLOW_ID)
+         SELECT SYSDATE,
+                USER_ID,
+                PROCESS_ID,
+                P_APP_FLOW_ID
+           FROM TEMP_PROCESS;
+
+      DELETE FROM BPF_USER_PROCESSES
+            WHERE     FLOW_ID = P_APP_FLOW_ID
+                  AND USER_ID IN (SELECT USER_ID FROM TEMP_PROCESS);
+
+      INSERT INTO BPF_USER_PROCESSES (ACTIVE_YN,
+                                      USER_ID,
+                                      PROCESS_ID,
+                                      APPLICATION_ID,
+                                      FLOW_ID)
+         SELECT 1,
+                B.USER_ID,
+                v_Process_Id,
+                v_Application_Id,
+                P_APP_FLOW_ID
+           FROM TEMP_STAFF A, IPR_USERS B
+          WHERE A.STAFFID = B.STAFF_NUMBER AND LEVEL_ID = 0;
+
+      -- REMOVE requesters FROM  REQUESTING USER ROLES  PREVIOUS PROCESSES
+      DELETE FROM BPF_USER_ROLES
+            WHERE USER_ROLE_ID IN (SELECT USER_ROLE_ID
+                                     FROM TEMP_PROCESS P,
+                                          BPF_TRANSITIONS Q,
+                                          BPF_USER_ROLES R
+                                    WHERE     P.PROCESS_ID = Q.PROCESS_ID
+                                          AND Q.ACTIVITY_TO =
+                                                 v_Draft_Activity
+                                          AND Q.ROLE_ID = R.ROLE_ID
+                                          AND P.USER_ID = R.USER_ID);
+
+
+
+      DBMS_OUTPUT.put_line ('uSERS MAPPED TO PROCESSES');
+
+      INSERT INTO BPF_TRANSITIONS_MATCH_BKP (
+            PROCESS_ID,PROCESS_INSTANCE_ID,ACTIVITY_FROM,ACTIVITY_TO,ACTIVITY_TO_STATE_ID,NEW_AO,OLD_ACTIVITY,OLD_AO,PERFORMED_END_TIME,
+            TRANSITION_ID,UPDATED_AT
+          )
+         SELECT PROCESS_ID,PROCESS_INSTANCE_ID,ACTIVITY_FROM,ACTIVITY_TO,ACTIVITY_TO_STATE_ID,NEW_AO,OLD_ACTIVITY,OLD_AO,PERFORMED_END_TIME,
+            TRANSITION_ID, SYSDATE
+            FROM BPF_TRANSITIONS_MATCH_VIEW
+                  WHERE     PROCESS_ID = v_Process_Id
+                        AND PROCESS_INSTANCE_ID IN (SELECT Q.PROCESS_INSTANCE_ID
+                                       FROM TEMP_PROCESS P,
+                                            BPF_PROCESS_INSTANCES Q,
+                                            BPF_PENDING_ACTIONS R
+                                      WHERE     P.PROCESS_ID = Q.PROCESS_ID
+                                            AND LOWER (P.USER_ID) =
+                                                   LOWER (Q.USER_ID)
+                                            AND Q.PROCESS_INSTANCE_ID =
+                                                   R.BPF_ID);
+
+      UPDATE BPF_PROCESS_INSTANCES X
+         SET (PROCESS_ID, LAST_ACTIVITY, STATE_ID) =
+                (SELECT PROCESS_ID,
+                        ACTIVITY_TO LAST_ACTIVITY,
+                        --ACTIVITY_TO_STATE_ID
+                        CASE WHEN X.STATE_ID = 76
+                             THEN X.STATE_ID
+                             ELSE ACTIVITY_TO_STATE_ID
+                        END AS STATE_ID
+                   FROM BPF_TRANSITIONS_MATCH_VIEW
+                  WHERE     PROCESS_ID = v_Process_Id
+                        AND PROCESS_INSTANCE_ID = X.PROCESS_INSTANCE_ID
+                        AND ROWNUM = 1)
+       WHERE PROCESS_INSTANCE_ID IN (SELECT Q.PROCESS_INSTANCE_ID
+                                       FROM TEMP_PROCESS P,
+                                            BPF_PROCESS_INSTANCES Q,
+                                            BPF_PENDING_ACTIONS R
+                                      WHERE     P.PROCESS_ID = Q.PROCESS_ID
+                                            AND LOWER (P.USER_ID) =
+                                                   LOWER (Q.USER_ID)
+                                            AND Q.PROCESS_INSTANCE_ID =
+                                                   R.BPF_ID);
+
+
+      
+      -- UPDATE PENDING ACTION QUE
+      INSERT INTO TEMP_BPF_ID (PROCESS_INSTANCE_ID)
+         SELECT Q.PROCESS_INSTANCE_ID
+           FROM TEMP_PROCESS P,
+                BPF_PROCESS_INSTANCES Q,
+                BPF_PENDING_ACTIONS R
+          WHERE     P.PROCESS_ID = Q.PROCESS_ID
+                AND LOWER (P.USER_ID) = LOWER (Q.USER_ID)
+                AND Q.PROCESS_INSTANCE_ID = R.BPF_ID;
+      
+
+
+      DBMS_OUTPUT.put_line (
+         'PENDING QUE ITEMS RE ROUTED TO MATCHING PROCESSES');
+
+      -- Map Overseas Training Process and role to requesters
+      SELECT PROCESS_ID
+        INTO v_OverSeasTrainingProcess
+        FROM BPF_PROCESSES
+       WHERE APP_FLOW_ID = v_OverSeasTrainingFlow;
+
+      SELECT ROLE_ID
+        INTO v_OverSeasTrainingRole
+        FROM BPF_TRANSITIONS
+       WHERE     PROCESS_ID = v_OverSeasTrainingProcess
+             AND ACTIVITY_FROM IS NULL
+             AND ACTIVITY_TO = v_Draft_Activity;
+
+      INSERT INTO BPF_USER_PROCESSES (ACTIVE_YN,
+                                      USER_ID,
+                                      PROCESS_ID,
+                                      APPLICATION_ID,
+                                      FLOW_ID)
+         SELECT 1,
+                USER_ID,
+                v_OverSeasTrainingProcess,
+                v_Application_Id,
+                v_OverSeasTrainingFlow
+           FROM (SELECT B.USER_ID
+                   FROM TEMP_STAFF_ROLE A, IPR_USERS B
+                  WHERE     TYPE = 'HR'
+                        AND A.STAFFID = B.STAFF_NUMBER
+                        AND LEVEL_ID = 0
+                 MINUS
+                 SELECT USER_ID
+                   FROM BPF_USER_PROCESSES
+                  WHERE PROCESS_ID = v_OverSeasTrainingProcess);
+
+      INSERT INTO BPF_USER_ROLES (USER_ROLE_ID, ROLE_ID, USER_ID)
+         SELECT SEQ_BPF_USERROLE.NEXTVAL, v_OverSeasTrainingRole, USER_ID
+           FROM (SELECT B.USER_ID
+                   FROM TEMP_STAFF_ROLE A, IPR_USERS B
+                  WHERE     TYPE = 'HR'
+                        AND A.STAFFID = B.STAFF_NUMBER
+                        AND LEVEL_ID = 0
+                 MINUS
+                 SELECT USER_ID
+                   FROM BPF_USER_ROLES
+                  WHERE ROLE_ID = v_OverSeasTrainingRole);
+   END;
