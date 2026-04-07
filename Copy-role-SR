@@ -1,0 +1,326 @@
+INSERT INTO wynetadm.temp_bpf_id
+            SELECT bpf_id
+              FROM bpf_pending_actions
+             WHERE next_actor = volduserid;
+During the execution of this line in the procedure, it will return about 9000 bpf_id and while inserting those getting the below error. How to check and overcome this issue. Provide a step by step explanation and solution for this.
+java.sql.SQLException: ORA-00001: unique constraint (WYNETADM.BPAD_UQ) violated
+ORA-06512: at "WYNETADM.BPF", line 711
+ORA-06512: at "WYNETADM.INS_TEMP_BPF_ID", line 2
+ORA-04088: error during execution of trigger 'WYNETADM.INS_TEMP_BPF_ID'
+ORA-06512: at "WYNETADM.BPF", line 190
+
+	at oracle.jdbc.driver.DatabaseError.throwSqlException(DatabaseError.java:111)
+	at oracle.jdbc.driver.T4CTTIoer.processError(T4CTTIoer.java:330)
+	at oracle.jdbc.driver.T4CTTIoer.processError(T4CTTIoer.java:287)
+	at oracle.jdbc.driver.T4C8Oall.receive(T4C8Oall.java:744)
+	at oracle.jdbc.driver.T4CCallableStatement.doOall8(T4CCallableStatement.java:214)
+
+create or replace TRIGGER "WYNETADM"."INS_TEMP_BPF_ID" 
+BEFORE INSERT
+ON WYNETADM.TEMP_BPF_ID 
+REFERENCING NEW AS NEW OLD AS OLD
+FOR EACH ROW
+
+
+BEGIN
+	 bpf.put_in_bpf_que(:new.PROCESS_INSTANCE_ID,1);
+END ;
+
+PROCEDURE put_in_bpf_que (bpfid IN NUMBER, trigflag IN NUMBER)
+   IS
+      is_conditional_flow   NUMBER          := 0;
+      appid                 NUMBER          := 0;
+      appflowid             NUMBER          := 0;
+      processid             NUMBER          := 0;
+      s                     VARCHAR2 (1000);
+      v_nonoutstation       NUMBER          := -1;
+      v_advapprove          NUMBER          := -1;
+      v_pending_actions_count NUMBER        := -1;
+      v_pending_actionsdtl_count NUMBER     := -1;
+      aprv_action           NUMBER          := 0;
+      cpo_aprved            NUMBER          := 0;
+      v_filter              VARCHAR2(1000);
+      v_sql                 VARCHAR2(1000);
+      v_sql_dtl             VARCHAR2(1000);
+      wy_payroll            NUMBER          := 0;
+      hr_type               NUMBER          := 0;
+
+   BEGIN
+
+      SELECT COUNT(*) INTO v_nonoutstation
+          FROM WYNETADM.BPF_NONOUTSTATION_PAYROLL 
+          WHERE PAYROLL_ID = (
+              SELECT PAYROLLID 
+              FROM WYNETADM.xxdt_employee_view 
+              WHERE STAFFID = (
+                  SELECT EMP_NO 
+                  FROM WYNETADM.DT_HDR 
+                  WHERE BPF_ID = bpfid
+              )
+          );      
+
+      SELECT COUNT(*) INTO v_advapprove 
+      FROM WYNETADM.BPF_PROCESS_INSTANCES 
+      WHERE PROCESS_INSTANCE_ID = bpfid AND STATE_ID = 8;
+
+      SELECT COUNT(*) INTO v_pending_actions_count 
+      FROM bpf_pending_actions WHERE bpf_id = bpfid;
+
+      SELECT COUNT(*) INTO v_pending_actionsdtl_count 
+      FROM bpf_pending_action_dtl WHERE bpf_id = bpfid;
+
+      IF v_nonoutstation = 0 AND v_advapprove = 1 AND v_pending_actions_count = 0 AND v_pending_actionsdtl_count = 0 
+      THEN
+          DBMS_OUTPUT.PUT_LINE('OUTSTATION STAFF, HENCE NOT REQUIRED TO ADD BACK PENDING ACTIONS');
+      ELSE
+
+      DELETE FROM bpf_temp_transitions;
+      INSERT INTO bpf_temp_transitions
+                  (trans_type, transition_id, activity_name, role_id,
+                   is_valid)
+         SELECT 1, transition_id, activity_to_name, role_id, 1
+           FROM bpf_pit_view
+          WHERE process_instance_id = bpfid;
+
+      INSERT INTO bpf_temp_transitions
+                  (trans_type, transition_id, is_valid)
+         SELECT 2, transition_id, 0
+           FROM bpf_transition_instances
+          WHERE process_instance_id = bpfid;
+
+      SELECT application_id, NVL (conditional_flow, 0)
+        INTO appid, is_conditional_flow
+        FROM bpf_applications
+       WHERE application_id =
+                     (SELECT application_id
+                        FROM bpf_processes
+                       WHERE process_id = (SELECT process_id
+                                             FROM bpf_process_instances
+                                            WHERE process_instance_id = bpfid));
+
+      SELECT app_flow_id, process_id
+        INTO appflowid, processid
+        FROM bpf_processes
+       WHERE process_id = (SELECT process_id
+                             FROM bpf_process_instances
+                            WHERE process_instance_id = bpfid);
+
+      IF is_conditional_flow = 1
+      THEN
+          -- Initially IS_VALID of BPF_TEMP_TRANSITIONS will be 0 i.e. INVALID. Now validation is shown below.
+         -- For includ any VALIDATION
+            --First setting as invalid for all transitions having includ any option
+         UPDATE bpf_temp_transitions a
+            SET is_valid = 0
+          WHERE trans_type = 1
+            AND 0 < (SELECT COUNT (*)
+                       FROM bpf_trans_rules
+                      WHERE val_type = 2 AND a.transition_id = parent_trans);
+
+         --Now updating valid transitions by checking any of the rul transitions in trans history.
+         UPDATE bpf_temp_transitions a
+            SET is_valid = 1
+          WHERE trans_type = 1
+            AND 0 <
+                   (SELECT COUNT (transition_id)
+                      FROM bpf_temp_transitions
+                     WHERE trans_type = 2
+                       AND transition_id IN (
+                              SELECT prev_trans
+                                FROM bpf_trans_rules
+                               WHERE val_type = 2
+                                 AND parent_trans = a.transition_id));
+
+         --For includ all VALIDATION [Rule trasitions minus history will allways return value if all rule trans does not exist in history and thus update as invalid.]
+         s :=
+            'update BPF_TEMP_TRANSITIONS A set is_valid=0 where 
+		  TRANS_TYPE=1 and (select PREV_TRANS from BPF_TRANS_RULES 
+		  where VAL_TYPE=3 and PARENT_TRANS=A.TRANSITION_ID ) in (select PREV_TRANS from BPF_TRANS_RULES 
+		  where VAL_TYPE=3 and PARENT_TRANS=A.TRANSITION_ID
+		  minus select TRANSITION_ID from BPF_TEMP_TRANSITIONS where  TRANS_TYPE=2)';
+
+         EXECUTE IMMEDIATE s;
+
+         --For must exclude VALIDATION [If history contains any of the Ruls transition it is invalid]
+         UPDATE bpf_temp_transitions a
+            SET is_valid = 0
+          WHERE trans_type = 1
+            AND 0 <
+                   (SELECT COUNT (transition_id)
+                      FROM bpf_temp_transitions
+                     WHERE trans_type = 2
+                       AND transition_id IN (
+                              SELECT prev_trans
+                                FROM bpf_trans_rules
+                               WHERE val_type = 1
+                                 AND parent_trans = a.transition_id));
+      END IF;
+
+      DELETE FROM bpf_pending_actions
+            WHERE bpf_id = bpfid;
+
+      DELETE FROM bpf_pending_action_dtl
+            WHERE bpf_id = bpfid;
+
+      INSERT INTO bpf_pending_actions
+                  (bpf_id, next_actor, user_role_id, application_id,
+                   app_flow_id)
+         SELECT bpfid, b.user_id, b.user_role_id, appid, appflowid
+           FROM bpf_temp_valid_roles_view a, bpf_user_roles b
+          WHERE a.role_id = b.role_id
+            AND (   a.role_id NOT IN (
+                        SELECT DISTINCT role_id
+                                   FROM bpf_transitions
+                                  WHERE process_id = processid
+                                    AND activity_from IS NULL)
+                 OR (    UPPER (b.user_id) =
+                                          (SELECT UPPER (user_id)
+                                             FROM bpf_process_instances
+                                            WHERE process_instance_id = bpfid)
+                     AND a.role_id IN (
+                            SELECT DISTINCT role_id
+                                       FROM bpf_transitions
+                                      WHERE process_id = processid
+                                        AND activity_from IS NULL)
+                    )
+                );
+
+/*  SELECT bpfId,B.USER_ID,B.USER_ROLE_ID,appId from  BPF_TEMP_VALID_ROLES_view A, BPF_USER_ROLES B
+    where  A.ROLE_ID not in (
+      SELECT DISTINCT ROLE_ID FROM BPF_TRANSITIONS
+      WHERE PROCESS_ID=(SELECT PROCESS_ID FROM BPF_PROCESS_INSTANCES
+      WHERE PROCESS_INSTANCE_ID=bpfId) AND ACTIVITY_FROM IS NULL )
+    and A.ROLE_ID=B.ROLE_ID;
+*/
+      INSERT INTO bpf_pending_action_dtl
+                  (bpf_id, transition_id, activity_name, next_actor,
+                   user_role_id, application_id, app_flow_id)
+         SELECT DISTINCT bpfid, a.transition_id, a.activity_name, b.user_id,
+                         b.user_role_id, appid, appflowid
+                    FROM bpf_temp_transitions a, bpf_user_roles b
+                   WHERE is_valid = 1
+                     AND a.role_id = b.role_id
+                     AND UPPER(a.activity_name) <> 'RECOVERED_ADV' --Omit RECOVERED_ADV
+                     AND (   a.role_id NOT IN (
+                                SELECT DISTINCT role_id
+                                           FROM bpf_transitions
+                                          WHERE process_id = processid
+                                            AND activity_from IS NULL)
+                          OR (    UPPER (b.user_id) =
+                                          (SELECT UPPER (user_id)
+                                             FROM bpf_process_instances
+                                            WHERE process_instance_id = bpfid)
+                              AND a.role_id IN (
+                                     SELECT DISTINCT role_id
+                                                FROM bpf_transitions
+                                               WHERE process_id = processid
+                                                 AND activity_from IS NULL)
+                             )
+                         );
+                         
+     --CPO
+     
+     SELECT count(*) INTO hr_type FROM DT_HDR WHERE BPF_ID = bpfid AND TRAVEL_TYPE in (11,30,31,32,33,34);
+     
+     IF hr_type > 0 THEN
+     
+     SELECT COUNT(*) INTO wy_payroll
+        FROM (
+          SELECT DISTINCT e.payrollid
+          FROM xxdt_employee_view e
+          WHERE e.staffid IN (SELECT EMP_NO FROM DT_HDR WHERE BPF_ID = bpfid
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM bpf_dts_payroll_treasury_map m
+            WHERE m.payroll_id = e.payrollid
+          )
+        ) t;
+      
+      IF wy_payroll > 0 THEN
+     
+     select count(*) into aprv_action from BPF_PENDING_ACTION_DTL where BPF_ID = bpfid and  ACTIVITY_NAME in ('APPROVE_ADV');
+     
+     SELECT COUNT(*) into cpo_aprved
+      FROM BPF_CPO_APPROVAL a
+      WHERE a.PROCESS_INSTANCE_ID = bpfid
+        AND a.CPO_APPROVED = 1
+        AND a.CPO_APPROVAL_ID = (
+              SELECT MAX(CPO_APPROVAL_ID)
+              FROM BPF_CPO_APPROVAL
+              WHERE PROCESS_INSTANCE_ID = bpfid
+            );
+     
+     
+     DBMS_OUTPUT.PUT_LINE('aprv_action: ' || aprv_action);
+     DBMS_OUTPUT.PUT_LINE('cpo_aprved: ' || cpo_aprved);
+     
+     IF aprv_action > 0  THEN  
+        IF cpo_aprved > 0 THEN 
+          NULL;
+        ELSE  
+            INSERT INTO BPF_CPO_APPROVAL
+                            (CPO_APPROVAL_ID, PROCESS_INSTANCE_ID, ITEM, PROCESS_ID,STATE_ID, LAST_TRANSITION,LAST_ACTIVITY,USER_ID,CPO_APPROVED)
+            select BPF_CPO_APPROVAL_SEQ.NEXTVAL,a.PROCESS_INSTANCE_ID, a.ITEM, a.PROCESS_ID,a.STATE_ID, a.LAST_TRANSITION,a.LAST_ACTIVITY,
+            a.USER_ID, 0 
+            from BPF_PROCESS_INSTANCES a where a.PROCESS_INSTANCE_ID = bpfid 
+                  AND NOT EXISTS (
+                     SELECT 1
+                       FROM BPF_CPO_APPROVAL ca
+                      WHERE ca.PROCESS_INSTANCE_ID = bpfid
+                        AND ca.CPO_APPROVED        = 0
+                   );
+     
+           DELETE FROM bpf_pending_actions
+                      WHERE bpf_id = bpfid;
+           DELETE FROM bpf_pending_action_dtl
+                      WHERE bpf_id = bpfid;
+                      
+           SELECT FILTER_SQL INTO v_filter FROM BPF_AUTHORITY WHERE AUTHORITY = 'CPO';
+           
+            v_sql :=
+                'INSERT INTO bpf_pending_actions (bpf_id, next_actor, user_role_id, application_id, app_flow_id)
+                 SELECT :1, a.user_id, a.user_role_id, :2, :3
+                 FROM bpf_user_roles a
+                 JOIN ipr_users d ON a.user_id = d.user_id
+                 JOIN xxdt_employee_view c ON c.staffid = d.staff_number
+                 WHERE a.role_id = 45 AND ' || v_filter;
+              
+              EXECUTE IMMEDIATE v_sql USING bpfid, appid, appflowid;
+              
+              v_sql_dtl :=
+                'INSERT INTO bpf_pending_action_dtl (bpf_id, transition_id, activity_name, next_actor, user_role_id, application_id, app_flow_id)
+                 SELECT DISTINCT :1, t.transition_id, act.name, ur.user_id, ur.user_role_id, :2, :3
+                 FROM bpf_transitions t
+                 JOIN bpf_user_roles ur ON t.role_id = ur.role_id
+                 JOIN bpf_activities act ON t.activity_to = act.activity_id
+                 JOIN ipr_users d ON ur.user_id = d.user_id
+                 JOIN xxdt_employee_view ev ON ev.staffid = d.staff_number
+                 WHERE t.process_id = :4 AND t.role_id = 45 AND ' || v_filter;
+              
+              EXECUTE IMMEDIATE v_sql_dtl USING bpfid, appid, appflowid, processid;
+
+      END IF;
+    END IF;   
+    END IF;
+    END IF;
+      --To delete pending with Treasury staff for ADV PAID or ADVANCE RECOVERED DTs
+      DELETE FROM bpf_pending_actions
+         WHERE bpf_id = bpfid
+         AND next_actor IN ( SELECT b.user_id
+                               FROM bpf_temp_transitions a
+                               JOIN bpf_user_roles b ON a.role_id = b.role_id
+                               WHERE UPPER(a.activity_name) = 'RECOVERED_ADV'
+                            );
+                            
+                            
+      IF trigflag = 0
+      THEN
+         COMMIT;
+      END IF;
+      END IF;
+   END;
+
+The error is occuring at this line: INSERT INTO bpf_pending_action_dtl
+
+How to troubleshoot this issue.
