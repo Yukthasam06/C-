@@ -324,3 +324,29 @@ PROCEDURE put_in_bpf_que (bpfid IN NUMBER, trigflag IN NUMBER)
 The error is occuring at this line: INSERT INTO bpf_pending_action_dtl
 
 How to troubleshoot this issue.
+
+bpf_pending_actions TABLE: 
+BPF_ID  NEXT_ACTOR  USER_ROLE_ID APPLICATION_ID APP_FLOW_ID
+176706	wy990416	701938	14	2
+176706	wy990416	714007	14	2
+176706	wy990416	714582	14	2
+176706	wy990416	714467	14	2
+176706	wy990416	714237	14	2
+176706	wy990416	714352	14	2
+176706	wy990416	714697	14	2
+176706	wy990416	714122	14	2
+176706	wy990416	713892	14	2
+
+For this table unique constaint is bpf_id and next_actor, but the error is not occuring while inserting this records and getting error only during bpf_pending_action_dtl table insert
+
+bpf_pending_action_dtl table:
+bpf_id transition_id activity_name next_actor user_role_id application_id app_flow_id
+176706	1080029	CANCEL_DT	wy990416	701938	14	2
+176706	1080040	CANCEL_DT	wy990416	713892	14	2
+176706	1080117	CANCEL_DT	wy990416	714697	14	2
+176706	1080051	CANCEL_DT	wy990416	714007	14	2
+176706	1080073	CANCEL_DT	wy990416	714237	14	2
+176706	1080106	CANCEL_DT	wy990416	714582	14	2
+176706	1080095	CANCEL_DT	wy990416	714467	14	2
+176706	1080062	CANCEL_DT	wy990416	714122	14	2
+176706	1080084	CANCEL_DT	wy990416	714352	14	2
