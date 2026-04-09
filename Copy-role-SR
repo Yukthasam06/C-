@@ -352,19 +352,32 @@ bpf_id transition_id activity_name next_actor user_role_id application_id app_fl
 176706	1080084	CANCEL_DT	wy990416	714352	14	2
 
 
-While troubleshooting in UAT, we encountered a unique constraint error (BPAD_UQ) when attempting to copy roles from staff member 60005 to 6969 using the procedure:
-
-bpf.copy_user_privs6969%%60005
-The issue occurs for BPF_ID: 176706, which is associated with an inactive process ID: 19429.
-Upon checking the BPF transitions, we observed multiple transition records for the same activity across different role IDs.
-All these roles are assigned to a single user: wy990416.
-As a result, multiple records are generated with the same combination of:
-BPF_ID
-ACTIVITY_NAME
-NEXT_ACTOR
-This leads to duplicate entries while inserting into BPF_PENDING_ACTION_DTL, thereby violating the BPAD_UQ constraint.
-The same data setup is also present in PROD (refer to attached details).
-Next Steps
-
-Please let us know if we can schedule a call to discuss this further and identify a suitable resolution.
+SELECT 
+    bt.process_id,
+    bt.name,
+    bt.activity_from,
+    bt.activity_to,
+    COUNT(*) AS duplicate_count
+FROM bpf_transitions bt
+WHERE bt.process_id IN (
+    SELECT DISTINCT bpi.process_id
+    FROM bpf_process_instances bpi
+    WHERE bpi.process_instance_id IN (
+        SELECT bpf_id
+        FROM bpf_pending_actions
+        WHERE next_actor = '60005'
+    )
+)
+AND EXISTS (
+    SELECT 1
+    FROM bpf_processes bp
+    WHERE bp.process_id = bt.process_id
+      AND bp.is_active = 1
+)
+GROUP BY 
+    bt.process_id,
+    bt.name,
+    bt.activity_from,
+    bt.activity_to
+HAVING COUNT(*) > 1;
 
