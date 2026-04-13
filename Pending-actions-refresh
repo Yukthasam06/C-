@@ -1,0 +1,3 @@
+Currently, when a process instance is terminated and recreated, discrepancies arise where pending actions and next actors are not aligned with the correct transition state. This leads to incorrect task assignments, workflow delays, and potential operational inefficiencies.
+
+To address this, the objective is to introduce a Refresh functionality alongside the Search and Add options. This feature will allow users to explicitly reload and synchronize the latest hierarchy, ensuring that all pending actions, transitions, and actor assignments are accurately updated based on the current process state.
