@@ -80,6 +80,16 @@
       COMMIT;
    END;
 
+create or replace TRIGGER "WYNETADM"."INS_TEMP_BPF_ID" 
+BEFORE INSERT
+ON WYNETADM.TEMP_BPF_ID 
+REFERENCING NEW AS NEW OLD AS OLD
+FOR EACH ROW
+
+
+BEGIN
+	 bpf.put_in_bpf_que(:new.PROCESS_INSTANCE_ID,1);
+END ;
 
 PROCEDURE put_in_bpf_que (bpfid IN NUMBER, trigflag IN NUMBER)
    IS
@@ -377,3 +387,4 @@ PROCEDURE put_in_bpf_que (bpfid IN NUMBER, trigflag IN NUMBER)
    END;
 
 
+Actually when doing copy role the copy_user_privs procedure will be called and it is also internally calling the trigger with a put_in_bpf_que procedure call before insert into temp_bpf_id table. So with these procedures when I try to do role copy with 2765 BPF IDs, then it is taking more than 16 minutes. So How this can be improved within 1 minutes for processing all the ids. If indexing is possible then provide where are all it has to be introduced with appropriate solution.
