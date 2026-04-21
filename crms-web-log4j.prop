@@ -1,0 +1,83 @@
+
+ status = error
+dest = err
+
+name = PropertiesConfig
+
+log=${sys:APP_LOG}/crms
+#log=D:/crms-web/
+#property.filepath=D:/crms-web/
+property.filename =${sys:APP_LOG}/crms/crms_email.log
+property.filename1=${sys:APP_LOG}/crms/crms.log
+
+
+appender.EmailFA.type=RollingFile
+appender.EmailFA.name = Email
+appender.EmailFA.fileName = ${filename}
+appender.EmailFA.layout.type = PatternLayout
+appender.EmailFA.layout.pattern = %d{DATE} %-5p %c:%L %x - %m%n
+appender.EmailFA.filePattern = ${filename}.%d{yyyyMMdd}
+
+appender.EmailFA.strategy.type = DefaultRolloverStrategy
+appender.EmailFA.strategy.max = 10
+
+appender.EmailFA.policies.type = Policies
+appender.EmailFA.policies.size.type = SizeBasedTriggeringPolicy
+appender.EmailFA.policies.size.size = 10MB
+
+
+loggers = file
+#logger.file.name =aero.omanair.ccms.service.impl.NotificationEmailServiceImpl
+logger.file.name =aero.omanair.ccms.service.impl.NotificationEmailServiceImpl
+logger.file.level =info
+logger.file.appenderRef= file
+logger.file.appenderRef.file.ref=Email
+logger.file.additivity = false
+
+
+
+# Define the file appender
+appender.rolling.type = RollingFile
+appender.rolling.name = File
+
+
+# Set the name of the file
+appender.rolling.fileName = ${filename1}
+
+# Set the immediate flush to true (default)
+#log4j.appender.FILE.ImmediateFlush=true
+
+# Set the threshold to debug mode
+filter.threshold.type = ThresholdFilter
+filter.threshold.level = debug
+
+# Set the append to false, should not overwrite
+#log4j.appender.FILE.Append=true 
+
+# Set the the backup index
+appender.rolling.strategy.type = DefaultRolloverStrategy
+appender.rolling.strategy.max = 10
+
+# Set the maximum file size before rollover
+appender.rolling.policies.type = Policies
+appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.rolling.policies.size.size = 50MB
+
+
+# Define the layout for file appender
+appender.rolling.layout.type = PatternLayout
+appender.rolling.layout.pattern=%d{yyyy/MM/dd HH:mm:ss.SSS} [UTC] [Customer Relationship Management System] [%c{1}] [%t]:  %p: %L - %m%n
+appender.rolling.filePattern = ${filename1}.%d{yyyyMMdd}
+rootLogger.appenderRef.rolling.ref = File
+rootLogger.level = debug
+logger.rolling.additivity = false
+
+# Log everything. Good for troubleshooting
+logger.hibernate.level=INFO
+ 
+# Log all JDBC parameters
+logger.hibernate.type=ALL
+ 
+# Struts OgnlUtil issues unimportant warnings
+#log4j.logger.com.opensymphony.xwork2.util.OgnlUtil=error
+#log4j.logger.com.opensymphony.xwork2.ognl.OgnlValueStack=error
