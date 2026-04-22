@@ -1,0 +1,138 @@
+public void updateRoutes(Connection connection, List<Long> flightIds, List<Long> inBoundIds) {
+		
+		List<Long> allFlightIds = new ArrayList<>(flightIds);
+		allFlightIds.addAll(inBoundIds);
+		
+		String filteredFlightIds = allFlightIds.stream().map(id -> "?")
+				.collect(Collectors.joining(","));
+		
+		String finalFlightQuery = "SELECT FLIGHT_ID, IN_FLIGHT_ID, FLIGHT_DATE, TAIL_REGN, AIRCRAFT_CODE, FL_FROM, FL_TO, STD, STA, FLIGHT_TYPE, STA_UTC, STD_UTC, PSEUDO_YN, FLIGHT_NO FROM PAX_FLIGHT WHERE FLIGHT_ID IN ("
+				+ filteredFlightIds + ") ORDER BY STD_UTC";
+			
+        List<FlightTO> flightTos = new ArrayList<>();
+    	FlightTO flightTo;
+    	Map<Long, FlightTO> allNewFlights = new HashMap<>();
+		Map<Long, List<FlightTO>> inFlightIdIndex = new HashMap<>();
+		
+	    try(PreparedStatement pstmt = connection.prepareStatement(finalFlightQuery);){
+				int index = 1;
+				for(Long id : allFlightIds) {
+					pstmt.setLong(index++, id);
+				}
+				
+			    try(ResultSet rs = pstmt.executeQuery();){
+			    	while (rs.next()) {
+						flightTo = new FlightTO();
+						flightTo.setFlightId(rs.getLong("FLIGHT_ID"));
+						
+						long inFlightId = rs.getLong("IN_FLIGHT_ID");
+						if(!rs.wasNull()) {
+							flightTo.setInFlightId(inFlightId);
+						}
+						flightTo.setFlightDate(rs.getDate("FLIGHT_DATE"));
+						flightTo.setTailReg(rs.getString("TAIL_REGN"));
+						flightTo.setAircraftType(rs.getString("AIRCRAFT_CODE"));
+						flightTo.setFltFrom(rs.getString("FL_FROM"));
+						flightTo.setFltTo(rs.getString("FL_TO"));
+						flightTo.setSchedArrive(rs.getTimestamp("STA"));
+						flightTo.setSchedDepart(rs.getTimestamp("STD"));
+						flightTo.setFlightType(rs.getString("FLIGHT_TYPE"));
+						flightTo.setStaUtc(rs.getTimestamp("STA_UTC"));
+						flightTo.setStdUtc(rs.getTimestamp("STD_UTC"));
+						flightTo.setFlightNo(rs.getString("FLIGHT_NO"));
+						flightTo.setPseudoYn(rs.getString("PSEUDO_YN"));
+						flightTos.add(flightTo);
+						allNewFlights.put(flightTo.getFlightId(), flightTo);
+						if(flightTo.getInFlightId() != null) {
+							inFlightIdIndex.computeIfAbsent(flightTo.getInFlightId(), k -> new ArrayList<>()).add(flightTo);
+						}
+				    }
+			    	logger.info("The flight records that will be updated with their routes are: "+flightTos);
+			    	
+			    } catch(SQLException e) {
+					logger.error("Error while fetching flights data for routes update", e);
+					e.printStackTrace();
+				}
+			     
+				for(FlightTO rootFlight : allNewFlights.values()) {
+					if(rootFlight.getInFlightId() == null) {
+						List<FlightTO> flightChain = new ArrayList<>();
+						FlightTO currentFlight = rootFlight;
+						
+						while(currentFlight != null) {
+							flightChain.add(currentFlight);
+							List<FlightTO> nextFlights = inFlightIdIndex.get(currentFlight.getFlightId());
+							if(nextFlights != null && !nextFlights.isEmpty()) {
+								currentFlight = nextFlights.get(0);
+							} else {
+								currentFlight = null;
+							}
+						}
+						StringBuilder route = new StringBuilder();
+						for(int i = 0; i < flightChain.size(); i++) {
+							if(i == 0) {
+								route.append(flightChain.get(i).getFltFrom());
+							}
+							route.append("-").append(flightChain.get(i).getFltTo());
+						}
+						
+						String finalRoute = route.toString();
+						Timestamp baseStd = rootFlight.getStdUtc();
+						String flightNo = rootFlight.getFlightNo();
+						Long parentFlightId = rootFlight.getFlightId();
+						
+						for(FlightTO flight : flightChain) {
+							String updateRoutes = "UPDATE PAX_FLIGHT SET ROUTE = ?, BASE_STD_UTC = ?,"
+									+ "BASE_FLIGHT_NO = ?, BASE_FLIGHT_ID = ?, MODIFIED_BY = 'AutoFlight', MODIFIED_DATE = SYSDATE "
+									+ "WHERE FLIGHT_ID = ?";
+							try(PreparedStatement ps = connection.prepareStatement(updateRoutes)){
+								ps.setString(1, finalRoute);
+								ps.setTimestamp(2, baseStd);
+								ps.setString(3, flightNo);
+								ps.setLong(4, parentFlightId);
+								ps.setLong(5, flight.getFlightId());
+								ps.executeUpdate();
+							} catch(SQLException e) {
+								logger.error("SQLException while updating route for flight ID: {}", flight.getFlightId(), e);
+								e.printStackTrace();
+								try {
+									connection.rollback();
+								} catch(SQLException e1) {
+									logger.error("Rollback failed: ", e1);
+									e.printStackTrace();
+								}
+							} catch(Exception e) {
+								logger.error("Exception while updating route for flight ID: {}", flight.getFlightId(), e);
+								e.printStackTrace();
+								try {
+									connection.rollback();
+								} catch(SQLException e1) {
+									logger.error("Rollback failed: ", e1);
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+				logger.info("The routes has been updated successfully...");
+			
+		} catch(SQLException e) {
+			logger.error("SQLException occured in updateRoutes,", e);
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch(SQLException e1) {
+				logger.error("Rollback failed: ", e1);
+				e.printStackTrace();
+			}
+		} catch(Exception e) {
+			logger.error("Exception occured in updateRoutes", e);
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch(SQLException e1) {
+				logger.error("Rollback failed: ", e1);
+				e.printStackTrace();
+			}
+		}
+	}
