@@ -1,0 +1,63 @@
+CREATE OR REPLACE FORCE VIEW "WYNETADM"."BPF_TRANSITIONS_MATCH_B_VIEW" ("PERFORMED_END_TIME", "PROCESS_INSTANCE_ID", "PROCESS_ID", "TRANSITION_ID", "ACTIVITY_FROM", "ACTIVITY_TO", "ACTIVITY_TO_STATE_ID", "NEW_AO", "OLD_AO", "OLD_ACTIVITY") AS 
+  SELECT B.PERFORMED_END_TIME,
+            B.PROCESS_INSTANCE_ID,
+            A.PROCESS_ID,
+            A.TRANSITION_ID,
+            A.ACTIVITY_FROM,
+            C.ACTIVITY_ID ACTIVITY_TO,
+            C.STATE_ID ACTIVITY_TO_STATE_ID,
+            C.APRV_ORDER NEW_AO,
+            D.APRV_ORDER OLD_AO,
+            D.ACTIVITY_ID OLD_ACTIVITY
+       FROM BPF_TRANSITIONS A,
+            BPF_TRANSITIONS_VIEW B,
+            BPF_ACTIVITIES C,
+            BPF_ACTIVITIES D
+      WHERE     A.ACTIVITY_TO = C.ACTIVITY_ID
+            AND B.ACTIVITY_TO = D.ACTIVITY_ID
+            AND C.APRV_ORDER <= D.APRV_ORDER
+            AND C.TYPE = D.TYPE
+   ORDER BY PERFORMED_END_TIME DESC, C.APRV_ORDER DESC;
+
+  CREATE OR REPLACE FORCE VIEW "WYNETADM"."BPF_TRANSITIONS_MATCH_VIEW" ("PROCESS_ID", "PROCESS_INSTANCE_ID", "ACTIVITY_FROM", "ACTIVITY_TO", "ACTIVITY_TO_STATE_ID", "NEW_AO", "OLD_ACTIVITY", "OLD_AO", "PERFORMED_END_TIME", "TRANSITION_ID", "RN") AS 
+  SELECT "PROCESS_ID",
+          "PROCESS_INSTANCE_ID",
+          "ACTIVITY_FROM",
+          "ACTIVITY_TO",
+          "ACTIVITY_TO_STATE_ID",
+          "NEW_AO",
+          "OLD_ACTIVITY",
+          "OLD_AO",
+          "PERFORMED_END_TIME",
+          "TRANSITION_ID",
+          "RN"
+     FROM (SELECT PROCESS_ID,
+                  PROCESS_INSTANCE_ID,
+                  ACTIVITY_FROM,
+                  ACTIVITY_TO,
+                  ACTIVITY_TO_STATE_ID,
+                  NEW_AO,
+                  OLD_ACTIVITY,
+                  OLD_AO,
+                  PERFORMED_END_TIME,
+                  TRANSITION_ID,
+                  ROW_NUMBER ()
+                  OVER (PARTITION BY PROCESS_ID, PROCESS_INSTANCE_ID
+                        ORDER BY PERFORMED_END_TIME DESC)
+                     AS RN
+             FROM BPF_TRANSITIONS_MATCH_B_VIEW)
+    WHERE RN = 1;
+ 
+UPDATE BPF_PROCESS_INSTANCES X
+         SET (PROCESS_ID, LAST_ACTIVITY, STATE_ID) =
+                (SELECT PROCESS_ID,
+                        ACTIVITY_TO LAST_ACTIVITY,
+                        --ACTIVITY_TO_STATE_ID
+                        CASE WHEN X.STATE_ID = 76
+                             THEN X.STATE_ID
+                             ELSE ACTIVITY_TO_STATE_ID
+                        END AS STATE_ID
+                   FROM BPF_TRANSITIONS_MATCH_VIEW
+                  WHERE     PROCESS_ID = v_Process_Id
+                        AND PROCESS_INSTANCE_ID = X.PROCESS_INSTANCE_ID
+                        AND ROWNUM = 1)
