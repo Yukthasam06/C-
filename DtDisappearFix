@@ -1,0 +1,72 @@
+DECLARE
+    v_old_process_id      NUMBER;
+    v_new_process_id      NUMBER := v_Process_Id;
+
+    v_invalid_staff_flag  NUMBER := 0;
+
+BEGIN
+
+    /* Get old hierarchy process id */
+    SELECT DISTINCT Q.PROCESS_ID
+    INTO v_old_process_id
+    FROM TEMP_PROCESS P,
+         BPF_PROCESS_INSTANCES Q
+    WHERE P.PROCESS_ID = Q.PROCESS_ID
+      AND LOWER(P.USER_ID) = LOWER(Q.USER_ID)
+      AND ROWNUM = 1;
+
+    /* Check whether hierarchy changed */
+    IF v_old_process_id <> v_new_process_id THEN
+
+        /*
+            Check whether any removed approver
+            is in status other than A or S
+        */
+        SELECT CASE
+                   WHEN COUNT(*) > 0 THEN 1
+                   ELSE 0
+               END
+        INTO v_invalid_staff_flag
+        FROM XXDT_EMPLOYEE_VIEW E
+        WHERE E.STAFFID IN
+        (
+            /* Old hierarchy approvers */
+            SELECT OLD_STAFFID
+            FROM
+            (
+                SELECT DISTINCT EMP.STAFFID AS OLD_STAFFID
+                FROM BPF_TRANS_VIEW A,
+                     BPF_USER_ROLES B,
+                     IPR_USERS C,
+                     XXDT_EMPLOYEE_VIEW EMP
+                WHERE A.PROCESS_ID = v_old_process_id
+                  AND A.TRANS_TYPE = 'ADV'
+                  AND A.APRV_ORDER BETWEEN 1 AND 8
+                  AND A.ROLE_ID = B.ROLE_ID
+                  AND B.USER_ID = C.USER_ID
+                  AND C.STAFF_NUMBER = EMP.STAFFID
+
+                MINUS
+
+                /* New hierarchy approvers */
+                SELECT DISTINCT EMP.STAFFID
+                FROM BPF_TRANS_VIEW A,
+                     BPF_USER_ROLES B,
+                     IPR_USERS C,
+                     XXDT_EMPLOYEE_VIEW EMP
+                WHERE A.PROCESS_ID = v_new_process_id
+                  AND A.TRANS_TYPE = 'ADV'
+                  AND A.APRV_ORDER BETWEEN 1 AND 8
+                  AND A.ROLE_ID = B.ROLE_ID
+                  AND B.USER_ID = C.USER_ID
+                  AND C.STAFF_NUMBER = EMP.STAFFID
+            )
+        )
+        AND NVL(E.STATUS, 'X') NOT IN ('A', 'S');
+
+        DBMS_OUTPUT.PUT_LINE('Invalid Staff Flag : ' || v_invalid_staff_flag);
+
+    END IF;
+
+END;
+/
