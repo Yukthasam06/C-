@@ -1,0 +1,41 @@
+<c:if test="${not empty eligibleMilesExpiry}">
+
+    <c:forEach var="expiryMiles" items="${eligibleMilesExpiry}">
+
+        <!-- Localized display -->
+        <fmt:setLocale value="de"/>
+
+        <fmt:formatDate
+            value="${expiryMiles.expiryPeriod}"
+            pattern="MMM yyyy"
+            var="displayDate"/>
+
+        <!-- Fixed English value for backend -->
+        <%
+            java.text.SimpleDateFormat sdf =
+                new java.text.SimpleDateFormat(
+                    "MMM yyyy",
+                    java.util.Locale.ENGLISH
+                );
+
+            pageContext.setAttribute(
+                "englishDate",
+                sdf.format(
+                    ((java.util.Date)pageContext.findAttribute("expiryMiles")
+                    .getClass()
+                    .getMethod("getExpiryPeriod")
+                    .invoke(pageContext.findAttribute("expiryMiles")))
+                )
+            );
+        %>
+
+        <form:option
+            value="${englishDate}, ${expiryMiles.expiryMiles}">
+
+            ${displayDate} (${expiryMiles.expiryMiles} miles)
+
+        </form:option>
+
+    </c:forEach>
+
+</c:if>
