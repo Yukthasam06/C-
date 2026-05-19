@@ -1,0 +1,1119 @@
+package aero.omanair.sabre.webservice;
+
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+//import com.hititcs.craneff.webservices.MemberRes;
+/*import com.sabre.services.acs.bso.airportflightlist.v200.ACSAirportFlightListRSACS;
+import com.sabre.services.acs.bso.airportflightlist.v200.AirportFlightACS;*/
+import com.sabre.services.acs.bso.airportflightlist.v3.ACSAirportFlightListRQACS;
+import com.sabre.services.acs.bso.airportflightlist.v3.ACSAirportFlightListRSACS;
+import com.sabre.services.acs.bso.airportflightlist.v3.AirportFlightACS;
+import com.sabre.services.acs.bso.airportflightlist.v3.DepartureTimeRangeACS;
+/*import com.sabre.services.acs.bso.passengerdata.v3.ACSPassengerDataRSACS;
+import com.sabre.services.acs.bso.passengerdata.v3.PassengerDataResponseACS;
+import com.sabre.services.acs.bso.passengerdata.v3.PassengerItineraryACS;*/
+//import com.sabre.services.acs.bso.passengerdata.v3.PassengerListACS.Passenger;
+import com.sabre.services.checkin.getpassengerdata.v4.PassengerACS;
+import com.sabre.services.checkin.getpassengerdata.v4.PassengerListACS;
+import com.sabre.services.checkin.getpassengerdata.v4.GetPassengerDataRQACS;
+import com.sabre.services.checkin.getpassengerdata.v4.GetPassengerDataRSACS;
+import com.sabre.services.checkin.getpassengerdata.v4.PassengerDataResponseACS;
+import com.sabre.services.checkin.getpassengerdata.v4.PassengerItineraryACS;
+import com.sabre.webservices.pnrbuilder.v1_19.ETicketNumberType;
+import com.sabre.webservices.pnrbuilder.v1_19.EmailAddressPNRB;
+import com.sabre.webservices.pnrbuilder.v1_19.GenericSpecialRequestPNRB;
+import com.sabre.webservices.pnrbuilder.v1_19.PassengerPNRB;
+import com.sabre.webservices.pnrbuilder.v1_19.SegmentTypePNRB;
+import com.sabre.webservices.pnrbuilder.v1_19.SegmentTypePNRB.Air;
+import com.sabre.webservices.pnrbuilder.v1_19.SegmentTypePNRB.Segment;
+import com.sabre.webservices.pnrbuilder.v1_19.SpecialMealRequestPNRB;
+import com.sabre.webservices.triprecord.DateCriterion;
+import com.sabre.webservices.triprecord.Reservations;
+import com.sabre.webservices.triprecord.TripSearchRQ.ReadRequests.ReservationReadRequest.FlightCriteria.Flight;
+import com.sabre.webservices.triprecord.TripSearchRS;
+
+/*import aero.omanair.crane.data.Member;
+import aero.omanair.crane.services.CraneService;
+import aero.omanair.crane.services.impl.CraneServiceImpl;*/
+import aero.omanair.dao.ExecuteDbQueries;
+import aero.omanair.model.SendMailTo;
+import aero.omanair.sabre.data.FlightLegDetails;
+import aero.omanair.sabre.exception.FlightNotificationException;
+import aero.omanair.sabre.services.SabreService;
+import aero.omanair.sabre.services.SabreServiceImpl;
+import aero.omanair.utils.CheckinReadProperties;
+import aero.omanair.utils.FNProperties;
+import aero.omanair.utils.FlightNotificationUtils;
+
+public class NotifyPassengerMain {
+	private static final Logger LOGGER = LogManager.getLogger(NotifyPassengerMain.class);
+
+	protected static String confirmStatusCode[] = new String[] { "HK","KK", "KL","RR"};
+	 
+	//SR412866 CKI Notifications - Changes in RBD
+	 protected static String classOfServiceCode[] = new String[]{"J", "C",
+			 "D", "I", "P", "Z", "U", "Y", "B", "H", "K", "M", "L", "V", "S", "N", "Q",
+			 "O", "R", "T", "E", "W", "X", "F", "A"};
+	 
+ 	private List<String> listStatusCode = Arrays.asList(confirmStatusCode);
+	private int minorPassengerCount = 0;
+	private int wheelChairPassengerCount = 0;
+	private int passengerExceedLimitCount = 0;
+	private static List<String> emailErrorMessageList = new ArrayList<String>();
+	public static List<String> agentEmailsList = new ArrayList<String>();
+	private static Map<String, String> mealCodesMap = new HashMap<String, String>();
+	private final SabreService sabreService;
+//	private final CraneService craneService;
+	protected static String restApiBaseURL;
+	private String token;
+	
+	private static volatile int INDEX = 0;
+
+	public NotifyPassengerMain(String pathProp) { 
+		CheckinReadProperties.setProperties(pathProp);
+		FNProperties fnProperties = CheckinReadProperties.getProperties();
+		sabreService = new SabreServiceImpl(fnProperties.getSabreWSUserId(),
+				fnProperties.getSabreWSPassword(),
+				fnProperties.getSabreWSEndPointAddress());
+		/*craneService = new CraneServiceImpl(fnProperties.getCraneWsdlUrl(),
+				fnProperties.getCraneUserName(),
+				fnProperties.getCranePassword());*/
+	}
+
+	static {
+		mealCodesMap.put("AVML", "ASIAN VEGETARIAN MEAL");
+		mealCodesMap.put("BBML", "INFANT/BABY FOOD");
+		mealCodesMap.put("BLML", "BLAND MEAL");
+		mealCodesMap.put("CHML", "CHILD MEAL");
+		mealCodesMap.put("DBML", "DIABETIC MEAL");
+		mealCodesMap.put("FPML", "FRUIT PLATTER");
+		mealCodesMap.put("GFML", "GLUTEN-FREE MEAL");
+		mealCodesMap.put("HNML", "HINDU (NON VEGETARIAN) MEAL");
+		mealCodesMap.put("JPML", "JAPANESE MEAL (LH SPECIFIC)");
+		mealCodesMap.put("KSML", "KOSHER MEAL");
+		mealCodesMap.put("LCML", "LOW CALORIE MEAL");
+		mealCodesMap.put("LFML", "LOW CHOLESTEROL/LOW FAT MEAL");
+		mealCodesMap.put("LSML", "LOW SODIUM, NO SALT ADDED");
+		mealCodesMap.put("MOML", "MOSLEM MEAL");
+		mealCodesMap.put("NFML", "NO FISH MEAL (LH SPECIFIC)");
+		mealCodesMap.put("NLML", "NON LACTOSE MEAL");
+		mealCodesMap.put("OBML", "JAPANESE OBENTO MEAL (UA SPECIFIC)");
+		mealCodesMap.put("ORML", "ORIENTAL MEAL");
+		mealCodesMap.put("RVML", "RAW VEGETARIAN MEAL");
+		mealCodesMap.put("SFML", "SEA FOOD MEAL");
+		mealCodesMap.put("SPML", "SPECIAL MEAL, SPECIFY FOOD");
+		mealCodesMap.put("VGML", "VEGETARIAN MEAL (NON-DAIRY)");
+		mealCodesMap.put("VLML", "VEGETARIAN MEAL (LACTO-OVO)");
+		mealCodesMap.put("VOML", "VEGETARIAN ORIENTAL MEAL ");
+	}
+	
+	public static void main(String[] args) throws SQLException {
+		new NotifyPassengerMain(args[0]).startProcess();
+	} 	
+ 
+	public void startProcess() {
+		LOGGER.info("<----- PROCESS HAS STARTED ----->");
+		Map<String, String> sabreSession = null;
+		try {
+			sabreSession = sabreService.sessionCreate();
+			String sabreSessionStatus = sabreSession.get("status").trim();
+			LOGGER.info("sabreSessionStatus============> " + sabreSessionStatus);
+			if (sabreSessionStatus.equalsIgnoreCase("Approved")) {
+				token = sabreSession.get("securityToken");
+				notifyPassenger(token);
+			}else {
+				LOGGER.info("################# ERROR IN SABRE WEB SERVICE SESSION CREATION ##################");
+				emailErrorMessageList.add(" ERROR IN SABRE WEB SERVICE SESSION CREATION - SESSION STATUS 'NOT APPROVED' ");
+			}
+		} catch (Exception e) {
+			LOGGER.error("####### EXCEPTION IN PROCESSING ####### "+ e.getMessage(),e);
+			emailErrorMessageList.add(" EXCEPTION IN SABRE WEB SERVICE SESSION CREATION ORIGINAL EXCEPTION --> " + e.getMessage());
+		}
+	}
+
+	private void notifyPassenger(String securityToken) {
+		List<ACSAirportFlightListRSACS> flightObjList = new ArrayList<ACSAirportFlightListRSACS>();
+		List<FlightLegDetails> flightInfoList = new ArrayList<FlightLegDetails>();
+		Map<String, String> checkInStatusMap = new HashMap<String, String>();
+//		Member member = null;
+
+		String mailSendingStatus = CheckinReadProperties.getProperties()
+				.getMailSendingStatus();
+		int addHours = Integer
+				.parseInt(CheckinReadProperties.getProperties().getAddHours());
+
+		int ffpCounterWithEmail = 0;
+		int ffpCounterWithoutEmail = 0;
+		try {
+			LOGGER.info("STEP 1 --> GETTING FLIGHT LIST");
+			for (String stationCode : ExecuteDbQueries.stationsList) {
+				try {
+					String localTimeString = null;
+					try {
+						localTimeString = sabreService.runCommand(securityToken,"T*" + stationCode);
+					} catch (Exception e) {
+						throw new FlightNotificationException(
+								" WS EXCEPION IN RETRIEVING LOCAL TIME OF STATION --> "+ stationCode+ " ORIGINAL EXCEPTION --> "+ e.getMessage());
+					}
+
+					Calendar localStartTimeCal = FlightNotificationUtils.getCalenderFormDate(localTimeString);
+
+					LOGGER.info(" LOCAL DATE TIME IN '" + stationCode+ "' --> '" + localStartTimeCal.getTime() + "'");
+					localStartTimeCal.add(Calendar.HOUR, addHours); // Add 22
+																	// Hours
+					LOGGER.info(" DATE TIME AFTER 22 HOURS IN '" + stationCode+ "' --> '" + localStartTimeCal.getTime() + "'");
+
+					String dateOfDepart = FlightNotificationUtils.simpleDateFormat.format(localStartTimeCal.getTime());
+
+					int hoursWs = localStartTimeCal.get(Calendar.HOUR_OF_DAY);
+
+					int addDynamicHours = CheckinReadProperties.getProperties().getAddDynamicHours();
+					String startTimeWs = FlightNotificationUtils.getTimeWebServiceForm(hoursWs);
+					String endTimeWs = FlightNotificationUtils.getTimeWebServiceTo(hoursWs, addDynamicHours);
+
+					if (hoursWs == 23) {
+						LOGGER.info(" TIME IN HOURS IS 23 ");
+
+						LOGGER.info(" SEARCHING FLIGHTS FOR '" + stationCode + "' ON --> '" + dateOfDepart + "' FROM --> '2300' TO '2359' ");
+						ACSAirportFlightListRSACS flightListRSACS = getFlightACSDetails(securityToken, dateOfDepart, stationCode,"2300", "2359");
+
+						localStartTimeCal.add(Calendar.DATE, 1);
+						String dateOfDepartt = FlightNotificationUtils.simpleDateFormat.format(localStartTimeCal.getTime());
+
+						LOGGER.info(" SEARCHING FLIGHTS FOR '" + stationCode + "' ON --> '" + dateOfDepartt 	+ "' FROM --> '0000' TO '0059' ");
+						ACSAirportFlightListRSACS flightListRSACSSEC = getFlightACSDetails(securityToken, dateOfDepartt, stationCode, "0000", "0059");
+
+						if (null != flightListRSACS
+								&& flightListRSACS.getResult().getStatus().value().equalsIgnoreCase("SUCCESS")) {
+							flightObjList.add(flightListRSACS);
+						}
+						if (null != flightListRSACSSEC
+								&& flightListRSACSSEC.getResult().getStatus().value().equalsIgnoreCase("SUCCESS")) {
+							flightObjList.add(flightListRSACSSEC);
+						}
+					}
+					// ELSE HOURS NOT EQUAL TO 23
+					else {
+						LOGGER.info(" SEARCHING FLIGHTS FOR '" + stationCode+ "' ON --> '" + dateOfDepart + "' FROM --> '"+ startTimeWs + "' TO " + endTimeWs + "'");
+						ACSAirportFlightListRSACS flightListRSACS = getFlightACSDetails(securityToken, dateOfDepart, stationCode,startTimeWs, endTimeWs);
+						if (null != flightListRSACS && flightListRSACS.getResult().getStatus().value().equalsIgnoreCase("SUCCESS")) {
+							flightObjList.add(flightListRSACS);
+						}
+					}
+				} catch (FlightNotificationException e) {
+					emailErrorMessageList.add(e.getMessage());
+					LOGGER.error(e.getMessage(),e);
+				} catch (Exception e) {
+					emailErrorMessageList.add("ERROR IN GETTING FLIGHT DETAILS FOR THE STATION --> "+ stationCode);
+					LOGGER.error(" ERROR IN GETTING FLIGHT DETAILS FOR THE STATION --> "+ stationCode + " " + e.getLocalizedMessage(),e);
+				}
+			}
+
+			LOGGER.info(" NUMBER OF SUCCESSFULL AIRPORT FLIGHT DETAILS RESPONSES --> "+ flightObjList.size()+ " GETTING FLIGHT LIST ENDED");
+			// Feed Trip search web service
+			List<SendMailTo> flightList = new ArrayList<SendMailTo>();
+			List<SendMailTo> mailSendingList = new ArrayList<SendMailTo>();
+			List<SendMailTo> specialMealCodeList = new ArrayList<SendMailTo>();
+
+			List<Flight> flightFinalList = new ArrayList<Flight>();
+			int totalBookings = 0;
+			int flightsFound = 0;
+			int confirmedStatus = 0;
+			int unConfirmedStatus = 0;
+			// Define passenger list to check Check-in status
+			List<PassengerACS> passLastNameList = new ArrayList<PassengerACS>();
+			LOGGER.info("STEP 2 --> GETTING COMPLETE INFO OF FLIGHTS AND BOOKING DETAILS");
+			for (ACSAirportFlightListRSACS listRSACS : flightObjList) {
+				if (null != listRSACS.getAirportFlightList() && !listRSACS.getAirportFlightList().getAirportFlight().isEmpty())
+ 					for (AirportFlightACS flightACS : listRSACS.getAirportFlightList().getAirportFlight()) {
+						try {  
+							//SR388904 FW: Web check in error KLFELQ
+							//To prevent online checkin for route TZX-MCT
+							LOGGER.info("FLIGHT NUMBER: "+flightACS.getFlight()+" ,ORIGIN: "+listRSACS.getOrigin()+" ,DESTINATION: "+flightACS.getDestination());
+							String skipFromSTN = CheckinReadProperties.getProperties().getSkipFromSTN();
+							String skipToSTN = CheckinReadProperties.getProperties().getSkipToSTN();
+							String[] skipFromSTNArray = (skipFromSTN != null && !skipFromSTN.isEmpty()) ? skipFromSTN.split(",") : new String[0];
+							String[] skipToSTNArray = (skipToSTN != null && !skipToSTN.isEmpty()) ? skipToSTN.split(",") : new String[0];
+							boolean skipStatus = false;
+							if(skipFromSTNArray != null && skipToSTNArray != null && skipFromSTNArray.length > 0 && skipToSTNArray.length > 0
+									&&  skipFromSTNArray.length == skipToSTNArray.length) {
+								for (int i = 0; i < skipFromSTNArray.length; i++) {
+									if (listRSACS.getOrigin().equalsIgnoreCase(skipFromSTNArray[i]) && flightACS.getDestination().equalsIgnoreCase(skipToSTNArray[i])) {
+										skipStatus = true;
+									}
+								}
+							}
+							if(!skipStatus) {
+								
+							++flightsFound;
+							// To get Flight complete information
+ 							String departureCity = listRSACS.getOrigin();								 
+
+							FlightLegDetails flightDetails = null;
+							LOGGER.info(" FETCHING COMPLETE FLIGHT INFORMATION OF FLIGHT --> "+ flightACS.getFlight());
+							try {
+								String departureDateTime = formatDateAndTime(flightACS.getDepartureDate(),flightACS.getDepartureTime());
+								String departureYear = findYear(flightACS.getDepartureDate());
+								/*flightDetails = sabreService.getFlightInfo(securityToken, listRSACS.getOrigin(),flightACS.getFlight(), flightACS.getDepartureDate());*/
+								flightDetails = sabreService.getFlightInfo(securityToken, listRSACS.getOrigin(),flightACS.getDestination(),flightACS.getFlight(), departureDateTime,departureYear);
+							} catch (Exception e) {
+								emailErrorMessageList
+										.add("EXCEPION IN SEARCHING COMPLETE FLIGHTS DETAILS OF FLIGHT --> "
+												+ flightACS.getFlight() + " DEPARTING FROM -->" + listRSACS.getOrigin() + " ON --> " + flightACS.getDepartureDate() + " ORIGINAL EXCEPTION --> "
+												+ e.getMessage());
+								LOGGER.error(
+										"EXCEPION IN SEARCHING COMPLETE FLIGHTS DETAILS OF FLIGHT --> "
+												+ flightACS.getFlight() + " DEPARTING FROM -->" + listRSACS.getOrigin() + " ON --> " + flightACS.getDepartureDate());
+								LOGGER.error(e.getMessage(),e);
+								throw e;
+							}
+							flightInfoList.add(flightDetails);
+
+							LOGGER.info(" FLIGHT --> "+ flightDetails.getFlightNumber() + " DEPARTURE STATION --> '" + flightDetails.getDepartureLocationCode() + "' DEPARTURE DATETIME --> " + flightDetails.getDepartureDateTime() + " ARRIVAL STATION --> '" + flightDetails.getArrivalLocationCode() + "' ARRIVAL DATETIME --> " + flightDetails.getArrivalDateTime());
+							String flightNumberLegInfo = flightDetails.getFlightNumber();
+							if (flightNumberLegInfo.startsWith(""))
+								flightNumberLegInfo = flightNumberLegInfo.replaceFirst(" ", "0");
+
+							String flightDepDateLegInfo = convertDateToString(flightDetails.getDepartureDateTime());
+							String flightArrDateLegInfo = convertDateToString(flightDetails.getArrivalDateTime());
+							String flightDepAirportLegInfo = flightDetails.getDepartureLocationCode();
+ 							String flightArrAirportLegInfo = flightDetails.getArrivalLocationCode();
+ 
+							// Getting Departure station complete name
+							String fullDepartureStationName = getStationFullName(securityToken, new StringBuilder().append("W/*") .append(flightDetails .getDepartureLocationCode()) .toString(), flightDetails);
+
+							if (null != fullDepartureStationName
+									&& fullDepartureStationName.length() > 5)
+								fullDepartureStationName = fullDepartureStationName.substring(5);
+
+							// Getting Arrival station complete name
+							String fullArrivalStationName = getStationFullName(securityToken, new StringBuilder().append("W/*") .append(flightDetails .getArrivalLocationCode()) .toString(), flightDetails);
+
+							if (null != fullArrivalStationName
+									&& fullArrivalStationName.length() > 5)
+								fullArrivalStationName = fullArrivalStationName.substring(5);
+							
+							LOGGER.info("DepartureCityCountry before mailTo-->"+fullDepartureStationName + " ArrivalCityCountry before mailTo-->"+fullArrivalStationName);
+							
+							int lengthClassList = classOfServiceCode.length;
+							for (int k = 0; k < lengthClassList; k++) {
+								LOGGER.info(" RETRIEVING BOOKINGS FOR THE CLASS OF SERVICE --> "
+												+ classOfServiceCode[k]);
+
+								DateCriterion dateCriterion = new DateCriterion();
+								dateCriterion.setIs(FlightNotificationUtils.stringToXMLGregorianCalendar(flightDepDateLegInfo));
+
+								Flight flight = new Flight();
+								flight.setAirlineCode("WY");
+								/*SR#412572 CKI Notifications - Update the Check-in Deeplinks from CDG - DepartureCity changed to DepartureAirport*/
+								/*flight.setDepartureCity(listRSACS.getOrigin());*/
+								if(listRSACS.getOrigin().equals("CDG") || listRSACS.getOrigin().equals("CGK") || listRSACS.getOrigin().equals("FCO") || listRSACS.getOrigin().equals("LHR"))
+								{
+									LOGGER.info("Origin() Station in IF : "+listRSACS.getOrigin());
+									flight.setDepartureAirport(listRSACS.getOrigin());
+								}
+								else {
+									LOGGER.info("Origin() Station in ELSE : "+listRSACS.getOrigin());
+									flight.setDepartureCity(listRSACS.getOrigin());
+								}
+									
+								flight.setDepartureDateTime(dateCriterion);
+								flight.setFlightNumber(flightACS.getFlight());
+								flight.setClassOfService(classOfServiceCode[k]);
+								flight.setFilterFlownFlights(true);
+								flightFinalList.add(flight);
+
+								TripSearchRS tripSearchRS = null;
+								try {
+									tripSearchRS = sabreService.getPNRdetailsForBooking(securityToken, flight);
+								} catch (Exception e) {
+									throw new FlightNotificationException(" WS EXCEPTION IN RETRIEVING BOOKING DETAILS FOR THE FLIGHT --> "+ flightDetails .getFlightNumber() + " DEPARTURE STATION --> '" + flightDetails .getDepartureLocationCode() + "' DEPARTURE DATETIME --> " + flightDetails .getDepartureDateTime() + " ARRIVAL STATION --> '" + flightDetails .getArrivalLocationCode() + "' ARRIVAL DATETIME --> " + flightDetails .getArrivalDateTime() + " ORIGINAL EXCEPTION --> " + e.getMessage() + " ORIGINAL EXCEPTION --> " + e.getMessage());
+								}
+								// End get bookings
+								
+								List<PassengerPNRB> passList = null;
+  								
+								// Merge Passengers and Flights
+								if (null != tripSearchRS
+										&& null != tripSearchRS.getSuccess()
+										&& tripSearchRS.getSuccess().equalsIgnoreCase("Success")
+										&& null != tripSearchRS.getReservationsList()
+										&& !tripSearchRS.getReservationsList().getReservations().isEmpty()) {
+									for (Reservations reserv : tripSearchRS.getReservationsList().getReservations()) { 
+										
+										
+										totalBookings += tripSearchRS.getReservationsList().getNumberResults();
+										if (null != reserv.getReservation())
+											for (Reservations.Reservation rsvr : reserv.getReservation()) {
+												
+												List<ETicketNumberType> etcktInfoList=rsvr.getGetReservationRS().getReservation().getPassengerReservation().getTicketingInfo().getETicketNumber();
+										
+												
+												if(etcktInfoList.size()==0){
+													System.out.println("rsvr.getGetReservationRS().getReservation().getEmailAddresses()-------------"+rsvr.getGetReservationRS().getReservation().getEmailAddresses());
+													System.out.println("PNR NUMBER--------------"+rsvr.getGetReservationRS().getReservation().getBookingDetails().getRecordLocator());
+												}
+												
+												if(etcktInfoList!=null && etcktInfoList.size()>0){
+												
+												LOGGER.info("################# E TICKET NUMBER NOT NULL ##################");
+												LOGGER.info("################# E TICKET NUMBER NOT NULL ##################"+rsvr.getGetReservationRS().getReservation().getPassengerReservation().getTicketingInfo().getETicketNumber());
+												String firstName = null;
+												String lastName = null;
+												String emailAddress = null;
+												String ffpNumberWithEmail = null;
+												String ffpNumberWithoutEmail = null;
+												List<String> allPassengerNames = new ArrayList<String>();
+												try {
+													if (null != rsvr.getGetReservationRS()
+															&& null != rsvr.getGetReservationRS().getReservation()
+															&& null != rsvr.getGetReservationRS().getReservation().getEmailAddresses()
+															&& null != rsvr.getGetReservationRS().getReservation().getEmailAddresses().getEmailAddress()
+															&& !rsvr.getGetReservationRS().getReservation().getEmailAddresses().getEmailAddress().isEmpty()) {
+														
+														// passenger
+														// <EmailAddress />
+														// under
+														// <PassengerRervervation
+														// /> is not null
+													for (EmailAddressPNRB emailAdd : rsvr.getGetReservationRS().getReservation().getEmailAddresses().getEmailAddress()) {
+														if (!emailAdd.getAddress().trim().equalsIgnoreCase("WEBBOOKING@OMANAIR.COM")
+																	 && !agentEmailsList.contains(emailAdd.getAddress().trim())
+																	 && null == emailAddress) {
+																emailAddress = emailAdd.getAddress().trim();
+															}
+														}
+													}
+													
+													passList = rsvr.getGetReservationRS().getReservation().getPassengerReservation().getPassengers().getPassenger();
+								
+ 													if (null == emailAddress) {
+ 														LOGGER.info("EMAIL NULL.... PASSENGERS COUNT IN BOOKING '"+ rsvr.getLocator()+ "'--> "+ passList.size());
+														for (Iterator<PassengerPNRB> passPnrb = passList.iterator(); passPnrb.hasNext();) {
+															PassengerPNRB passengerPNRB = passPnrb.next();														
+															 
+															// Checking if
+															// passenger Email-ID 
+															// is null or not
+															
+															firstName = passengerPNRB.getFirstName();
+															lastName = passengerPNRB.getLastName();
+															
+															String passengerFullName = getFullName(passengerPNRB.getFirstName(), passengerPNRB.getLastName());
+															allPassengerNames.add(passengerFullName);
+															
+															if (null != passengerPNRB.getEmailAddress()
+																	&& !passengerPNRB.getEmailAddress().isEmpty()) {
+																for (EmailAddressPNRB emailAdd : passengerPNRB.getEmailAddress()) {
+																	if (!agentEmailsList.contains(emailAdd.getAddress().trim()) 
+																			&& null == emailAddress) {
+																		emailAddress = emailAdd.getAddress().trim();
+																		LOGGER.info("EMAIL ADDRESS--> " + emailAddress + " FOUND IN PASSENGER DETAILS FOR BOOKING--> " + rsvr.getLocator());																	 
+																	}
+																}
+															} else 
+																LOGGER.info("EMAIL ADDRESS NOT FOUND IN PASSENGER DETAILS FOR BOOKING --> "+ rsvr.getLocator());
+															
+															if (null != passengerPNRB.getFrequentFlyer()
+																	&& !passengerPNRB.getFrequentFlyer().isEmpty()) {
+																if (passengerPNRB.getFrequentFlyer().get(0).getSupplierCode().equalsIgnoreCase("WY")) {
+																	ffpNumberWithoutEmail = passengerPNRB.getFrequentFlyer().get(0).getNumber();
+																	++ffpCounterWithoutEmail;
+																}
+															} else {
+																LOGGER.info(" FFP NUMBER NOT FOUND IN PASSENGER DETAILS (WITHOUT EMAIL) FOR BOOKING --> "+ rsvr.getLocator());
+															}	 
+														}  // Iteration of Passenger count ends
+													} else { 
+														// If email address is null under <PassengerReservation>,<Passenger>, 
+														// then it will check for Sindbad number to retrieve customer KYC.  
+														LOGGER.info("EMAIL IS NOT NULL.... PASSENGERS COUNT IN BOOKING '"+ rsvr.getLocator()+ "'--> "+ passList.size());
+														if (passList.isEmpty()) {
+															firstName = "-";
+															lastName = "-";
+														} else {
+															for (Iterator<PassengerPNRB> passPnrb = passList.iterator(); passPnrb.hasNext();)  {
+																PassengerPNRB passPnb = passPnrb.next();
+																
+																if(null == firstName && null == lastName){
+																	firstName = passPnb.getFirstName();
+																	lastName = passPnb.getLastName();
+																}
+																
+																String passengerFullName = getFullName(passPnb.getFirstName(), passPnb.getLastName());
+																allPassengerNames.add(passengerFullName);
+																
+																if (null != passPnb.getFrequentFlyer()
+																		&& !passPnb.getFrequentFlyer().isEmpty()) {
+																	if ("WY".equalsIgnoreCase(passPnb.getFrequentFlyer().get(0).getSupplierCode())) {
+																		ffpNumberWithEmail = passPnb.getFrequentFlyer().get(0).getNumber();
+																		++ffpCounterWithEmail;
+																		LOGGER.info(" FFP NUMBER FOR THE CURRENT PASSENGER --> "+ ffpNumberWithEmail);
+																	}
+																} else {
+																	LOGGER.info(" FFP NUMBER NOT FOUND IN PASSENGER DETAILS FOR BOOKING --> "+ rsvr.getLocator());
+																}
+															}
+														}
+													} 
+												 
+  												List<String> passMealsData = mapSpecialMealData(passList, 
+  															Integer.parseInt(flightDetails.getFlightNumber().replaceAll("\\s", "")), 
+ 															flightDepDateLegInfo, 
+ 															flightDetails.getDepartureLocationCode(), 
+ 															flightDetails.getArrivalLocationCode());
+  													
+												LOGGER.info("SIZE OF THE ARRAY FOR PASSENGERS LIST FOR : "  + rsvr.getLocator() + " IS "+ passMealsData.size());
+												
+												
+												for(Segment segment : rsvr.getGetReservationRS().getReservation().getPassengerReservation().getSegments().getSegment()){
+													LOGGER.info("segment : ",segment);
+													com.sabre.webservices.pnrbuilder.v1_19.SegmentTypePNRB.Segment.Air air = segment.getAir();
+													LOGGER.info("air : ",air);
+											
+													String flightNumberC = air.getOperatingFlightNumber();
+													String depAirport = air.getDepartureAirport();
+													String depDate = air.getDepartureDateTime();
+													String arrAirport = air.getArrivalAirport();
+													String arrDate = air.getArrivalDateTime();
+													String spOpertaingAirLineCode = air.getOperatingAirlineCode();
+													String travelClass = air.getClassOfService();
+													String status = air.getActionCode();
+													
+												if(flightNumberLegInfo.length() ==3) {
+													flightNumberLegInfo = "0"+flightNumberLegInfo;
+												}else if(flightNumberLegInfo.length() ==2) {
+													flightNumberLegInfo = "00"+flightNumberLegInfo;
+												}
+														
+													LOGGER.info("flightNumberLegInfo : "+flightNumberLegInfo + " flightNumberC : "+flightNumberC
+															+" flightDepAirportLegInfo : "+flightDepAirportLegInfo+" depAirport : "+depAirport
+															+ " flightDepDateLegInfo : "+flightDepDateLegInfo +" depDate : "+depDate
+															+ " flightArrAirportLegInfo : "+flightArrAirportLegInfo +" arrAirport : "+arrAirport
+															+ " flightArrDateLegInfo : "+flightArrDateLegInfo + " arrDate : "+arrDate
+															+ " air.isIsPast : "+ air.isIsPast());
+													if(flightNumberLegInfo.equals(flightNumberC) 
+															&& flightDepAirportLegInfo.equals(depAirport)
+															&& flightDepDateLegInfo.equals(depDate)
+															&& flightArrAirportLegInfo.equals(arrAirport)
+															&& flightArrDateLegInfo.equals(arrDate)
+															&& !air.isIsPast()) {
+
+														LOGGER.info("FLIGHT & SEGMENT DETAILS MATCHED FOR BOOKING --> " + rsvr.getLocator());
+														
+														if(null != air.getSegmentSpecialRequests() 
+																&& null != air.getSegmentSpecialRequests().getGenericSpecialRequest()
+																&& !air.getSegmentSpecialRequests().getGenericSpecialRequest().isEmpty()) {
+															
+															LOGGER.info("SPECIAL REQUESTS MATCHED FOR BOOKING --> " + rsvr.getLocator());
+															
+															List<GenericSpecialRequestPNRB> genericSpecialRequestPNRBList = air.getSegmentSpecialRequests().getGenericSpecialRequest();
+ 															for(GenericSpecialRequestPNRB genericSpecialRequestPNRB : genericSpecialRequestPNRBList) {
+																if(null != genericSpecialRequestPNRB.getCode() 
+																		&& mealCodesMap.containsKey(genericSpecialRequestPNRB.getCode())
+																		&& genericSpecialRequestPNRB.getType().value().contains("G")) {
+ 																	for(int m = 0; m < passMealsData.size(); m++) {
+																		// The below logic is for checking per passenger per meal condition
+																		String dat [] = null; 
+																		
+																		try {
+																			dat = passMealsData.get(m).split("_");	
+																		} catch (Exception e) { 
+																			dat = new String[0];
+																			LOGGER.error("ERROR WHILE SPLITTING THE DATA.",e);
+																		} 
+																		
+																		if(null != dat && dat.length > 3) 
+																		if(genericSpecialRequestPNRB.getId().contains(dat[0]) 
+																				&& genericSpecialRequestPNRB.getCode().contains(dat[1])) { 
+																			 
+ 																			SendMailTo spMailTo = new SendMailTo();
+ 																			if(spOpertaingAirLineCode.contains("WY")) {
+																				spMailTo.setFlightNumber("Oman Air - WY " + flightNumberC);
+																			} else {
+																				String airLineName =  ExecuteDbQueries.operatingAirlineCodeMap.get(spOpertaingAirLineCode);
+																				if(null != airLineName && !airLineName.equals(" ")) {
+																					spMailTo.setFlightNumber(airLineName + " - " + spOpertaingAirLineCode + " " + flightNumberC);
+																				}
+																			}
+																			 
+																			spMailTo.setFirstName(dat[2]);
+																			spMailTo.setLastName(dat[3]); 
+																			spMailTo.setBookingReference(rsvr.getLocator());
+																			spMailTo.setDepartureCity(depAirport);
+																			spMailTo.setDepartureDate(depDate);
+																			spMailTo.setArrivalCity(arrAirport);
+																			spMailTo.setArrivalDate(arrDate); 
+																			spMailTo.setDepartureCityCountry(fullDepartureStationName);
+																			spMailTo.setArrivalCityCountry(fullArrivalStationName);
+ 																			spMailTo.setTravelClass(travelClass);
+ 																			
+ 																			spMailTo.setPassengers(allPassengerNames);
+																			
+																			if(null != emailAddress) {  
+																				spMailTo.setEmailID(emailAddress); 
+																				if(null != ffpNumberWithEmail) {
+																					spMailTo.setFfpNumber(ffpNumberWithEmail);
+																				} 
+ 																			} else if(null != ffpNumberWithoutEmail) { 
+																				spMailTo.setFfpNumber(ffpNumberWithoutEmail); 
+																			}  
+																			
+																			LOGGER.info("FOR BOOKING --> " + rsvr.getLocator()+" EMAIL - "+emailAddress +" FFP - "+ffpNumberWithoutEmail);
+																																						 
+																			spMailTo.setSpecialMealCode(genericSpecialRequestPNRB.getCode());
+																			specialMealCodeList.add(spMailTo); 
+																			
+																			firstName = null;
+																			lastName = null;
+																			emailAddress = null;
+																			ffpNumberWithEmail = null;
+																			ffpNumberWithoutEmail = null;	
+																			spMailTo = null; 
+																		}
+  																	}
+																}
+															}
+														}			
+														
+														LOGGER.info("SPECIAL REQUESTS LIST SIZE FOR --> " + rsvr.getLocator() +" IS " + specialMealCodeList.size());
+														boolean result = validateCheckIn(rsvr);
+														if (result) {
+															LOGGER.info("BOOKING --> "  + rsvr.getLocator() + " CLEARED ALL VALIDATION CHECKINGS");
+															if(listStatusCode.contains(status)
+																	&& air.getClassOfService().trim().contains(classOfServiceCode[k])) {
+																SendMailTo mailTo = new SendMailTo();
+																boolean flg = false;
+																
+																++ confirmedStatus;
+																
+																if(spOpertaingAirLineCode.equalsIgnoreCase("WY")){
+																	mailTo.setFlightNumber("Oman Air - WY " + flightNumberC);
+																} else {
+																	String airLineName =  ExecuteDbQueries.operatingAirlineCodeMap.get(spOpertaingAirLineCode);
+																	if(null != airLineName && !airLineName.equals(" ")){
+																		mailTo.setFlightNumber(airLineName + " - " + spOpertaingAirLineCode + " " + flightNumberC);
+																	}
+																}
+																LOGGER.info("DepartureCityCountry in mailTo-->"+fullDepartureStationName + "ArrivalCityCountry in mailTo-->"+fullArrivalStationName);
+																LOGGER.info("arrAirport in mailTo-->"+arrAirport);
+																mailTo.setDepartureCity(departureCity);
+																mailTo.setDepartureDate(depDate);
+																mailTo.setArrivalCity(arrAirport);
+																mailTo.setArrivalDate(arrDate);
+																mailTo.setBookingReference(rsvr.getLocator());
+																mailTo.setSegmentClass(travelClass);
+																mailTo.setDepartureCityCountry(fullDepartureStationName);
+	                                                            mailTo.setArrivalCityCountry(fullArrivalStationName);
+	                                                            mailTo.setFirstName(firstName);
+																mailTo.setLastName(lastName); 
+																mailTo.setTravelClass(travelClass);
+																LOGGER.info("travelClass-------"+travelClass);
+																mailTo.setPassengers(allPassengerNames);
+																
+																LOGGER.info("FOR BOOKING --> " + rsvr.getLocator()+" -- EMAIL ADDRESS --"+emailAddress +"-- LAST NAME -- "+lastName
+																		+ " -- FFP --"+ffpNumberWithoutEmail);
+																
+																if(null != emailAddress && null != lastName) {  
+ 																	mailTo.setEmailID(emailAddress); 
+ 																	
+		                                                            if(null != ffpNumberWithEmail) {
+		                                                            	mailTo.setFfpNumber(ffpNumberWithEmail);
+		                                                            	mailTo.setStatus("1");
+		                                                            }
+		                                                            
+		                                                            mailSendingList.add(mailTo); 
+		                                                            flg = true;
+																} else if(null != ffpNumberWithoutEmail) {
+																	
+																	if (lastName == null) {
+																		/*mailTo.setFirstName(member.getName());
+																		mailTo.setLastName(member.getSurname());*/
+																		mailTo.setFirstName("");
+																		mailTo.setLastName("");
+																		firstName = mailTo.getFirstName();
+																		lastName = mailTo.getLastName();
+																	}  
+																	
+ 																	/*if(member != null && member.getPerEmailAddress() != null)
+																		mailTo.setEmailID(member.getPerEmailAddress());*/
+																	
+		                                                            if(null != ffpNumberWithoutEmail) { 
+		                                                            	mailTo.setFfpNumber(ffpNumberWithoutEmail);
+		                                                            	mailTo.setStatus("0");
+		                                                            }
+		                                                            
+		                                                            flightList.add(mailTo);
+		                                                            flg = true;
+																}
+																
+																// To add passenger first name and last name to check check-in status
+																if(flg){
+																	PassengerACS passengerCheckIn = new PassengerACS();
+																	passengerCheckIn.setFirstName(firstName);
+																	passengerCheckIn.setLastName(lastName);
+																	passLastNameList.add(passengerCheckIn); 
+																}  
+														    } else { 
+																++ unConfirmedStatus; 
+																LOGGER.info("STATUS CODE IS NOT QUALIFIED FOR THIS SEGEMENT OF --> "+rsvr.getLocator());
+															}															
+															firstName = null;
+															lastName = null;
+															emailAddress = null;
+															ffpNumberWithEmail = null;
+															ffpNumberWithoutEmail = null; 
+														} else {
+															LOGGER.info("BOOKING -->"+ rsvr.getLocator()+ "  FAILED TO CLEAR ALL VALIDATION CHECKINGS");
+														}	
+															
+													} else {
+														LOGGER.info("FLIGHT DETAILS AND SEGMENT DETAILS DID NOT MATCH FOR BOOKING --> "+rsvr.getLocator());
+													}
+												} 
+
+												firstName = null;
+												lastName = null;
+												emailAddress = null;
+											} catch (Exception e) {
+												LOGGER.error("Exception while processing reservations:"+e.getMessage(),e);
+											}
+										}
+									}
+									}
+								}
+							}
+							// Get Check-in status
+							LOGGER.info(" GET CHECK-IN STATUS");
+							findCheckinStatus(flightACS.getDepartureDate(), flightACS.getFlight(),
+									listRSACS.getOrigin(), passLastNameList,
+									checkInStatusMap);
+							passLastNameList.clear();
+							// END OF ITERATING CLASS OF SERVICES
+							LOGGER.info(
+									" FILTERING COMPLETED IN CURRENT FLIGHT");
+						}else {
+							LOGGER.info("SKIP FLIGHT NUMBER: "+flightACS.getFlight()+" ,ORIGIN: "+listRSACS.getOrigin()+" ,DESTINATION: "+flightACS.getDestination());
+						}
+						} catch (FlightNotificationException e) {
+							emailErrorMessageList.add(e.getMessage());
+							LOGGER.error(e.getMessage(),e);
+						} catch (Exception e) {
+							emailErrorMessageList
+									.add(" EXCEPTION IN PROCESSING BOOKINGS --> "
+											+ e.getMessage());
+							LOGGER.error(
+									" EXCEPTION IN PROCESSING BOOKINGS --> "
+											+ e.getMessage(),e);
+						}
+					}
+			}
+			LOGGER.info(" UPDATING CHECK-IN STATUS IN FINAL MAIL SEND LIST");
+			LOGGER.info("### TOTAL BOOKING WITH ONLY EMAILS BEFORE --> "+ mailSendingList.size() + ""+ " ### TOTAL BOOKING WITHOUT ONLY EMAILS --> "+ flightList.size());
+			mailSendingList.addAll(flightList);
+			updateCheckInStatus(mailSendingList, checkInStatusMap);
+			LOGGER.info("STEP 3 --> SAVING FLIGHT DETAILS TO DATABASE");
+			ExecuteDbQueries.saveFlightDetails(flightInfoList);
+			LOGGER.info("### TOTAL FLIGHTS FOUND --> " + flightsFound);
+			LOGGER.info("### TOTAL BOOKING IN ALL THE FLIGHTS --> "+ totalBookings);
+			LOGGER.info("### TOTAL BOOKING WITH ONLY EMAILS --> "+ mailSendingList.size());
+			LOGGER.info("### TOTAL BOOKING WITH EMAILS AND FFP NUMBER--> "+ ffpCounterWithEmail);
+			LOGGER.info("### TOTAL BOOKING WITH ONLY FFP NUMBERS--> "+ ffpCounterWithoutEmail);
+			LOGGER.info("### TOTAL NUMBER OF MINOR PASSENGERS --> "+ minorPassengerCount);
+			LOGGER.info("### TOTAL NUMBER OF PASSENGERS REQUESTED FOR SPECIAL ASSISTANCE --> "+ wheelChairPassengerCount);
+			LOGGER.info("### TOTAL NUMBER OF BOOKING THAT EXCEED PASSENGER LIMIT --> "+ passengerExceedLimitCount);
+			LOGGER.info("### TOTAL NUMBER OF BOOKING HAVING STATUS CONFIRMED --> "+ confirmedStatus);
+			LOGGER.info("### TOTAL NUMBER OF BOOKING HAVING STATUS NOT CONFIRMED --> "+ unConfirmedStatus);
+			LOGGER.info("### TOTAL NUMBER OF ALREADY CHECK_IN BOOKINGs --> "+ checkInStatusMap.size());
+			LOGGER.info("### SIZE OF EMAIL LIST --> " + mailSendingList.size());
+
+			if (mailSendingList.isEmpty())
+				LOGGER.info("NO DATA FOUND TO SEND EMAILS --> " + new Date());
+			else {
+				if (null != mailSendingStatus
+						&& mailSendingStatus.equals("true")) {
+					LOGGER.info("STEP 4 --> SENDING EMAIL TO PASSENGERS");
+					try {
+						ExecuteDbQueries.sendEmail(mailSendingList);
+						// AddRemarkForNotification(mailSendingList,securityToken);
+					} catch (Exception e) {
+						LOGGER.error(
+								" ERROR IN MAIL SENDING --> " + e.getMessage(),e);
+					}
+					LOGGER.info("SENDING EMAIL ENDED **");
+				} else {
+					LOGGER.info(" MAIL SENDING DISABLED IN PROPERTIES FILE");
+				}
+			}
+
+			if (mailSendingList.isEmpty())
+				LOGGER.info("NO DATA FOUND TO GENERATE EXCLE FILES --> "
+						+ new Date());
+			else {
+				LOGGER.info(
+						"STEP 5 --> GENERATING EXCEL FILE WITH PASSENGER DETAILS");
+				try {
+					String excelFileName = ExecuteDbQueries
+							.generateExcelFile(mailSendingList);
+					LOGGER.info("excelFileName" + excelFileName);
+				} catch (Exception e) {
+					LOGGER.error(" ERROR IN EXCEL FILE GENERATION --> "
+							+ e.getMessage(),e);
+				}
+				LOGGER.info("GENERATING EXCEL FILE ENDED");
+			}
+			
+			LOGGER.info("### SIZE OF SPECIAL MEAL LIST --> " + specialMealCodeList.size());
+			
+			if (specialMealCodeList.isEmpty()) {
+				LOGGER.info("NO DATA FOUND TO SAVE SPECIAL MEAL DATA --> "+ new Date());
+			} else {
+				ExecuteDbQueries executeDbQueries = new ExecuteDbQueries();
+ 				executeDbQueries.saveSpecialMealDetails(specialMealCodeList);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Exception while processing Check-in and Special Meal.",e);
+		} finally {
+			try {
+				sabreService.sessionClose(securityToken);
+			} catch (Exception e) {
+				emailErrorMessageList
+						.add("ERROR IN CLOSING THE WEB SERVICE SESSION --> "
+								+ e.getMessage());
+				LOGGER.error(e.getMessage(),e);
+			}
+		}
+	} 
+	 
+	private String formatDateAndTime(String date, String time) {
+		// TODO Auto-generated method stub
+		time = time.substring(0,5);
+		String dateTime = date+" "+time;
+		
+        SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+        Date date1 = null;
+		try {
+			date1 = dt1.parse(dateTime);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        SimpleDateFormat dt2 = new SimpleDateFormat("MM-dd'T'HH:mm");
+        String convertedDateTime = dt2.format(date1);
+        LOGGER.info("convertedDateTime : "+convertedDateTime);
+		return convertedDateTime;
+	}
+	
+	private String findYear(String departureDate) {
+		// TODO Auto-generated method stub
+		String departureYear = null;
+		departureYear = departureDate.substring(0,4);
+		
+        LOGGER.info("departureYear : "+departureYear);
+		return departureYear;
+	}
+
+	private ACSAirportFlightListRSACS getFlightACSDetails(
+			final String securityToken, final String dateOfDepart,
+			final String stationCode, final String startTimeWs,
+			final String endTimeWs) {
+		try {
+			return sabreService.getFlightDetailsByTimePeriod(securityToken,
+					dateOfDepart, stationCode, startTimeWs, endTimeWs);
+		} catch (Exception e) {
+			LOGGER.error(" WS EXCEPION IN SEARCHING FLIGHTS FOR '" + stationCode
+					+ "' ON --> '" + dateOfDepart + "' FROM --> " + startTimeWs
+					+ " TO " + endTimeWs + " ORIGINAL EXCEPTION --> "
+					+ e.getMessage(),e);
+		}
+		return null;
+	}
+
+	private boolean validateCheckIn(Reservations.Reservation rsvr) {
+		LOGGER.info(" VALIDATING BOOKING --> " + rsvr.getLocator());
+		boolean isWheelChair = false;
+		boolean isMinorPanssgr = false;
+		boolean isExceedspassengerLimit = false;
+
+		for (PassengerPNRB passengerLst : rsvr.getGetReservationRS()
+				.getReservation().getPassengerReservation().getPassengers()
+				.getPassenger()) {
+			if (passengerLst.getSpecialRequests() != null) {
+				if (passengerLst.getSpecialRequests().getWheelchairRequest() != null
+						&& !passengerLst.getSpecialRequests().getWheelchairRequest().isEmpty()) {
+					isWheelChair = true;
+					++wheelChairPassengerCount;
+					LOGGER.info( " SPECIAL WHEEL CHAIR REQUEST EXIST FOR BOOKING --> " + rsvr.getLocator());
+				}
+				if (passengerLst.getSpecialRequests().getUnaccompaniedMinorMessage() != null
+						&& !passengerLst.getSpecialRequests().getUnaccompaniedMinorMessage().isEmpty()) {
+					isMinorPanssgr = true;
+					++minorPassengerCount;
+					LOGGER.info(" MINOR PASSENGER EXIST FOR BOOKING --> "+ rsvr.getLocator());
+				}
+			}
+		}
+
+		if (rsvr.getGetReservationRS().getReservation().getNumberInParty() > 9) {
+			isExceedspassengerLimit = true;
+			++passengerExceedLimitCount;
+			LOGGER.info(" PASSENGER LIMIT EXCEED FOR BOOKING --> "
+					+ rsvr.getLocator());
+		}
+
+		if (isWheelChair || isMinorPanssgr || isExceedspassengerLimit)
+			return false;
+		else
+			return true;
+	}
+
+	private volatile static int SPLIT_RANGE = 14;
+	
+	/**
+	 * 
+	 * @param departDate
+	 * @param flightNumber
+	 * @param originStation
+	 * @param passengerList
+	 * @param checkInStatusMap
+	 */
+	public void findCheckinStatus(String departDate, String flightNumber,
+			String originStation, List<PassengerACS> passengerList,
+			Map<String, String> checkInStatusMap) {
+		List<List<PassengerACS>> passengerNList = null;
+		try {
+			LOGGER.info("CHECKED-IN PASSENGERS REQUEST AND RESPONSE :: PASSENGER SIZE - "+passengerList.size());
+
+			if (null != passengerList && !passengerList.isEmpty()) {
+				
+				passengerNList = new ArrayList<List<PassengerACS>>(); 
+				
+				int startindex = 0;
+				int remRange = passengerList.size() % SPLIT_RANGE;
+				int ques = passengerList.size() / SPLIT_RANGE;
+				int remRange1 = SPLIT_RANGE * ques;
+				
+				for (int i = 0; i < ques; i++) {
+					if (i == 0) {
+						passengerNList.add(passengerList.subList(startindex, Math.min(passengerList.size(), 15)));
+						startindex = i;
+					} else {
+						int range = SPLIT_RANGE * i;
+						passengerNList.add(passengerList.subList(range, range + SPLIT_RANGE));
+					}
+				}
+				
+				if (remRange > 0) {
+					passengerNList.add(passengerList.subList(remRange1, remRange1 + remRange));
+ 				}  
+				 
+				// The below code is to retreive the remainder elements to array 
+				LOGGER.info("TOTAL SUB LIST SIZE IS :: "+passengerNList.size());
+
+				for (List<PassengerACS> passList : passengerNList) {
+
+					GetPassengerDataRSACS rs = sabreService.getPassengerData(token, departDate, flightNumber, originStation,passList);
+
+					if (null != rs && null != rs.getPassengerDataResponseList()
+							&& !rs.getPassengerDataResponseList().getPassengerDataResponse().isEmpty()) {
+						List<PassengerDataResponseACS> dataResponseACSs = rs.getPassengerDataResponseList().getPassengerDataResponse();
+						for (PassengerDataResponseACS dataResponseACS : dataResponseACSs) {
+							if (null != dataResponseACS
+									.getPassengerItineraryList()
+									&& null != dataResponseACS.getPassengerItineraryList().getPassengerItinerary()
+									&& !dataResponseACS.getPassengerItineraryList().getPassengerItinerary().isEmpty()) {
+								// Consider first passenger as always one
+								// passenger
+								// data
+								// returned
+								PassengerItineraryACS passengerItineraryACS = dataResponseACS.getPassengerItineraryList().getPassengerItinerary().get(0);
+								if (null != passengerItineraryACS
+										.getBoardingPassFlag()
+										&& passengerItineraryACS.getBoardingPassFlag().equalsIgnoreCase("*"))
+									checkInStatusMap.put(dataResponseACS.getPNRLocator().getValue(),passengerItineraryACS.getBoardingPassFlag());
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Excpetion while finding check-in status :", e);
+		}
+	}
+
+	private String getStationFullName(final String securityToken,
+			final String command, final FlightLegDetails flightDetails) {
+		try {
+			return sabreService.runCommand(securityToken, command);
+		} catch (Exception e) {
+			LOGGER.error(
+					" WS EXCEPION IN RETRIEVING FULL STATION NAME FOR THE COMMAND --> "
+							+ command + " FOR THE FLIGHT --> "
+							+ flightDetails.getFlightNumber()
+							+ " DEPARTURE STATION --> '"
+							+ flightDetails.getDepartureLocationCode()
+							+ "' DEPARTURE DATETIME --> "
+							+ flightDetails.getDepartureDateTime()
+							+ " ARRIVAL STATION --> '"
+							+ flightDetails.getArrivalLocationCode()
+							+ "' ARRIVAL DATETIME --> "
+							+ flightDetails.getArrivalDateTime()
+							+ " ORIGINAL EXCEPTION --> " + e.getMessage(),e);
+		}
+		return null;
+	}
+
+	public void updateCheckInStatus(List<SendMailTo> mailSendingList,
+			Map<String, String> checkInStatusMap) {
+		if (null != mailSendingList && !mailSendingList.isEmpty()
+				&& null != checkInStatusMap && !checkInStatusMap.isEmpty())
+			LOGGER.info("SETTING CHECK_INSTATUS VALUE FOR EXCEL FILE");
+		for (SendMailTo mailTo : mailSendingList) {
+			if (null != mailTo && mailTo.getBookingReference() != null) {
+				String check_in_stat = mailTo.getBookingReference() != null
+						? checkInStatusMap.get(mailTo.getBookingReference())
+						: null;
+				if (null != check_in_stat
+						&& check_in_stat.equalsIgnoreCase("*"))
+					mailTo.setCheckInStatus("1");
+				else
+					mailTo.setCheckInStatus("0");
+			} else
+				mailTo.setCheckInStatus("0");
+		}
+	}
+	
+	/*private Member getCraneMember(final String ffpNumber){
+		//MemberRes member = new MemberRes();
+		Member member =new Member();
+		LOGGER.info("ffpNumber : "+ffpNumber);
+		try {
+			member = craneService.retrieveMember(ffpNumber.replaceAll("WY", ""));
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN CRANE WEB SERVICES ---> "+ e.getMessage(),e);
+		}			
+		return member;
+	}*/
+	
+	/**
+	 * 
+	 * @param passList
+	 * @param flightNumber
+	 * @param date
+	 * @param dept
+	 * @param arr
+	 * @return
+	 */
+ 	private List<String> mapSpecialMealData(final List<PassengerPNRB> passList, 
+ 			int flightNumber,final String date,final String dept,final String arr) { 		
+  		List<String> mealData = new LinkedList<String>();
+  		for (Iterator<PassengerPNRB> passPnrb = passList.iterator(); passPnrb.hasNext();)  {
+			PassengerPNRB passPnb = passPnrb.next();	
+			boolean flag = true; 
+			if(null != passPnb.getSpecialRequests()
+					&& null != passPnb.getSpecialRequests().getSpecialMealRequest()) {
+				for (SpecialMealRequestPNRB spmPnrb : passPnb.getSpecialRequests()
+						.getSpecialMealRequest()) {				
+					if(spmPnrb.getType().name().contains("G"))   
+						if (spmPnrb.getBoardCity().contains(dept)
+								&& date.contains(spmPnrb.getFlightDate())
+								&& spmPnrb.getOffCity().contains(arr)
+								&& flightNumber == Integer.parseInt(spmPnrb.getFlightNumber().replaceAll("\\s", ""))) { 
+								flag = false;
+								mealData.add(new StringBuilder(spmPnrb.getId())
+											.append("_").append(spmPnrb.getMealType())
+											.append("_").append(passPnb.getFirstName())
+											.append("_").append(passPnb.getLastName()).toString());
+		 				}
+					
+				}
+				
+				if(flag)
+				for (SpecialMealRequestPNRB spmPnrb : passPnb.getSpecialRequests()
+						.getSpecialMealRequest()) {				
+					if(spmPnrb.getType().name().contains("A"))  
+						if (spmPnrb.getBoardCity().contains(dept)
+								&& date.contains(spmPnrb.getFlightDate())
+ 								&& flightNumber == Integer.parseInt(spmPnrb.getFlightNumber().replaceAll("\\s", ""))) {
+							mealData.add(new StringBuilder(spmPnrb.getId())
+									.append("_").append(spmPnrb.getMealType())
+									.append("_").append(passPnb.getFirstName())
+									.append("_").append(passPnb.getLastName()).toString());
+		 				}
+					
+				}				
+			}
+ 		}
+		return mealData;
+	}
+  
+ 	
+ 	
+	private static String[] dynamicStringArray(String[] oldData) {
+		if (oldData.length == (INDEX + 1)) {
+			String[] newArray = new String[oldData.length + 1];
+			for (int ind = 0; ind < oldData.length; ind++) {
+				newArray[ind] = oldData[ind];
+			}
+			return newArray;
+		} else
+			return oldData;
+  	}
+	
+	private static String[] constructMealData(String[] mealData,
+				final SpecialMealRequestPNRB spmPnrb,
+				final PassengerPNRB passPnb) {
+		String temp[] = dynamicStringArray(mealData);
+ 		temp[INDEX++] =  new StringBuilder(spmPnrb.getId())
+				.append("_").append(spmPnrb.getMealType())
+				.append("_").append(passPnb.getFirstName())
+				.append("_").append(passPnb.getLastName()).toString();
+		return temp; 
+ 		
+ 	}
+
+	public String convertDateToString(Date indate) {
+		return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(indate);
+	} 
+	/*
+	 * To get set all passenger names 
+	 */
+	
+	private static String getFullName(String firstName, String lastName) {
+		StringBuilder nameWithSalutation = new StringBuilder(10);
+		if (null != firstName && null != lastName) {
+			String title = "";
+			if (firstName.toUpperCase().lastIndexOf("MRS") != -1) {
+				title = "MRS";
+			} else if (firstName.toUpperCase().lastIndexOf("MR") != -1) {
+				title = "MR";
+			} else if (firstName.toUpperCase().lastIndexOf("MS") != -1) {
+				title = "MS";
+			} else if (firstName.toUpperCase().lastIndexOf("DR") != -1) {
+				title = "DR";
+			}
+			nameWithSalutation.append(title).append(".").append(" ")
+					.append(firstName.substring(0,
+							firstName.lastIndexOf(title)))
+					.append(" ").append(lastName);
+		}
+
+		return nameWithSalutation.toString().startsWith(". ")
+				? nameWithSalutation.toString().replace(". ", "")
+				: nameWithSalutation.toString();
+	}
+}
