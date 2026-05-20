@@ -1,0 +1,35 @@
+PFB the details.
+
+Regarding the email retrieval logic, the system reads the email address from the Address field.
+
+The checks are performed in the following order:
+
+Reservation Level Check
+First, the system checks whether an email address is available in the booking reservation.
+<st119:EmailAddresses>
+    <st119:EmailAddress id="10">
+        <st119:Address>AZHABRI@GMAIL.COM</st119:Address>
+        <st119:Comment>@E</st119:Comment>
+    </st119:EmailAddress>
+</st119:EmailAddresses>
+Passenger Level Check
+If the email address is not available at the reservation level, then the system checks under the passenger details.
+<st119:Passenger>
+    <st119:EmailAddress id="11">
+        <st119:Address>AZHABRI@GMAIL.COM</st119:Address>
+        <st119:Comment>@E</st119:Comment>
+    </st119:EmailAddress>
+</st119:Passenger>
+
+Other than this, the system only checks for the Frequent Flyer Number and stores it if present.
+If the email address is not found in both of the above checks, the email value will remain null and the check-in email notification will not be triggered.
+
+Regarding the below passenger, the passenger will not receive the check-in email.
+
+When we checked the PNR RQIMBS in UAT, the flight itself was not fetched from the Flight List API call, and currently there are no validations for codeshare flights in the online check-in logic.
+
+From the logs, we could identify that the codeshare flight details are available only in the getPassengerData API response under the passenger itinerary list (which contains the complete travel plan of the passenger). However, the codeshare flights are not received in the initial Flight List API call itself.
+
+Additionally, PFA the API request and response details for your reference.
+
+As discussed, TZX station flights are not available in the DB station list, and therefore flights for those routes will not be processed.
