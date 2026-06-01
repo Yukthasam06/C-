@@ -333,3 +333,945 @@ Customer seat information
 Check-in details (terminal, airline, channel)
 
 Terminal information/flight information for connecting flights
+
+<soap-env:Body>
+		<ns3:ACS_AirportFlightListRS
+			xmlns:ns2="http://services.sabre.com/STL/v3"
+			xmlns:ns3="http://services.sabre.com/ACS/BSO/airportFlightList/v3">
+			<Origin>LHR</Origin>
+			<AirportFlightList>
+				<AirportFlight>
+					<Flight>0102</Flight>
+					<DepartureDate>2026-05-20</DepartureDate>
+					<DepartureTime>08:50PM</DepartureTime>
+					<Destination>MCT</Destination>
+					<Status>OPENCI</Status>
+					<AircraftType>789</AircraftType>
+				</AirportFlight>
+			</AirportFlightList>
+			<Result messageId="ID-prod-cki-ws-group3-wd75-1778647489795-2-50109355" timeStamp="2026-05-18T21:00:31.094Z">
+				<ns2:Status>Success</ns2:Status>
+				<ns2:CompletionStatus>Complete</ns2:CompletionStatus>
+				<ns2:System>ACS-BSO</ns2:System>
+			</Result>
+		</ns3:ACS_AirportFlightListRS>
+	</soap-env:Body>
+The above is the response of getFlightDetailsByTimePeriod API
+
+<soap-env:Body>
+		<VerifyFlightDetailsRS
+			xmlns="http://webservices.sabre.com/sabreXML/2011/10"
+			xmlns:stl="http://services.sabre.com/STL/v01"
+			xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="2.0.1">
+			<stl:ApplicationResults status="Complete">
+				<stl:Success timeStamp="2026-05-18T21:00:54Z"/>
+			</stl:ApplicationResults>
+			<OriginDestinationOptions>
+				<OriginDestinationOption DestinationTimeZone="Z" OriginTimeZone="Z">
+					<FlightSegment AccumulatedElapsedTime="7.20" AirMilesFlown="3628" ArrivalDateTime="05-21T07:10" DepartureDateTime="05-20T20:50" ElapsedTime="7.20" FlightNumber="102">
+						<DestinationLocation LocationCode="MCT"/>
+						<Equipment AirEquipType="789"/>
+						<MarketingAirline Code="WY" FlightNumber="102"/>
+						<Meal Code="DS"/>
+						<OriginLocation LocationCode="LHR" Terminal="TERMINAL 4"/>
+					</FlightSegment>
+				</OriginDestinationOption>
+			</OriginDestinationOptions>
+		</VerifyFlightDetailsRS>
+	</soap-env:Body>
+The above is the response of getFlightInfo API
+
+<soap-env:Body>
+		<Trip_SearchRS
+			xmlns="http://webservices.sabre.com/triprecord"
+			xmlns:ns10="http://services.sabre.com/STL_Header/v02_00"
+			xmlns:ns11="http://www.OpenTravel.org/ns/OTA2/AppInfo_v01_00"
+			xmlns:ns12="http://opentravel.org/common/v02"
+			xmlns:ns13="http://www.sabre.com/eps/schemas"
+			xmlns:ns14="http://tds.sabre.com/distribution"
+			xmlns:ns15="http://webservices.sabre.com/servicesplatform/orr/rules/1.0.0"
+			xmlns:ns2="http://services.sabre.com/STL/v01"
+			xmlns:ns20="http://services.sabre.com/res/or/v1_14"
+			xmlns:ns3="http://webservices.sabre.com/pnrbuilder"
+			xmlns:ns4="http://webservices.sabre.com/sabreXML/2003/07"
+			xmlns:ns5="http://tds.sabre.com/rules"
+			xmlns:ns6="http://tds.sabre.com/itinerary"
+			xmlns:ns7="http://services.sabre.com/res/orr/v0"
+			xmlns:ns8="http://services.sabre.com/STL/v02"
+			xmlns:ns9="http://www.sabre.com/ssg/des/v1"
+			xmlns:or18="http://services.sabre.com/res/or/v1_8"
+			xmlns:or19="http://services.sabre.com/res/or/v1_9"
+			xmlns:stl115="http://webservices.sabre.com/pnrbuilder/v1_15"
+			xmlns:stl119="http://webservices.sabre.com/pnrbuilder/v1_19"
+			xmlns:tir39="http://services.sabre.com/res/tir/v3_9" Target="Production" TimeStamp="2026-05-18T16:00:58" Version="4.5.0">
+			<Success>Success</Success>
+			<Warnings>
+				<Warning ShortText="Max number of requested PNRs exceeded view limit [800]">200005</Warning>
+			</Warnings>
+			<ReservationsList NumberPages="1" NumberResults="2" TotalResults="2">
+				<Reservations>
+					<Reservation Locator="CWTECU">
+						<stl19:GetReservationRS
+							xmlns:ns4="http://webservices.sabre.com/pnrconn/ReaccSearch"
+							xmlns:ns6="http://services.sabre.com/res/orr/v0"
+							xmlns:or114="http://services.sabre.com/res/or/v1_14"
+							xmlns:raw="http://tds.sabre.com/itinerary"
+							xmlns:stl19="http://webservices.sabre.com/pnrbuilder/v1_19" Version="1.19.0">
+							<stl19:Reservation NumberInSegment="1" numberInParty="1" numberOfInfants="0">
+								<stl19:BookingDetails>
+									<stl19:RecordLocator>CWTECU</stl19:RecordLocator>
+									<stl19:CreationTimestamp>2026-05-11T02:42:00</stl19:CreationTimestamp>
+									<stl19:SystemCreationTimestamp>2026-05-11T02:42:00</stl19:SystemCreationTimestamp>
+									<stl19:UpdateTimestamp>2026-05-18T02:23:57</stl19:UpdateTimestamp>
+									<stl19:PNRSequence>18</stl19:PNRSequence>
+									<stl19:FlightsRange End="2026-05-21T07:10:00" Start="2026-05-18T13:30:00"/>
+									<stl19:DivideSplitDetails/>
+									<stl19:EstimatedPurgeTimestamp>2026-05-20T00:00:00</stl19:EstimatedPurgeTimestamp>
+									<stl19:UpdateToken>b1eAjlHK0W3vzsr4weuPY2XJ27vUtrsZC5FLI0wMlCUxRSzjnp8=</stl19:UpdateToken>
+								</stl19:BookingDetails>
+								<stl19:POS AirExtras="false" InhibitCode="U">
+									<stl19:Source AirlineVendorID="WY" BookingSource="A0A0" HomePseudoCityCode="TTY" ISOCountry="FR" PrimeHostID="WY" PseudoCityCode="TTY">
+										<stl19:TTYRecordLocator>
+											<stl19:CRSLocator>MUC</stl19:CRSLocator>
+											<stl19:CRSCode>1A</stl19:CRSCode>
+											<stl19:RecordLocator>YKW2UZ</stl19:RecordLocator>
+											<stl19:AgencyId>PARMM211Z</stl19:AgencyId>
+											<stl19:IataNumber>2021607</stl19:IataNumber>
+											<stl19:AgencyLocation>PAR</stl19:AgencyLocation>
+											<stl19:UserType>T</stl19:UserType>
+											<stl19:CountryCode>FR</stl19:CountryCode>
+											<stl19:Currency/>
+										</stl19:TTYRecordLocator>
+									</stl19:Source>
+								</stl19:POS>
+								<stl19:PassengerReservation>
+									<stl19:Passengers>
+										<stl19:Passenger elementId="pnr-5.1" id="5" nameAssocId="1" nameId="01.01" nameType="S">
+											<stl19:LastName>ALHARTHI</stl19:LastName>
+											<stl19:FirstName>ABDALLAH MOHAMMED ABDALLAH</stl19:FirstName>
+											<stl19:SpecialRequests>
+												<stl19:GenericSpecialRequest id="58" msgType="S" type="A">
+													<stl19:Code>TKNE</stl19:Code>
+													<stl19:FreeText>WY HK1 MCTLHR0101J18MAY/9109233107388C1</stl19:FreeText>
+													<stl19:ActionCode>HK</stl19:ActionCode>
+													<stl19:NumberInParty>1</stl19:NumberInParty>
+													<stl19:AirlineCode>WY</stl19:AirlineCode>
+													<stl19:TicketNumber>9109233107388</stl19:TicketNumber>
+													<stl19:FullText>TKNE WY HK1 MCTLHR0101J18MAY/9109233107388C1</stl19:FullText>
+												</stl19:GenericSpecialRequest>
+												<stl19:GenericSpecialRequest id="59" msgType="S" type="A">
+													<stl19:Code>TKNE</stl19:Code>
+													<stl19:FreeText>WY HK1 LHRMCT0102J20MAY/9109233107388C2</stl19:FreeText>
+													<stl19:ActionCode>HK</stl19:ActionCode>
+													<stl19:NumberInParty>1</stl19:NumberInParty>
+													<stl19:AirlineCode>WY</stl19:AirlineCode>
+													<stl19:TicketNumber>9109233107388</stl19:TicketNumber>
+													<stl19:FullText>TKNE WY HK1 LHRMCT0102J20MAY/9109233107388C2</stl19:FullText>
+												</stl19:GenericSpecialRequest>
+												<stl19:APISRequest>
+													<stl19:DOCSEntry id="13" type="A">
+														<stl19:DocumentType>P</stl19:DocumentType>
+														<stl19:CountryOfIssue>OM</stl19:CountryOfIssue>
+														<stl19:DocumentNumber>FZ2144934</stl19:DocumentNumber>
+														<stl19:DocumentNationalityCountry>OM</stl19:DocumentNationalityCountry>
+														<stl19:DateOfBirth>1992-03-16</stl19:DateOfBirth>
+														<stl19:Gender>M</stl19:Gender>
+														<stl19:DocumentExpirationDate>2028-10-03</stl19:DocumentExpirationDate>
+														<stl19:Surname>ALHARTHI</stl19:Surname>
+														<stl19:Forename>ABDALLAHMOHAMMEDABDALLAH</stl19:Forename>
+														<stl19:MiddleName/>
+														<stl19:PrimaryHolder>false</stl19:PrimaryHolder>
+														<stl19:FreeText/>
+														<stl19:ActionCode>HK</stl19:ActionCode>
+														<stl19:NumberInParty>1</stl19:NumberInParty>
+														<stl19:VendorCode>WY</stl19:VendorCode>
+													</stl19:DOCSEntry>
+												</stl19:APISRequest>
+												<stl19:EmergencyContactRequest id="62" type="A">
+													<stl19:CountryCode>USNOPRIMARYPHONE</stl19:CountryCode>
+													<stl19:Comment>HK/NO/USNOPRIMARYPHONE</stl19:Comment>
+													<stl19:PassengerRefusal>true</stl19:PassengerRefusal>
+													<stl19:VendorCode>WY</stl19:VendorCode>
+												</stl19:EmergencyContactRequest>
+											</stl19:SpecialRequests>
+											<stl19:Seats>
+												<stl19:PreReservedSeats>
+													<stl19:PreReservedSeat id="48">
+														<stl19:SeatNumber>14J</stl19:SeatNumber>
+														<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+														<stl19:SeatTypeCode>ARMI</stl19:SeatTypeCode>
+														<stl19:SeatStatusCode>HK</stl19:SeatStatusCode>
+														<stl19:BoardPoint>MCT</stl19:BoardPoint>
+														<stl19:OffPoint>LHR</stl19:OffPoint>
+														<stl19:Changed>N</stl19:Changed>
+														<stl19:NameNumber>01.01</stl19:NameNumber>
+													</stl19:PreReservedSeat>
+													<stl19:PreReservedSeat id="49">
+														<stl19:SeatNumber>10B</stl19:SeatNumber>
+														<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+														<stl19:SeatTypeCode>ALMI</stl19:SeatTypeCode>
+														<stl19:SeatStatusCode>HK</stl19:SeatStatusCode>
+														<stl19:BoardPoint>LHR</stl19:BoardPoint>
+														<stl19:OffPoint>MCT</stl19:OffPoint>
+														<stl19:Changed>N</stl19:Changed>
+														<stl19:NameNumber>01.01</stl19:NameNumber>
+													</stl19:PreReservedSeat>
+												</stl19:PreReservedSeats>
+											</stl19:Seats>
+										</stl19:Passenger>
+									</stl19:Passengers>
+									<stl19:Segments>
+										<stl19:Poc>
+											<stl19:Airport>MCT</stl19:Airport>
+											<stl19:Departure>2026-05-18T13:30:00</stl19:Departure>
+										</stl19:Poc>
+										<stl19:Segment id="38" sequence="1">
+											<stl19:Air CodeShare="false" DayOfWeekInd="1" ResBookDesigCode="J" SmokingAllowed="false" SpecialMeal="false" id="38" isPast="false" segmentAssociationId="4" sequence="1">
+												<stl19:DepartureAirport>MCT</stl19:DepartureAirport>
+												<stl19:DepartureAirportCodeContext>IATA</stl19:DepartureAirportCodeContext>
+												<stl19:ArrivalAirport>LHR</stl19:ArrivalAirport>
+												<stl19:ArrivalAirportCodeContext>IATA</stl19:ArrivalAirportCodeContext>
+												<stl19:OperatingAirlineCode>WY</stl19:OperatingAirlineCode>
+												<stl19:OperatingAirlineShortName>OMAN AIR</stl19:OperatingAirlineShortName>
+												<stl19:OperatingFlightNumber>0101</stl19:OperatingFlightNumber>
+												<stl19:EquipmentType>789</stl19:EquipmentType>
+												<stl19:MarketingAirlineCode>WY</stl19:MarketingAirlineCode>
+												<stl19:MarketingFlightNumber>0101</stl19:MarketingFlightNumber>
+												<stl19:OperatingClassOfService>J</stl19:OperatingClassOfService>
+												<stl19:MarketingClassOfService>J</stl19:MarketingClassOfService>
+												<stl19:MarriageGrp>
+													<stl19:Ind>0</stl19:Ind>
+													<stl19:Group>0</stl19:Group>
+													<stl19:Sequence>0</stl19:Sequence>
+												</stl19:MarriageGrp>
+												<stl19:Seats>
+													<stl19:PreReservedSeats>
+														<stl19:PreReservedSeat id="48">
+															<stl19:SeatNumber>14J</stl19:SeatNumber>
+															<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+															<stl19:SeatTypeCode>ARMI</stl19:SeatTypeCode>
+															<stl19:SeatStatusCode>HK</stl19:SeatStatusCode>
+															<stl19:BoardPoint>MCT</stl19:BoardPoint>
+															<stl19:OffPoint>LHR</stl19:OffPoint>
+															<stl19:Changed>N</stl19:Changed>
+															<stl19:NameNumber>01.01</stl19:NameNumber>
+														</stl19:PreReservedSeat>
+													</stl19:PreReservedSeats>
+												</stl19:Seats>
+												<stl19:Eticket>true</stl19:Eticket>
+												<stl19:DepartureDateTime>2026-05-18T13:30:00</stl19:DepartureDateTime>
+												<stl19:ArrivalDateTime>2026-05-18T19:10:00</stl19:ArrivalDateTime>
+												<stl19:FlightNumber>0101</stl19:FlightNumber>
+												<stl19:ClassOfService>J</stl19:ClassOfService>
+												<stl19:ActionCode>HK</stl19:ActionCode>
+												<stl19:NumberInParty>1</stl19:NumberInParty>
+												<stl19:SegmentSpecialRequests>
+													<stl19:GenericSpecialRequest id="58" msgType="S" type="A">
+														<stl19:Code>TKNE</stl19:Code>
+														<stl19:FreeText>WY HK1 MCTLHR0101J18MAY/9109233107388C1</stl19:FreeText>
+														<stl19:ActionCode>HK</stl19:ActionCode>
+														<stl19:NumberInParty>1</stl19:NumberInParty>
+														<stl19:AirlineCode>WY</stl19:AirlineCode>
+														<stl19:TicketNumber>9109233107388</stl19:TicketNumber>
+														<stl19:FullText>TKNE WY HK1 MCTLHR0101J18MAY/9109233107388C1</stl19:FullText>
+													</stl19:GenericSpecialRequest>
+												</stl19:SegmentSpecialRequests>
+												<stl19:inboundConnection>false</stl19:inboundConnection>
+												<stl19:outboundConnection>false</stl19:outboundConnection>
+												<stl19:ScheduleChangeIndicator>false</stl19:ScheduleChangeIndicator>
+												<stl19:SegmentBookedDate>2026-05-11T07:45:00</stl19:SegmentBookedDate>
+												<stl19:Pos>
+													<stl19:CrsCode>1A</stl19:CrsCode>
+													<stl19:IataNumber>2021607</stl19:IataNumber>
+													<stl19:AgencyCityCode>PAR</stl19:AgencyCityCode>
+													<stl19:CountryCode>FR</stl19:CountryCode>
+													<stl19:DutyCode>R</stl19:DutyCode>
+												</stl19:Pos>
+												<stl19:Banner>MARKETED BY OMAN AIR</stl19:Banner>
+												<stl19:Informational>false</stl19:Informational>
+											</stl19:Air>
+										</stl19:Segment>
+										<stl19:Segment id="43" sequence="2">
+											<stl19:Air CodeShare="false" DayOfWeekInd="3" ResBookDesigCode="J" SmokingAllowed="false" SpecialMeal="false" id="43" isPast="false" segmentAssociationId="2" sequence="2">
+												<stl19:DepartureAirport>LHR</stl19:DepartureAirport>
+												<stl19:DepartureAirportCodeContext>IATA</stl19:DepartureAirportCodeContext>
+												<stl19:ArrivalAirport>MCT</stl19:ArrivalAirport>
+												<stl19:ArrivalAirportCodeContext>IATA</stl19:ArrivalAirportCodeContext>
+												<stl19:OperatingAirlineCode>WY</stl19:OperatingAirlineCode>
+												<stl19:OperatingAirlineShortName>OMAN AIR</stl19:OperatingAirlineShortName>
+												<stl19:OperatingFlightNumber>0102</stl19:OperatingFlightNumber>
+												<stl19:EquipmentType>789</stl19:EquipmentType>
+												<stl19:MarketingAirlineCode>WY</stl19:MarketingAirlineCode>
+												<stl19:MarketingFlightNumber>0102</stl19:MarketingFlightNumber>
+												<stl19:OperatingClassOfService>J</stl19:OperatingClassOfService>
+												<stl19:MarketingClassOfService>J</stl19:MarketingClassOfService>
+												<stl19:MarriageGrp>
+													<stl19:Ind>0</stl19:Ind>
+													<stl19:Group>0</stl19:Group>
+													<stl19:Sequence>0</stl19:Sequence>
+												</stl19:MarriageGrp>
+												<stl19:Seats>
+													<stl19:PreReservedSeats>
+														<stl19:PreReservedSeat id="49">
+															<stl19:SeatNumber>10B</stl19:SeatNumber>
+															<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+															<stl19:SeatTypeCode>ALMI</stl19:SeatTypeCode>
+															<stl19:SeatStatusCode>HK</stl19:SeatStatusCode>
+															<stl19:BoardPoint>LHR</stl19:BoardPoint>
+															<stl19:OffPoint>MCT</stl19:OffPoint>
+															<stl19:Changed>N</stl19:Changed>
+															<stl19:NameNumber>01.01</stl19:NameNumber>
+														</stl19:PreReservedSeat>
+													</stl19:PreReservedSeats>
+												</stl19:Seats>
+												<stl19:Eticket>true</stl19:Eticket>
+												<stl19:DepartureDateTime>2026-05-20T20:50:00</stl19:DepartureDateTime>
+												<stl19:ArrivalDateTime>2026-05-21T07:10:00</stl19:ArrivalDateTime>
+												<stl19:FlightNumber>0102</stl19:FlightNumber>
+												<stl19:ClassOfService>J</stl19:ClassOfService>
+												<stl19:ActionCode>HK</stl19:ActionCode>
+												<stl19:NumberInParty>1</stl19:NumberInParty>
+												<stl19:SegmentSpecialRequests>
+													<stl19:GenericSpecialRequest id="59" msgType="S" type="A">
+														<stl19:Code>TKNE</stl19:Code>
+														<stl19:FreeText>WY HK1 LHRMCT0102J20MAY/9109233107388C2</stl19:FreeText>
+														<stl19:ActionCode>HK</stl19:ActionCode>
+														<stl19:NumberInParty>1</stl19:NumberInParty>
+														<stl19:AirlineCode>WY</stl19:AirlineCode>
+														<stl19:TicketNumber>9109233107388</stl19:TicketNumber>
+														<stl19:FullText>TKNE WY HK1 LHRMCT0102J20MAY/9109233107388C2</stl19:FullText>
+													</stl19:GenericSpecialRequest>
+												</stl19:SegmentSpecialRequests>
+												<stl19:inboundConnection>false</stl19:inboundConnection>
+												<stl19:outboundConnection>false</stl19:outboundConnection>
+												<stl19:ScheduleChangeIndicator>false</stl19:ScheduleChangeIndicator>
+												<stl19:SegmentBookedDate>2026-05-11T07:46:00</stl19:SegmentBookedDate>
+												<stl19:Pos>
+													<stl19:CrsCode>1A</stl19:CrsCode>
+													<stl19:IataNumber>2021607</stl19:IataNumber>
+													<stl19:AgencyCityCode>PAR</stl19:AgencyCityCode>
+													<stl19:CountryCode>FR</stl19:CountryCode>
+													<stl19:DutyCode>R</stl19:DutyCode>
+												</stl19:Pos>
+												<stl19:Banner>MARKETED BY OMAN AIR</stl19:Banner>
+												<stl19:Informational>false</stl19:Informational>
+											</stl19:Air>
+										</stl19:Segment>
+									</stl19:Segments>
+									<stl19:TicketingInfo>
+										<stl19:AlreadyTicketed elementId="pnr-55" id="55" index="1">
+											<stl19:Code>T-11MAY</stl19:Code>
+										</stl19:AlreadyTicketed>
+										<stl19:ETicketNumber elementId="pnr-56" id="56" index="2">TE 9109233107388 AL HA/A SYSSYS 1002/11MAY*</stl19:ETicketNumber>
+										<stl19:TicketDetails elementId="pnr-56" id="56" index="2">
+											<stl19:OriginalTicketDetails>TE 9109233107388 AL HA/A SYSSYS 1002/11MAY*</stl19:OriginalTicketDetails>
+											<stl19:TransactionIndicator>TE</stl19:TransactionIndicator>
+											<stl19:TicketNumber>9109233107388</stl19:TicketNumber>
+											<stl19:PassengerName>AL HA/A</stl19:PassengerName>
+											<stl19:AgencyLocation>SYS</stl19:AgencyLocation>
+											<stl19:DutyCode/>
+											<stl19:AgentSine>SYS</stl19:AgentSine>
+											<stl19:Timestamp>2026-05-11T10:02:00</stl19:Timestamp>
+											<stl19:PaymentType>*</stl19:PaymentType>
+										</stl19:TicketDetails>
+									</stl19:TicketingInfo>
+									<stl19:ItineraryPricing/>
+								</stl19:PassengerReservation>
+								<stl19:ReceivedFrom>
+									<stl19:Name>EDIRM1A11074209 4AC1AD76-001</stl19:Name>
+								</stl19:ReceivedFrom>
+								<stl19:Remarks>
+									<stl19:Remark elementId="pnr-16" id="16" index="1" type="HS">
+										<stl19:RemarkLines>
+											<stl19:RemarkLine>
+												<stl19:Text>REF IATA TO PRVD PAX EMAIL N MBL CTC IN SSR CTCE OR CTCM</stl19:Text>
+											</stl19:RemarkLine>
+										</stl19:RemarkLines>
+									</stl19:Remark>
+									<stl19:Remark elementId="pnr-19" id="19" index="2" type="HS">
+										<stl19:RemarkLines>
+											<stl19:RemarkLine>
+												<stl19:Text>ADTK B4 0942 13MAY26 PAR LT ELSE BKG WILL BE XXLD</stl19:Text>
+											</stl19:RemarkLine>
+										</stl19:RemarkLines>
+									</stl19:Remark>
+									<stl19:Remark elementId="pnr-51" id="51" index="3" type="HS">
+										<stl19:RemarkLines>
+											<stl19:RemarkLine>
+												<stl19:Text>ADTK B4 1445 13MAY26 PAR LT ELSE BKG WILL BE XXLD</stl19:Text>
+											</stl19:RemarkLine>
+										</stl19:RemarkLines>
+									</stl19:Remark>
+								</stl19:Remarks>
+								<stl19:EmailAddresses/>
+								<stl19:GenericSpecialRequests id="6" msgType="O" type="A">
+									<stl19:FreeText>OINFRANTIN</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>WY OINFRANTIN</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="7" msgType="O" type="A">
+									<stl19:Code>CTCT</stl19:Code>
+									<stl19:FreeText>PAR 0176494360 GLOBEO TRAVEL</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>WY CTCT PAR 0176494360 GLOBEO TRAVEL</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="22" msgType="S" type="A">
+									<stl19:Code>SEAT</stl19:Code>
+									<stl19:FreeText>LK1 MCTLHR0101F18MAY.02K/RS</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>SEAT WY LK1 MCTLHR0101F18MAY.02K/RS</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="23" msgType="S" type="A">
+									<stl19:Code>SEAT</stl19:Code>
+									<stl19:FreeText>LK1 LHRMCT0102F20MAY.02K/RS</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>SEAT WY LK1 LHRMCT0102F20MAY.02K/RS</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="27" msgType="O" type="A">
+									<stl19:Code>CTCP</stl19:Code>
+									<stl19:FreeText>VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>WY CTCP VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="30" msgType="O" type="A">
+									<stl19:Code>CTCP</stl19:Code>
+									<stl19:FreeText>VIRGINIE / VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>WY CTCP VIRGINIE / VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="32" msgType="S" type="A">
+									<stl19:Code>CTCM</stl19:Code>
+									<stl19:FreeText>/33170081340/FR</stl19:FreeText>
+									<stl19:ActionCode>HK</stl19:ActionCode>
+									<stl19:NumberInParty>1</stl19:NumberInParty>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>CTCM WY HK1/33170081340/FR</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="34" msgType="S" type="A">
+									<stl19:Code>CTCE</stl19:Code>
+									<stl19:FreeText>/EVENTS//ANTIN./IP.COM</stl19:FreeText>
+									<stl19:ActionCode>HK</stl19:ActionCode>
+									<stl19:NumberInParty>1</stl19:NumberInParty>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>CTCE WY HK1/EVENTS//ANTIN./IP.COM</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="46" msgType="S" type="A">
+									<stl19:Code>SEAT</stl19:Code>
+									<stl19:FreeText>LK1 MCTLHR0101J18MAY.14J/RS</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>SEAT WY LK1 MCTLHR0101J18MAY.14J/RS</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="47" msgType="S" type="A">
+									<stl19:Code>SEAT</stl19:Code>
+									<stl19:FreeText>LK1 LHRMCT0102J20MAY.10B/RS</stl19:FreeText>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>SEAT WY LK1 LHRMCT0102J20MAY.10B/RS</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:GenericSpecialRequests id="61" msgType="S" type="A">
+									<stl19:Code>CTCM</stl19:Code>
+									<stl19:FreeText>/442074946564/GB</stl19:FreeText>
+									<stl19:ActionCode>HK</stl19:ActionCode>
+									<stl19:NumberInParty>1</stl19:NumberInParty>
+									<stl19:AirlineCode>WY</stl19:AirlineCode>
+									<stl19:FullText>CTCM WY HK1/442074946564/GB</stl19:FullText>
+								</stl19:GenericSpecialRequests>
+								<stl19:History>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="16">
+											<stl19:HistoryTimestamp>2026-05-18T02:23:00</stl19:HistoryTimestamp>
+											<stl19:DutyCode>5</stl19:DutyCode>
+											<stl19:AgentSine>51B</stl19:AgentSine>
+											<stl19:HomePCC>MCT</stl19:HomePCC>
+											<stl19:AgencyPCC>MCT</stl19:AgencyPCC>
+											<stl19:OAC>
+												<stl19:PartitionId>WY</stl19:PartitionId>
+												<stl19:AccountingCityCode>MCT</stl19:AccountingCityCode>
+												<stl19:AccountingCode>KK</stl19:AccountingCode>
+												<stl19:AccountingOfficeStationCode>9105292    CTO</stl19:AccountingOfficeStationCode>
+											</stl19:OAC>
+											<stl19:HistoryFrom>MCT51B</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>PCTC</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:FreeText/>
+											<stl19:FullText>PCTC WY HK/NO/USNOPRIMARYPHONE</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="15">
+											<stl19:HistoryTimestamp>2026-05-11T10:04:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11150419 4EF481FD-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>CTCM</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:NumberInParty>1</stl19:NumberInParty>
+											<stl19:FreeText>/442074946564/GB</stl19:FreeText>
+											<stl19:FullText>CTCM WY HK1/442074946564/GB</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="14">
+											<stl19:HistoryTimestamp>2026-05-11T10:02:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11150254 4EF44573-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>TKNE</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:NumberInParty>1</stl19:NumberInParty>
+											<stl19:TicketNumber>9109233107388C1</stl19:TicketNumber>
+											<stl19:FreeText/>
+											<stl19:FullText>TKNE WY HK1 MCTLHR0101J18MAY/9109233107388C1</stl19:FullText>
+										</stl19:FactHistory>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>TKNE</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:NumberInParty>1</stl19:NumberInParty>
+											<stl19:TicketNumber>9109233107388C2</stl19:TicketNumber>
+											<stl19:FreeText/>
+											<stl19:FullText>TKNE WY HK1 LHRMCT0102J20MAY/9109233107388C2</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="13">
+											<stl19:HistoryTimestamp>2026-05-11T10:02:00</stl19:HistoryTimestamp>
+											<stl19:DutyCode>V</stl19:DutyCode>
+											<stl19:AgentSine>DSU</stl19:AgentSine>
+											<stl19:HomePCC>PAR</stl19:HomePCC>
+											<stl19:AgencyPCC>PAR</stl19:AgencyPCC>
+											<stl19:HistoryFrom/>
+										</stl19:Signature>
+										<stl19:TicketingHistory>
+											<stl19:OriginalTicketDetails>T-11MAY</stl19:OriginalTicketDetails>
+											<stl19:TransactionIndicator>T</stl19:TransactionIndicator>
+											<stl19:AgencyLocation/>
+											<stl19:HistoryAction>A7</stl19:HistoryAction>
+										</stl19:TicketingHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="12">
+											<stl19:HistoryTimestamp>2026-05-11T07:53:00</stl19:HistoryTimestamp>
+											<stl19:DutyCode>8</stl19:DutyCode>
+											<stl19:AgentSine>3RI</stl19:AgentSine>
+											<stl19:HomePCC>CRC</stl19:HomePCC>
+											<stl19:AgencyPCC>CRC</stl19:AgencyPCC>
+											<stl19:OAC>
+												<stl19:PartitionId>WY</stl19:PartitionId>
+												<stl19:AccountingCityCode>CRC</stl19:AccountingCityCode>
+												<stl19:AccountingCode>RC</stl19:AccountingCode>
+												<stl19:AccountingOfficeStationCode>9105005    ATO</stl19:AccountingOfficeStationCode>
+											</stl19:OAC>
+											<stl19:HistoryFrom>RI TTL GENERIC TL POST FCR GENERIC TL</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5T</stl19:HistoryAction>
+											<stl19:RemarkType>1</stl19:RemarkType>
+											<stl19:RemarkActionCode/>
+											<stl19:RemarkText>QQ SSR OTHS 1A ADTK BY 1445 13MAY26 PAR LT ELSE WY WILL XXL</stl19:RemarkText>
+										</stl19:RemarkHistory>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5H</stl19:HistoryAction>
+											<stl19:RemarkType>8</stl19:RemarkType>
+											<stl19:RemarkActionCode>H-</stl19:RemarkActionCode>
+											<stl19:RemarkText>ADTK B4 1445 13MAY26 PAR LT ELSE BKG WILL BE XXLD</stl19:RemarkText>
+										</stl19:RemarkHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="11">
+											<stl19:HistoryTimestamp>2026-05-11T07:48:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>EDIRM1A11124817 501A1824-001 BPR</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>SEAT</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:FreeText>LK1 MCTLHR0101J18MAY</stl19:FreeText>
+											<stl19:FullText>SEAT WY LK1 MCTLHR0101J18MAY.14J/RS</stl19:FullText>
+										</stl19:FactHistory>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>SEAT</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:FreeText>LK1 LHRMCT0102J20MAY</stl19:FreeText>
+											<stl19:FullText>SEAT WY LK1 LHRMCT0102J20MAY.10B/RS</stl19:FullText>
+										</stl19:FactHistory>
+										<stl19:SeatsHistory>
+											<stl19:FlightNumber>101</stl19:FlightNumber>
+											<stl19:VendorCode>WY</stl19:VendorCode>
+											<stl19:FlightDate>2026-05-18T00:00:00</stl19:FlightDate>
+											<stl19:BoardCity>MCT</stl19:BoardCity>
+											<stl19:OffCity>LHR</stl19:OffCity>
+											<stl19:HistoryAction>A4G</stl19:HistoryAction>
+											<stl19:SeatNumber>14J</stl19:SeatNumber>
+											<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+											<stl19:SeatTypeCode>ARMI</stl19:SeatTypeCode>
+											<stl19:SeatStatusCode>SS</stl19:SeatStatusCode>
+										</stl19:SeatsHistory>
+										<stl19:SeatsHistory>
+											<stl19:FlightNumber>102</stl19:FlightNumber>
+											<stl19:VendorCode>WY</stl19:VendorCode>
+											<stl19:FlightDate>2026-05-20T00:00:00</stl19:FlightDate>
+											<stl19:BoardCity>LHR</stl19:BoardCity>
+											<stl19:OffCity>MCT</stl19:OffCity>
+											<stl19:HistoryAction>A4G</stl19:HistoryAction>
+											<stl19:SeatNumber>10B</stl19:SeatNumber>
+											<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+											<stl19:SeatTypeCode>ALMI</stl19:SeatTypeCode>
+											<stl19:SeatStatusCode>SS</stl19:SeatStatusCode>
+										</stl19:SeatsHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="10">
+											<stl19:HistoryTimestamp>2026-05-11T07:46:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>EDIRM1A11124615 4E402A2D-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:ItineraryHistory>
+											<stl19:AirSegment>
+												<stl19:DepartureAirport>LHR</stl19:DepartureAirport>
+												<stl19:ArrivalAirport>MCT</stl19:ArrivalAirport>
+												<stl19:EquipmentType>789</stl19:EquipmentType>
+												<stl19:MarketingAirlineCode>WY</stl19:MarketingAirlineCode>
+												<stl19:MarketingFlightNumber>0102</stl19:MarketingFlightNumber>
+												<stl19:DepartureDateTime>2026-05-20T20:50:00</stl19:DepartureDateTime>
+												<stl19:ArrivalDateTime>2026-05-21T07:10:00</stl19:ArrivalDateTime>
+												<stl19:FlightNumber>0102</stl19:FlightNumber>
+												<stl19:ClassOfService>F</stl19:ClassOfService>
+												<stl19:ActionCode>HK</stl19:ActionCode>
+												<stl19:NumberInParty>1</stl19:NumberInParty>
+												<stl19:HistoryAction>XS</stl19:HistoryAction>
+											</stl19:AirSegment>
+										</stl19:ItineraryHistory>
+										<stl19:ItineraryHistory>
+											<stl19:AirSegment>
+												<stl19:DepartureAirport>LHR</stl19:DepartureAirport>
+												<stl19:ArrivalAirport>MCT</stl19:ArrivalAirport>
+												<stl19:EquipmentType>789</stl19:EquipmentType>
+												<stl19:MarketingAirlineCode>WY</stl19:MarketingAirlineCode>
+												<stl19:MarketingFlightNumber>0102</stl19:MarketingFlightNumber>
+												<stl19:DepartureDateTime>2026-05-20T20:50:00</stl19:DepartureDateTime>
+												<stl19:ArrivalDateTime>2026-05-21T07:10:00</stl19:ArrivalDateTime>
+												<stl19:FlightNumber>0102</stl19:FlightNumber>
+												<stl19:ClassOfService>J</stl19:ClassOfService>
+												<stl19:ActionCode>HK</stl19:ActionCode>
+												<stl19:NumberInParty>1</stl19:NumberInParty>
+												<stl19:HistoryAction>AS</stl19:HistoryAction>
+											</stl19:AirSegment>
+										</stl19:ItineraryHistory>
+										<stl19:SeatsHistory>
+											<stl19:FlightNumber>102</stl19:FlightNumber>
+											<stl19:VendorCode>WY</stl19:VendorCode>
+											<stl19:FlightDate>2026-05-20T00:00:00</stl19:FlightDate>
+											<stl19:BoardCity>LHR</stl19:BoardCity>
+											<stl19:OffCity>MCT</stl19:OffCity>
+											<stl19:HistoryAction>X4G*</stl19:HistoryAction>
+											<stl19:SeatNumber>2K</stl19:SeatNumber>
+											<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+											<stl19:SeatTypeCode>WARMI</stl19:SeatTypeCode>
+											<stl19:SeatStatusCode>HK</stl19:SeatStatusCode>
+										</stl19:SeatsHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="9">
+											<stl19:HistoryTimestamp>2026-05-11T07:45:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>EDIRM1A11124553 4E4D19AC-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:ItineraryHistory>
+											<stl19:AirSegment>
+												<stl19:DepartureAirport>MCT</stl19:DepartureAirport>
+												<stl19:ArrivalAirport>LHR</stl19:ArrivalAirport>
+												<stl19:EquipmentType>789</stl19:EquipmentType>
+												<stl19:MarketingAirlineCode>WY</stl19:MarketingAirlineCode>
+												<stl19:MarketingFlightNumber>0101</stl19:MarketingFlightNumber>
+												<stl19:DepartureDateTime>2026-05-18T13:30:00</stl19:DepartureDateTime>
+												<stl19:ArrivalDateTime>2026-05-18T19:10:00</stl19:ArrivalDateTime>
+												<stl19:FlightNumber>0101</stl19:FlightNumber>
+												<stl19:ClassOfService>F</stl19:ClassOfService>
+												<stl19:ActionCode>HK</stl19:ActionCode>
+												<stl19:NumberInParty>1</stl19:NumberInParty>
+												<stl19:HistoryAction>XS</stl19:HistoryAction>
+											</stl19:AirSegment>
+										</stl19:ItineraryHistory>
+										<stl19:ItineraryHistory>
+											<stl19:AirSegment>
+												<stl19:DepartureAirport>MCT</stl19:DepartureAirport>
+												<stl19:ArrivalAirport>LHR</stl19:ArrivalAirport>
+												<stl19:EquipmentType>789</stl19:EquipmentType>
+												<stl19:MarketingAirlineCode>WY</stl19:MarketingAirlineCode>
+												<stl19:MarketingFlightNumber>0101</stl19:MarketingFlightNumber>
+												<stl19:DepartureDateTime>2026-05-18T13:30:00</stl19:DepartureDateTime>
+												<stl19:ArrivalDateTime>2026-05-18T19:10:00</stl19:ArrivalDateTime>
+												<stl19:FlightNumber>0101</stl19:FlightNumber>
+												<stl19:ClassOfService>J</stl19:ClassOfService>
+												<stl19:ActionCode>HK</stl19:ActionCode>
+												<stl19:NumberInParty>1</stl19:NumberInParty>
+												<stl19:HistoryAction>AS</stl19:HistoryAction>
+											</stl19:AirSegment>
+										</stl19:ItineraryHistory>
+										<stl19:SeatsHistory>
+											<stl19:FlightNumber>101</stl19:FlightNumber>
+											<stl19:VendorCode>WY</stl19:VendorCode>
+											<stl19:FlightDate>2026-05-18T00:00:00</stl19:FlightDate>
+											<stl19:BoardCity>MCT</stl19:BoardCity>
+											<stl19:OffCity>LHR</stl19:OffCity>
+											<stl19:HistoryAction>X4G*</stl19:HistoryAction>
+											<stl19:SeatNumber>2K</stl19:SeatNumber>
+											<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+											<stl19:SeatTypeCode>WARMI</stl19:SeatTypeCode>
+											<stl19:SeatStatusCode>HK</stl19:SeatStatusCode>
+										</stl19:SeatsHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="8">
+											<stl19:HistoryTimestamp>2026-05-11T06:22:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11112210 4DF9E30D-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>CTCE</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:NumberInParty>1</stl19:NumberInParty>
+											<stl19:FreeText>/EVENTS//ANTIN</stl19:FreeText>
+											<stl19:FullText>CTCE WY HK1/EVENTS//ANTIN./IP.COM</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="7">
+											<stl19:HistoryTimestamp>2026-05-11T06:22:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11112206 4DF9E0CF-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>CTCM</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:NumberInParty>1</stl19:NumberInParty>
+											<stl19:FreeText>/33170081340/FR</stl19:FreeText>
+											<stl19:FullText>CTCM WY HK1/33170081340/FR</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="6">
+											<stl19:HistoryTimestamp>2026-05-11T06:22:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11112204 4DF9DFAB-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>OSI</stl19:Type>
+											<stl19:HistoryAction>A4O</stl19:HistoryAction>
+											<stl19:Code>CTCP</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:FreeText>VIRGINIE / VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FreeText>
+											<stl19:FullText>WY CTCP VIRGINIE / VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="5">
+											<stl19:HistoryTimestamp>2026-05-11T06:19:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11111906 4DF007B0-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>OSI</stl19:Type>
+											<stl19:HistoryAction>A4O</stl19:HistoryAction>
+											<stl19:Code>CTCP</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:FreeText>VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FreeText>
+											<stl19:FullText>WY CTCP VIP - GLOBEO 01 76 49 76 00 // CTC SUZIE</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="4">
+											<stl19:HistoryTimestamp>2026-05-11T06:18:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>EDIRM1A11111803 4DE98447-001 BPR</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>SEAT</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:FreeText>LK1 MCTLHR0101F18MAY</stl19:FreeText>
+											<stl19:FullText>SEAT WY LK1 MCTLHR0101F18MAY.02K/RS</stl19:FullText>
+										</stl19:FactHistory>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>SEAT</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:FreeText>LK1 LHRMCT0102F20MAY</stl19:FreeText>
+											<stl19:FullText>SEAT WY LK1 LHRMCT0102F20MAY.02K/RS</stl19:FullText>
+										</stl19:FactHistory>
+										<stl19:SeatsHistory>
+											<stl19:FlightNumber>101</stl19:FlightNumber>
+											<stl19:VendorCode>WY</stl19:VendorCode>
+											<stl19:FlightDate>2026-05-18T00:00:00</stl19:FlightDate>
+											<stl19:BoardCity>MCT</stl19:BoardCity>
+											<stl19:OffCity>LHR</stl19:OffCity>
+											<stl19:HistoryAction>A4G</stl19:HistoryAction>
+											<stl19:SeatNumber>2K</stl19:SeatNumber>
+											<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+											<stl19:SeatTypeCode>WARMI</stl19:SeatTypeCode>
+											<stl19:SeatStatusCode>SS</stl19:SeatStatusCode>
+										</stl19:SeatsHistory>
+										<stl19:SeatsHistory>
+											<stl19:FlightNumber>102</stl19:FlightNumber>
+											<stl19:VendorCode>WY</stl19:VendorCode>
+											<stl19:FlightDate>2026-05-20T00:00:00</stl19:FlightDate>
+											<stl19:BoardCity>LHR</stl19:BoardCity>
+											<stl19:OffCity>MCT</stl19:OffCity>
+											<stl19:HistoryAction>A4G</stl19:HistoryAction>
+											<stl19:SeatNumber>2K</stl19:SeatNumber>
+											<stl19:SmokingPrefOfferedIndicator>false</stl19:SmokingPrefOfferedIndicator>
+											<stl19:SeatTypeCode>WARMI</stl19:SeatTypeCode>
+											<stl19:SeatStatusCode>SS</stl19:SeatStatusCode>
+										</stl19:SeatsHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="3">
+											<stl19:HistoryTimestamp>2026-05-11T02:45:00</stl19:HistoryTimestamp>
+											<stl19:DutyCode>8</stl19:DutyCode>
+											<stl19:AgentSine>3RI</stl19:AgentSine>
+											<stl19:HomePCC>CRC</stl19:HomePCC>
+											<stl19:AgencyPCC>CRC</stl19:AgencyPCC>
+											<stl19:OAC>
+												<stl19:PartitionId>WY</stl19:PartitionId>
+												<stl19:AccountingCityCode>CRC</stl19:AccountingCityCode>
+												<stl19:AccountingCode>RC</stl19:AccountingCode>
+												<stl19:AccountingOfficeStationCode>9105005    ATO</stl19:AccountingOfficeStationCode>
+											</stl19:OAC>
+											<stl19:HistoryFrom>RI TTL GENERIC TL POST FCR GENERIC TL</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5T</stl19:HistoryAction>
+											<stl19:RemarkType>1</stl19:RemarkType>
+											<stl19:RemarkActionCode/>
+											<stl19:RemarkText>QQ SSR OTHS 1A ADTK BY 0942 13MAY26 PAR LT ELSE WY WILL XXL</stl19:RemarkText>
+										</stl19:RemarkHistory>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5H</stl19:HistoryAction>
+											<stl19:RemarkType>8</stl19:RemarkType>
+											<stl19:RemarkActionCode>H-</stl19:RemarkActionCode>
+											<stl19:RemarkText>ADTK B4 0942 13MAY26 PAR LT ELSE BKG WILL BE XXLD</stl19:RemarkText>
+										</stl19:RemarkHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="2">
+											<stl19:HistoryTimestamp>2026-05-11T02:45:00</stl19:HistoryTimestamp>
+											<stl19:DutyCode>8</stl19:DutyCode>
+											<stl19:AgentSine>3RI</stl19:AgentSine>
+											<stl19:HomePCC>CRC</stl19:HomePCC>
+											<stl19:AgencyPCC>CRC</stl19:AgencyPCC>
+											<stl19:OAC>
+												<stl19:PartitionId>WY</stl19:PartitionId>
+												<stl19:AccountingCityCode>CRC</stl19:AccountingCityCode>
+												<stl19:AccountingCode>RC</stl19:AccountingCode>
+												<stl19:AccountingOfficeStationCode>9105005    ATO</stl19:AccountingOfficeStationCode>
+											</stl19:OAC>
+											<stl19:HistoryFrom>RI IATA AUTO MSG</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5T</stl19:HistoryAction>
+											<stl19:RemarkType>1</stl19:RemarkType>
+											<stl19:RemarkActionCode/>
+											<stl19:RemarkText>QQ SSR OTHS 1A REF IATA PRVD PAX EMAIL N MBL CTC IN SSR CTCE OR CTCM</stl19:RemarkText>
+										</stl19:RemarkHistory>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5T</stl19:HistoryAction>
+											<stl19:RemarkType>1</stl19:RemarkType>
+											<stl19:RemarkActionCode/>
+											<stl19:RemarkText>QQ SSR OTHS 1A REF IATA UPDATE SSR CTCR IF PAX REFUSING TO PRVD CTC</stl19:RemarkText>
+										</stl19:RemarkHistory>
+										<stl19:RemarkHistory>
+											<stl19:HistoryAction>A5H</stl19:HistoryAction>
+											<stl19:RemarkType>8</stl19:RemarkType>
+											<stl19:RemarkActionCode>H-</stl19:RemarkActionCode>
+											<stl19:RemarkText>REF IATA TO PRVD PAX EMAIL N MBL CTC IN SSR CTCE OR CTCM</stl19:RemarkText>
+										</stl19:RemarkHistory>
+									</stl19:HistoryTransaction>
+									<stl19:HistoryTransaction>
+										<stl19:Signature SequenceNbr="1">
+											<stl19:HistoryTimestamp>2026-05-11T02:45:00</stl19:HistoryTimestamp>
+											<stl19:HomePCC>TTY</stl19:HomePCC>
+											<stl19:AgencyPCC>TTY</stl19:AgencyPCC>
+											<stl19:HistoryFrom>MUCRM1A11074527 4CE6F80D-001</stl19:HistoryFrom>
+										</stl19:Signature>
+										<stl19:FactHistory FactType="AA">
+											<stl19:Type>SSR</stl19:Type>
+											<stl19:HistoryAction>A4S</stl19:HistoryAction>
+											<stl19:Code>DOCS</stl19:Code>
+											<stl19:ActionId>WY</stl19:ActionId>
+											<stl19:ActionCode>HK</stl19:ActionCode>
+											<stl19:NumberInParty>1</stl19:NumberInParty>
+											<stl19:FreeText/>
+											<stl19:FullText>DOCS WY HK1/P/OM/FZ2144934/OM/16MAR92/M/03OCT28/ALHARTHI/ABDALLAHMOHAMMEDABDALLAH</stl19:FullText>
+										</stl19:FactHistory>
+									</stl19:HistoryTransaction>
+								</stl19:History>
+							</stl19:Reservation>
+						</stl19:GetReservationRS>
+					</Reservation>
+					<Reservation Locator="QJLSAP">
+						<stl19:GetReservationRS
+							xmlns:ns4="http://webservices.sabre.com/pnrconn/ReaccSearch"
+							xmlns:ns6="http://services.sabre.com/res/orr/v0"
+							xmlns:or114="http://services.sabre.com/res/or/v1_14"
+							xmlns:raw="http://tds.sabre.com/itinerary"
+							xmlns:stl19="http://webservices.sabre.com/pnrbuilder/v1_19" Version="1.19.0">
+							<stl19:Reservation NumberInSegment="1" numberInParty="1" numberOfInfants="0">
+								<stl19:BookingDetails>
+This above response is from getPNRdetailsForBooking API. 
+So provide which are the below fields that can be picked from each of the above API.  
+Operating airline
+
+Operating airline flight number
+
+Marketing airline 
+Marketing airline flight number
+
+Record locator for operating airline
+
+Record locator for ticketing airline
+
+Customer baggage allowance
+
+Customer seat information
+
+Check-in details (terminal, airline, channel)
+
+Terminal information/flight information for connecting flights
