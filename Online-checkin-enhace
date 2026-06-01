@@ -1,0 +1,316 @@
+GetPassengerDataRSACS rs = sabreService.getPassengerData(token, departDate, flightNumber, originStation,passList);
+
+<ns3:GetPassengerDataRS
+			xmlns:ns2="http://services.sabre.com/STL/v3"
+			xmlns:ns3="http://services.sabre.com/checkin/getPassengerData/v4">
+			<PassengerDataResponseList>
+				<PassengerDataResponse>
+					<LineNumber>1</LineNumber>
+					<LastName>AL AJMI</LastName>
+					<FirstName>MARWA MRS</FirstName>
+					<PassengerID>DBD218320201</PassengerID>
+					<PNRLocator nameAssociationID="1">GSNYDM</PNRLocator>
+					<GroupCode>AK2</GroupCode>
+					<VCRNumber couponNumber="2">9102126038138</VCRNumber>
+					<BaggageRouteList>
+						<ns2:BaggageRoute>
+							<ns2:SegmentID>1</ns2:SegmentID>
+							<ns2:Airline>WY</ns2:Airline>
+							<ns2:Flight>818</ns2:Flight>
+							<ns2:BookingClass>J</ns2:BookingClass>
+							<ns2:OperatingBookingClass>J</ns2:OperatingBookingClass>
+							<ns2:OperatingAirline>WY</ns2:OperatingAirline>
+							<ns2:OperatingFlight>818</ns2:OperatingFlight>
+							<ns2:Origin>BKK</ns2:Origin>
+							<ns2:Destination>MCT</ns2:Destination>
+							<ns2:DepartureDate>2026-05-18</ns2:DepartureDate>
+							<ns2:DepartureTime>09:00AM</ns2:DepartureTime>
+							<ns2:ArrivalDate>2026-05-18</ns2:ArrivalDate>
+							<ns2:ArrivalTime>11:50AM</ns2:ArrivalTime>
+							<ns2:SegmentStatus>HK</ns2:SegmentStatus>
+							<ns2:PassengerID>DBD218320201</ns2:PassengerID>
+						</ns2:BaggageRoute>
+					</BaggageRouteList>
+					<PassengerItineraryList>
+						<PassengerItinerary>
+							<SegmentID>2</SegmentID>
+							<Airline>WY</Airline>
+							<Flight>818</Flight>
+							<OperatingAirline>WY</OperatingAirline>
+							<OperatingFlight>818</OperatingFlight>
+							<MarketingAirline>WY</MarketingAirline>
+							<MarketingFlight>818</MarketingFlight>
+							<ThirdPartyGroundHandled>false</ThirdPartyGroundHandled>
+							<BookingClass>J</BookingClass>
+							<OperatingBookingClass>J</OperatingBookingClass>
+							<Origin>BKK</Origin>
+							<Destination>MCT</Destination>
+							<DepartureDate>2026-05-18</DepartureDate>
+							<AircraftType>789</AircraftType>
+							<Cabin>J</Cabin>
+							<Seat>15D</Seat>
+							<PassengerType>F</PassengerType>
+							<BagCount>0</BagCount>
+							<TotalBagWeightAndUnit>0</TotalBagWeightAndUnit>
+							<EditCodeList>
+								<ns2:EditCode>F</ns2:EditCode>
+								<ns2:EditCode>BC</ns2:EditCode>
+								<ns2:EditCode>DOCS</ns2:EditCode>
+								<ns2:EditCode>ETI</ns2:EditCode>
+								<ns2:EditCode>APP</ns2:EditCode>
+							</EditCodeList>
+							<VCRInfoList>
+								<VCRInfo>
+									<VCRNumber couponNumber="2">9102126038138</VCRNumber>
+									<FareBasisCode>JCFROM</FareBasisCode>
+									<BagAllowance unit="KG">40</BagAllowance>
+								</VCRInfo>
+							</VCRInfoList>
+							<SSRInfoList>
+								<BrandedFare>BC</BrandedFare>
+							</SSRInfoList>
+							<RequiredInfoList>
+								<RequiredInfo>
+									<Code>BTP</Code>
+									<FreeText>ALLOW BAGTAG ISSUANCE PRIOR TO PAYMENT</FreeText>
+								</RequiredInfo>
+							</RequiredInfoList>
+						</PassengerItinerary>
+					</PassengerItineraryList>
+					<RequiredInfoSumList>
+						<RequiredInfo>
+							<Code>BTP</Code>
+							<FreeText>ALLOW BAGTAG ISSUANCE PRIOR TO PAYMENT</FreeText>
+						</RequiredInfo>
+					</RequiredInfoSumList>
+					<PassengerEditList/>
+					<FreeTextInfoList>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>DOCS</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>P/OM/ZZ5719997/OM/07FEB1986/F/16NOV2029/AL AJMI/MARWA/ABDUL REDHA HAJI//S1</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>PCTC</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>PAX/OM78444444/SELF</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>APP</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>TH/8503/B-N/BOARD IF DOCS OK</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>APP</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>OM/8503/B-N/BOARD IF DOCS OK</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+					</FreeTextInfoList>
+				</PassengerDataResponse>
+				<PassengerDataResponse>
+					<LineNumber>2</LineNumber>
+					<LastName>AL DHAHAB</LastName>
+					<FirstName>MUHANI MRS</FirstName>
+					<PassengerID>F1FE00150101</PassengerID>
+					<PNRLocator nameAssociationID="1">NXHQIN</PNRLocator>
+					<GroupCode>AQ6</GroupCode>
+					<VCRNumber couponNumber="2">9102125956052</VCRNumber>
+					<BaggageRouteList>
+						<ns2:BaggageRoute>
+							<ns2:SegmentID>1</ns2:SegmentID>
+							<ns2:Airline>WY</ns2:Airline>
+							<ns2:Flight>818</ns2:Flight>
+							<ns2:BookingClass>P</ns2:BookingClass>
+							<ns2:OperatingBookingClass>P</ns2:OperatingBookingClass>
+							<ns2:OperatingAirline>WY</ns2:OperatingAirline>
+							<ns2:OperatingFlight>818</ns2:OperatingFlight>
+							<ns2:Origin>BKK</ns2:Origin>
+							<ns2:Destination>MCT</ns2:Destination>
+							<ns2:DepartureDate>2026-05-18</ns2:DepartureDate>
+							<ns2:DepartureTime>09:00AM</ns2:DepartureTime>
+							<ns2:ArrivalDate>2026-05-18</ns2:ArrivalDate>
+							<ns2:ArrivalTime>11:50AM</ns2:ArrivalTime>
+							<ns2:SegmentStatus>HK</ns2:SegmentStatus>
+							<ns2:PassengerID>F1FE00150101</ns2:PassengerID>
+						</ns2:BaggageRoute>
+					</BaggageRouteList>
+					<PassengerItineraryList>
+						<PassengerItinerary>
+							<SegmentID>1</SegmentID>
+							<Airline>WY</Airline>
+							<Flight>818</Flight>
+							<OperatingAirline>WY</OperatingAirline>
+							<OperatingFlight>818</OperatingFlight>
+							<MarketingAirline>WY</MarketingAirline>
+							<MarketingFlight>818</MarketingFlight>
+							<ThirdPartyGroundHandled>false</ThirdPartyGroundHandled>
+							<BookingClass>P</BookingClass>
+							<OperatingBookingClass>P</OperatingBookingClass>
+							<Origin>BKK</Origin>
+							<Destination>MCT</Destination>
+							<DepartureDate>2026-05-18</DepartureDate>
+							<AircraftType>789</AircraftType>
+							<Cabin>J</Cabin>
+							<Seat>14A</Seat>
+							<PassengerType>F</PassengerType>
+							<BagCount>0</BagCount>
+							<TotalBagWeightAndUnit>0</TotalBagWeightAndUnit>
+							<EditCodeList>
+								<ns2:EditCode>F</ns2:EditCode>
+								<ns2:EditCode>BC</ns2:EditCode>
+								<ns2:EditCode>FF</ns2:EditCode>
+								<ns2:EditCode>DOCS</ns2:EditCode>
+								<ns2:EditCode>ETI</ns2:EditCode>
+								<ns2:EditCode>SIL</ns2:EditCode>
+							</EditCodeList>
+							<TierLevel>SIL</TierLevel>
+							<VCRInfoList>
+								<VCRInfo>
+									<VCRNumber couponNumber="2">9102125956052</VCRNumber>
+									<FareBasisCode>PGCF2OM</FareBasisCode>
+									<BagAllowance unit="KG">40</BagAllowance>
+								</VCRInfo>
+							</VCRInfoList>
+							<SSRInfoList>
+								<BrandedFare>BC</BrandedFare>
+							</SSRInfoList>
+							<RequiredInfoList>
+								<RequiredInfo>
+									<Code>BTP</Code>
+									<FreeText>ALLOW BAGTAG ISSUANCE PRIOR TO PAYMENT</FreeText>
+								</RequiredInfo>
+							</RequiredInfoList>
+						</PassengerItinerary>
+					</PassengerItineraryList>
+					<RequiredInfoSumList>
+						<RequiredInfo>
+							<Code>BTP</Code>
+							<FreeText>ALLOW BAGTAG ISSUANCE PRIOR TO PAYMENT</FreeText>
+						</RequiredInfo>
+					</RequiredInfoSumList>
+					<PassengerEditList/>
+					<FreeTextInfoList>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>SIL</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>WY008918722            SILVER * RUBY *</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>DOCS</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>P/OM/NZ0880193/OM/01JAN65/F/09NOV31/AL DHAHAB/MUHANI/AQEEL AHMED//S1</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>PCTC</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>NO/PRIMARY/PHONE</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+					</FreeTextInfoList>
+				</PassengerDataResponse>
+				<PassengerDataResponse>
+					<LineNumber>3</LineNumber>
+					<LastName>ALSHAHWARZI</LastName>
+					<FirstName>MAHMOOD MR</FirstName>
+					<PassengerID>C3F9C2DE0501</PassengerID>
+					<PNRLocator nameAssociationID="1">HAJKGK</PNRLocator>
+					<VCRNumber couponNumber="1">9102908041916</VCRNumber>
+					<BaggageRouteList>
+						<ns2:BaggageRoute>
+							<ns2:SegmentID>1</ns2:SegmentID>
+							<ns2:Airline>WY</ns2:Airline>
+							<ns2:Flight>818</ns2:Flight>
+							<ns2:BookingClass>J</ns2:BookingClass>
+							<ns2:OperatingBookingClass>J</ns2:OperatingBookingClass>
+							<ns2:OperatingAirline>WY</ns2:OperatingAirline>
+							<ns2:OperatingFlight>818</ns2:OperatingFlight>
+							<ns2:Origin>BKK</ns2:Origin>
+							<ns2:Destination>MCT</ns2:Destination>
+							<ns2:DepartureDate>2026-05-18</ns2:DepartureDate>
+							<ns2:DepartureTime>09:00AM</ns2:DepartureTime>
+							<ns2:ArrivalDate>2026-05-18</ns2:ArrivalDate>
+							<ns2:ArrivalTime>11:50AM</ns2:ArrivalTime>
+							<ns2:SegmentStatus>HK</ns2:SegmentStatus>
+							<ns2:PassengerID>C3F9C2DE0501</ns2:PassengerID>
+						</ns2:BaggageRoute>
+					</BaggageRouteList>
+					<PassengerItineraryList>
+						<PassengerItinerary>
+							<SegmentID>1</SegmentID>
+							<Airline>WY</Airline>
+							<Flight>818</Flight>
+							<OperatingAirline>WY</OperatingAirline>
+							<OperatingFlight>818</OperatingFlight>
+							<MarketingAirline>WY</MarketingAirline>
+							<MarketingFlight>818</MarketingFlight>
+							<ThirdPartyGroundHandled>false</ThirdPartyGroundHandled>
+							<BookingClass>J</BookingClass>
+							<OperatingBookingClass>J</OperatingBookingClass>
+							<Origin>BKK</Origin>
+							<Destination>MCT</Destination>
+							<DepartureDate>2026-05-18</DepartureDate>
+							<AircraftType>789</AircraftType>
+							<Cabin>J</Cabin>
+							<Seat>11J</Seat>
+							<PassengerType>F</PassengerType>
+							<BagCount>NB</BagCount>
+							<TotalBagWeightAndUnit>0</TotalBagWeightAndUnit>
+							<EditCodeList>
+								<ns2:EditCode>M</ns2:EditCode>
+								<ns2:EditCode>FF</ns2:EditCode>
+								<ns2:EditCode>DOCS</ns2:EditCode>
+								<ns2:EditCode>ETI</ns2:EditCode>
+								<ns2:EditCode>GLD</ns2:EditCode>
+							</EditCodeList>
+							<TierLevel>GLD</TierLevel>
+							<VCRInfoList>
+								<VCRInfo>
+									<VCRNumber couponNumber="1">9102908041916</VCRNumber>
+									<FareBasisCode>JCFROM</FareBasisCode>
+									<BagAllowance unit="KG">40</BagAllowance>
+								</VCRInfo>
+							</VCRInfoList>
+							<RequiredInfoList>
+								<RequiredInfo>
+									<Code>BTP</Code>
+									<FreeText>ALLOW BAGTAG ISSUANCE PRIOR TO PAYMENT</FreeText>
+								</RequiredInfo>
+							</RequiredInfoList>
+						</PassengerItinerary>
+					</PassengerItineraryList>
+					<RequiredInfoSumList>
+						<RequiredInfo>
+							<Code>BTP</Code>
+							<FreeText>ALLOW BAGTAG ISSUANCE PRIOR TO PAYMENT</FreeText>
+						</RequiredInfo>
+					</RequiredInfoSumList>
+					<PassengerEditList/>
+					<FreeTextInfoList>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>GLD</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>WY004200862            GOLD * SAPPHIRE *</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>DOCS</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>P/OM/RP0738888/OM/24NOV1961/M/03SEP2029/ALSHAHWARZI/MAHMOOD/ABDULQADER MIRHADI//S1</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+						<ns2:FreeTextInfo>
+							<ns2:EditCode>PCTC</ns2:EditCode>
+							<ns2:TextLine>
+								<ns2:Text>GST/OM99323323</ns2:Text>
+							</ns2:TextLine>
+						</ns2:FreeTextInfo>
+					</FreeTextInfoList>
+				</PassengerDataResponse>
+
+This will be the response that we will get from the getPassengerList API. Please map the below details accordingly from this web service
