@@ -313,4 +313,23 @@ GetPassengerDataRSACS rs = sabreService.getPassengerData(token, departDate, flig
 					</FreeTextInfoList>
 				</PassengerDataResponse>
 
-This will be the response that we will get from the getPassengerList API. Please map the below details accordingly from this web service
+This will be the response that we will get from the getPassengerList API. Please map the below details accordingly from this web service.
+
+Operating airline
+
+Operating airline flight number
+
+Marketing airline 
+Marketing airline flight number
+
+Record locator for operating airline
+
+Record locator for ticketing airline
+
+Customer baggage allowance
+
+Customer seat information
+
+Check-in details (terminal, airline, channel)
+
+Terminal information/flight information for connecting flights
