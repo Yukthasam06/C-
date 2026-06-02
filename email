@@ -1,0 +1,61 @@
+Operating and Marketing Airline Details
+
+The following fields will be displayed in the check-in email only when the Operating Airline Code and Marketing Airline Code are different in the TripSearch API response:
+
+Operating Airline
+Operating Airline Flight Number
+Marketing Airline
+Marketing Airline Flight Number
+
+These fields will not be displayed in the check-in email when the Operating Airline Code and Marketing Airline Code are the same, as shown in the example below:
+
+Operating Airline Code: WY
+Operating Flight Number: 0101
+Marketing Airline Code: WY
+Marketing Flight Number: 0101
+2. Record Locator for Operating Airline
+
+The Record Locator for the Operating Airline will be the PNR that is currently displayed as the Booking Reference in the check-in email.
+
+3. Baggage Allowance
+
+The customer's baggage allowance will be obtained from the GetPassengerData API response using the BagAllowance field. For example:
+
+Bag Allowance: 30 KG
+4. Seat Information
+
+Seat information will be displayed alongside the passenger's name only when seat details are available in the TripSearch API response.
+
+If seat information is not available, it will not be displayed in the check-in email.
+
+5. Check-in Details
+Check-in Terminal
+
+The check-in terminal will be displayed based on the Terminal information received from the FlightInfo API response.
+
+Example:
+
+Departure Airport: LHR
+Terminal: TERMINAL 4
+Check-in Airline
+
+The check-in airline will be displayed as "WY" for all passengers.
+
+Check-in Channel
+
+Please confirm what should be displayed for the Check-in Channel field in the check-in email.
+
+6. Fields Pending Validation
+
+The following fields will be finalized after validating sample PNRs in the UAT environment:
+
+Flight Information for Connecting Flights
+Record Locator for Ticketing Airline
+UAT Test Scenarios Required
+
+As discussed, kindly create sample bookings/tickets for the following scenarios so that we can perform UAT testing:
+
+Codeshare and interline PNRs where the Operating Airline Code and Marketing Airline Code are different.
+PNRs containing a Record Locator for the Ticketing Airline.
+PNRs with different baggage allowance values.
+PNRs containing connecting flights.
