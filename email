@@ -241,8 +241,9 @@ logger.hibernate.type=ALL
 #log4j.logger.com.opensymphony.xwork2.ognl.OgnlValueStack=error
 
 
-INFO: Using DataSource [org.apache.tomcat.jdbc.pool.DataSource@31fd085b{ConnectionPool[defaultAutoCommit=null; defaultReadOnly=null; defaultTransactionIsolation=-1; defaultCatalog=null; driverClassName=com.mysql.jdbc.Driver; maxActive=377; maxIdle=233; minIdle=89; initialSize=10; maxWait=30000; testOnBorrow=true; testOnReturn=false; timeBetweenEvictionRunsMillis=34000; numTestsPerEvictionRun=0; minEvictableIdleTimeMillis=55000; testWhileIdle=false; testOnConnect=false; password=********; url=jdbc:mysql://10.241.3.56:3306/crmsuat?characterEncoding=utf8; username=HTL38175; validationQuery=SELECT 1; validationQueryTimeout=-1; validatorClassName=null; validationInterval=34000; accessToUnderlyingConnectionAllowed=true; removeAbandoned=true; removeAbandonedTimeout=55; logAbandoned=false; connectionProperties=null; initSQL=null; jdbcInterceptors=null; jmxEnabled=true; fairQueue=true; useEquals=true; abandonWhenPercentageFull=0; maxAge=0; useLock=false; dataSource=null; dataSourceJNDI=null; suspectTimeout=0; alternateUsernameAllowed=false; commitOnReturn=false; rollbackOnReturn=false; useDisposableConnectionFacade=true; logValidationErrors=false; propagateInterruptState=false; ignoreExceptionOnPreLoad=false; useStatementFacade=true; }] of Hibernate SessionFactory for HibernateTransactionManager
-Jun 03, 2026 10:05:50 AM org.springframework.web.context.ContextLoader initWebApplicationContext
+Jun 03, 2026 10:31:17 AM org.springframework.orm.hibernate4.HibernateTransactionManager afterPropertiesSet
+INFO: Using DataSource [org.apache.tomcat.jdbc.pool.DataSource@1e90a738{ConnectionPool[defaultAutoCommit=null; defaultReadOnly=null; defaultTransactionIsolation=-1; defaultCatalog=null; driverClassName=com.mysql.jdbc.Driver; maxActive=377; maxIdle=233; minIdle=89; initialSize=10; maxWait=30000; testOnBorrow=true; testOnReturn=false; timeBetweenEvictionRunsMillis=34000; numTestsPerEvictionRun=0; minEvictableIdleTimeMillis=55000; testWhileIdle=false; testOnConnect=false; password=********; url=jdbc:mysql://10.241.3.56:3306/crmsuat?characterEncoding=utf8; username=HTL38175; validationQuery=SELECT 1; validationQueryTimeout=-1; validatorClassName=null; validationInterval=34000; accessToUnderlyingConnectionAllowed=true; removeAbandoned=true; removeAbandonedTimeout=55; logAbandoned=false; connectionProperties=null; initSQL=null; jdbcInterceptors=null; jmxEnabled=true; fairQueue=true; useEquals=true; abandonWhenPercentageFull=0; maxAge=0; useLock=false; dataSource=null; dataSourceJNDI=null; suspectTimeout=0; alternateUsernameAllowed=false; commitOnReturn=false; rollbackOnReturn=false; useDisposableConnectionFacade=true; logValidationErrors=false; propagateInterruptState=false; ignoreExceptionOnPreLoad=false; useStatementFacade=true; }] of Hibernate SessionFactory for HibernateTransactionManager
+Jun 03, 2026 10:31:23 AM org.springframework.web.context.ContextLoader initWebApplicationContext
 SEVERE: Context initialization failed
 org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'authenticationService' defined in ServletContext resource [/WEB-INF/classes/config/spring/beans/beans-service.xml]: Instantiation of bean failed; nested exception is java.lang.ExceptionInInitializerError
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1076)
@@ -277,9 +278,10 @@ Caused by: java.lang.ExceptionInInitializerError
 	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:89)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1069)
 	... 22 more
-Caused by: org.apache.logging.log4j.core.config.ConfigurationException: Unknown Logger type Logger for Logger aero.omanair.ccms.service.impl.NotificationEmailServiceImpl
-	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.createLogger(PropertiesConfigurationBuilder.java:292)
-	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.build(PropertiesConfigurationBuilder.java:165)
+Caused by: org.apache.logging.log4j.core.config.ConfigurationException: No type attribute provided for component logger
+	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.createComponent(PropertiesConfigurationBuilder.java:362)
+	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.processRemainingProperties(PropertiesConfigurationBuilder.java:206)
+	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.build(PropertiesConfigurationBuilder.java:190)
 	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory.getConfiguration(PropertiesConfigurationFactory.java:56)
 	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory.getConfiguration(PropertiesConfigurationFactory.java:34)
 	at org.apache.logging.log4j.core.config.ConfigurationFactory$Factory.getConfiguration(ConfigurationFactory.java:544)
@@ -295,7 +297,7 @@ Caused by: org.apache.logging.log4j.core.config.ConfigurationException: Unknown 
 	at aero.omanair.ccms.service.impl.AuthenticationServiceImpl.<clinit>(AuthenticationServiceImpl.java:24)
 	... 29 more
 
-Jun 03, 2026 10:05:50 AM org.apache.catalina.core.StandardContext listenerStart
+Jun 03, 2026 10:31:23 AM org.apache.catalina.core.StandardContext listenerStart
 SEVERE: Exception sending context initialized event to listener instance of class org.springframework.web.context.ContextLoaderListener
 org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'authenticationService' defined in ServletContext resource [/WEB-INF/classes/config/spring/beans/beans-service.xml]: Instantiation of bean failed; nested exception is java.lang.ExceptionInInitializerError
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1076)
@@ -330,9 +332,10 @@ Caused by: java.lang.ExceptionInInitializerError
 	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:89)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateBean(AbstractAutowireCapableBeanFactory.java:1069)
 	... 22 more
-Caused by: org.apache.logging.log4j.core.config.ConfigurationException: Unknown Logger type Logger for Logger aero.omanair.ccms.service.impl.NotificationEmailServiceImpl
-	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.createLogger(PropertiesConfigurationBuilder.java:292)
-	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.build(PropertiesConfigurationBuilder.java:165)
+Caused by: org.apache.logging.log4j.core.config.ConfigurationException: No type attribute provided for component logger
+	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.createComponent(PropertiesConfigurationBuilder.java:362)
+	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.processRemainingProperties(PropertiesConfigurationBuilder.java:206)
+	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationBuilder.build(PropertiesConfigurationBuilder.java:190)
 	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory.getConfiguration(PropertiesConfigurationFactory.java:56)
 	at org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory.getConfiguration(PropertiesConfigurationFactory.java:34)
 	at org.apache.logging.log4j.core.config.ConfigurationFactory$Factory.getConfiguration(ConfigurationFactory.java:544)
@@ -348,50 +351,136 @@ Caused by: org.apache.logging.log4j.core.config.ConfigurationException: Unknown 
 	at aero.omanair.ccms.service.impl.AuthenticationServiceImpl.<clinit>(AuthenticationServiceImpl.java:24)
 	... 29 more
 
-Jun 03, 2026 10:05:50 AM com.sun.faces.config.ConfigureListener contextInitialized
+Jun 03, 2026 10:31:24 AM com.sun.faces.config.ConfigureListener contextInitialized
 INFO: Initializing Mojarra 2.1.27 ( 20140108-1632 https://svn.java.net/svn/mojarra~svn/tags/2.1.27@12764) for context '/ccms-web'
-Jun 03, 2026 10:05:50 AM com.sun.faces.spi.InjectionProviderFactory createInstance
+Jun 03, 2026 10:31:25 AM com.sun.faces.spi.InjectionProviderFactory createInstance
 INFO: JSF1048: PostConstruct/PreDestroy annotations present.  ManagedBeans methods marked with these annotations will have said annotations processed.
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.NotNull, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class org.hibernate.validator.constraints.NotEmpty, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.Size, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.Pattern, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.Min, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.Max, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.AssertTrue, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.javascript.ClientServiceConfigParser parse
+Jun 03, 2026 10:31:34 AM org.richfaces.javascript.ClientServiceConfigParser parse
 WARNING: Found JavaScript function definition for class javax.validation.constraints.AssertFalse, but that class is not presented
-Jun 03, 2026 10:05:52 AM org.richfaces.cache.CacheManager getCacheFactory
+Jun 03, 2026 10:31:34 AM org.richfaces.cache.CacheManager getCacheFactory
 INFO: Selected fallback cache factory
-Jun 03, 2026 10:05:52 AM org.richfaces.cache.lru.LRUMapCacheFactory createCache
+Jun 03, 2026 10:31:34 AM org.richfaces.cache.lru.LRUMapCacheFactory createCache
 INFO: Creating LRUMap cache instance using parameters: {quartz:wait-on-shutdown=true, quartz:shutdown-on-unload=true, javax.faces.PROJECT_STAGE=Production, quartz:scheduler-context-servlet-context-key=servletContext, org.richfaces.enableControlSkinning=false, quartz:start-scheduler-on-load=true, org.richfaces.skin=plain, quartz:config-file=/config/scheduler/quartz.properties}
-Jun 03, 2026 10:05:52 AM org.richfaces.cache.lru.LRUMapCacheFactory createCache
+Jun 03, 2026 10:31:34 AM org.richfaces.cache.lru.LRUMapCacheFactory createCache
 INFO: Creating LRUMap cache instance of 512 items capacity
-Jun 03, 2026 10:05:52 AM org.richfaces.application.InitializationListener onStart
+Jun 03, 2026 10:31:35 AM org.richfaces.application.InitializationListener onStart
 INFO: RichFaces Core Implementation by JBoss by Red Hat, version 4.3.5.Final
-Jun 03, 2026 10:05:52 AM org.apache.catalina.core.StandardContext startInternal
+Jun 03, 2026 10:31:35 AM org.apache.catalina.core.StandardContext startInternal
 SEVERE: One or more listeners failed to start. Full details will be found in the appropriate container log file
-Jun 03, 2026 10:05:52 AM org.apache.catalina.core.StandardContext startInternal
+Jun 03, 2026 10:31:35 AM org.apache.catalina.core.StandardContext startInternal
 SEVERE: Context [/ccms-web] startup failed due to previous errors
-Jun 03, 2026 10:05:52 AM org.apache.catalina.core.ApplicationContext log
+Jun 03, 2026 10:31:35 AM org.apache.catalina.core.ApplicationContext log
 INFO: Closing Spring root WebApplicationContext
-Jun 03, 2026 10:05:52 AM org.apache.catalina.loader.WebappClassLoaderBase clearReferencesJdbc
+Jun 03, 2026 10:31:36 AM org.apache.catalina.loader.WebappClassLoaderBase clearReferencesJdbc
 WARNING: The web application [ccms-web] registered the JDBC driver [com.mysql.jdbc.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
-Jun 03, 2026 10:05:52 AM org.apache.catalina.loader.WebappClassLoaderBase clearReferencesThreads
+Jun 03, 2026 10:31:36 AM org.apache.catalina.loader.WebappClassLoaderBase clearReferencesThreads
 WARNING: The web application [ccms-web] appears to have started a thread named [Abandoned connection cleanup thread] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
  java.lang.Object.wait(Native Method)
  java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:144)
  com.mysql.jdbc.AbandonedConnectionCleanupThread.run(AbandonedConnectionCleanupThread.java:43)
-Jun 03, 2026 10:05:52 AM org.apache.coyote.AbstractProtocol start
+Jun 03, 2026 10:31:36 AM org.apache.coyote.AbstractProtocol start
 INFO: Starting ProtocolHandler ["http-nio-6663"]
-Jun 03, 2026 10:05:52 AM org.apache.coyote.AbstractProtocol start
+Jun 03, 2026 10:31:36 AM org.apache.coyote.AbstractProtocol start
 INFO: Starting ProtocolHandler ["ajp-nio-6664"]
-Jun 03, 2026 10:05:52 AM org.apache.catalina.startup.Catalina start
-INFO: Server startup in 141716 ms
+Jun 03, 2026 10:31:36 AM org.apache.catalina.startup.Catalina start
+INFO: Server startup in 207878 ms
+
+
+
+ status = error
+dest = err
+
+name = PropertiesConfig
+
+log=C:/crms
+#log=D:/crms-web/
+#property.filepath=D:/crms-web/
+property.filename =C:/crms/crms_email.log
+property.filename1=C:/crms/crms.log
+
+
+appender.EmailFA.type=RollingFile
+appender.EmailFA.name = Email
+appender.EmailFA.fileName = ${filename}
+appender.EmailFA.layout.type = PatternLayout
+appender.EmailFA.layout.pattern = %d{DATE} %-5p %c:%L %x - %m%n
+appender.EmailFA.filePattern = ${filename}.%d{yyyyMMdd}
+
+appender.EmailFA.strategy.type = DefaultRolloverStrategy
+appender.EmailFA.strategy.max = 10
+
+appender.EmailFA.policies.type = Policies
+appender.EmailFA.policies.size.type = SizeBasedTriggeringPolicy
+appender.EmailFA.policies.size.size = 10MB
+
+
+loggers = file
+#logger.file.type = Logger
+#logger.file.name =aero.omanair.ccms.service.impl.NotificationEmailServiceImpl
+logger.file.name =aero.omanair.ccms.service.impl.NotificationEmailServiceImpl
+logger.file.level =info
+logger.file.appenderRefs= file
+logger.file.appenderRef.file.ref=Email
+logger.file.additivity = false
+
+
+
+# Define the file appender
+appender.rolling.type = RollingFile
+appender.rolling.name = File
+
+
+# Set the name of the file
+appender.rolling.fileName = C:/crms/crms.log
+
+# Set the immediate flush to true (default)
+#log4j.appender.FILE.ImmediateFlush=true
+
+# Set the threshold to debug mode
+filter.threshold.type = ThresholdFilter
+filter.threshold.level = debug
+
+# Set the append to false, should not overwrite
+#log4j.appender.FILE.Append=true 
+
+# Set the the backup index
+appender.rolling.strategy.type = DefaultRolloverStrategy
+appender.rolling.strategy.max = 10
+
+# Set the maximum file size before rollover
+appender.rolling.policies.type = Policies
+appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.rolling.policies.size.size = 50MB
+
+
+# Define the layout for file appender
+appender.rolling.layout.type = PatternLayout
+appender.rolling.layout.pattern=%d{yyyy/MM/dd HH:mm:ss.SSS} [UTC] [Customer Relationship Management System] [%c{1}] [%t]:  %p: %L - %m%n
+appender.rolling.filePattern = crms.%d{yyyyMMdd}
+rootLogger.appenderRef.rolling.ref = File
+rootLogger.level = debug
+logger.rolling.additivity = false
+
+# Log everything. Good for troubleshooting
+logger.hibernate.level=INFO
+ 
+# Log all JDBC parameters
+logger.hibernate.type=ALL
+ 
+# Struts OgnlUtil issues unimportant warnings
+#log4j.logger.com.opensymphony.xwork2.util.OgnlUtil=error
+#log4j.logger.com.opensymphony.xwork2.ognl.OgnlValueStack=error
