@@ -1,99 +1,76 @@
-@RestController
-@RequestMapping("/onlineFeedback")
+Please find below the details investigated from the PROD logs for the shared PNRs.
 
-public class RestOnlineFeedbackFormController {
+Codeshare PNR
 
-	private int SOURCE_WEBSITE = 6;
-	private String ATTACH_UPLOAD_PATH = "/data/crms/attachments/";
-	 private static final String ALGORITHM = "AES";
+PNR: EPBVXB
 
-     private static final byte[] SALT = "crmsfbenckey9636".getBytes();// THE KEY MUST BE SAME
+1.1 ALHARAMI/YACOUB YOUSEF SJ MR
+2.1 ALBUHENDI/AMEL ALI A A MRS
 
-	static final Logger logger = LogManager
-			.getLogger(RestOnlineFeedbackFormController.class);
+1 QR1124N 09JUN T DOHMCT HK2 1840 2145 /E
+2 WY 661N 13JUN J MCTDOH HK2 2010 2045 HRS/E
+  /MARKETED BY QATAR AIRWAYS /QR4634N/...
 
-	@Autowired
-	private OnlineFeedbackService onlineFeedbackService;
+As per the PROD logs, the response received for this codeshare PNR flight is shown below:
 
-	@Autowired
-	private StationService stationService;
+DOH DAILY FLIGHT LIST
+NO DATA FOR THIS SELECTION
 
-	@Autowired
-	private FeedbackStatusService feedbackStatusService;
+Although the service response status is Success and Complete, no flight data was returned for the selected criteria.
 
-	@Autowired
-	private FeedbackMasterService feedbackMasterService;
+Interline PNR
 
-	@Autowired
-	private CountryService countryService;
-	
-	@Autowired
-	private ComplaintMasterService complaintMasterService;
-	
-	@Autowired
-	private FeedbackTypeService  feedbackTypeService;
-	
-	@Autowired
-	private SourcesService  sourcesService;
+PNR: USODAD
 
-	@RequestMapping(value = "/createFeedback", method = RequestMethod.POST)
-	@ResponseBody
-	public ServiceResponse createOnlineFeedback(
-			@ModelAttribute OnlineFeedbackDTO onlineDTO) throws JSONException {
-		System.out.println("Called...");
-		ServiceResponse serviceResponse = new ServiceResponse();
-		String successMsg = "";
-		try {
-			if (onlineDTO != null) {
-			
-				logger.info(onlineDTO.getJsonString());
-				logger.info("Attach" + onlineDTO.getAttach());
-				logger.info("Attach1" + onlineDTO.getAttach1());
-				logger.info("Attach2" + onlineDTO.getAttach2());
-				logger.info("Attach3" + onlineDTO.getAttach3());
+1.1 MACHERLA/ANITHA MRS
 
-				if (!StringUtils.isBlank(onlineDTO.getJsonString())) {
-					Map<String, Object> dataMap = convertJsonArrayToMap(onlineDTO
-							.getJsonString());
+1 QR720N 08JUN M SEADOH HK1 1705 1830 09JUN T/E
+2 WY662Y 09JUN T DOHMCT HK1 2145 0015 10JUN W/E
+3 WY235Y 10JUN W MCTHYD HK1 0245 0740 /E
 
-					List<String> receivedFiles = new ArrayList<String>();
+For this PROD PNR, the departure station SEA is not available in the station details table in PROD. Therefore, this flight was not processed and no corresponding entry is available in the PROD logs.
 
-					if (!StringUtils.isEmpty(onlineDTO.getAttach())) {
-						receivedFiles.add(onlineDTO.getAttach());
-					}
-					if (!StringUtils.isEmpty(onlineDTO.getAttach1())) {
-						receivedFiles.add(onlineDTO.getAttach1());
-					}
+CERT Interline PNR
 
-					if (!StringUtils.isEmpty(onlineDTO.getAttach2())) {
-						receivedFiles.add(onlineDTO.getAttach2());
-					}
+PNR: PPRFGT
 
-					if (!StringUtils.isEmpty(onlineDTO.getAttach3())) {
-						receivedFiles.add(onlineDTO.getAttach3());
-					}
+1.1 KULMONGKUT/YUMITA MS
 
-					List<Attachments> attachments = saveAndCreateAttachments(receivedFiles);
+1 WY101Y 09JUN T MCTLHR HK1 1420 1910 /E
+2 QF002Y 09JUN T LHRSYD HK1 2050 0610 11JUN Q /E
 
-					serviceResponse = createFeedbackWithMapDetails(dataMap,
-							attachments, serviceResponse);
-				}
-				logger.info(successMsg);
+When tested in UAT, the segments were displayed as follows:
 
-			}
-		} catch (JSONException jse) {
-			logger.error("Error occured while parsing JSON");
-			serviceResponse.setStatus("NOK");
-			serviceResponse.setErrorMessage("Error occured while parsing JSON");
-		} catch (Exception e) {
-			logger.error(e);
-			serviceResponse.setStatus("NOK");
-			serviceResponse.setErrorMessage("Error occured while processing");
+Segment 1
+Operating Airline Code: WY
+Operating Flight Number: 0101
+Marketing Airline Code: WY
+Marketing Flight Number: 0101
+Segment 2
+Operating Airline Code: QF
+Operating Flight Number: 0002
+Marketing Airline Code: QF
+Marketing Flight Number: 0002
 
-		}
-		return serviceResponse;
-	}
-	}
+The following record locator was available in the reservation response:
+
+CRS Code: 1A (Amadeus)
+Record Locator: EZIJC5
+
+However, this PNR does not trigger the email notification because the E-Ticket Number is not available in the TripSearch response, which is one of the validation checks required before sending the notification.
+
+<st119:TicketingInfo>
+    <st119:AlreadyTicketed>
+        <st119:Code>T-08JUN</st119:Code>
+    </st119:AlreadyTicketed>
+</st119:TicketingInfo>
+
+No E-Ticket Number is present in the response.
+
+As discussed, please provide a PROD PNR for an interline flight that includes stations available in the attached PROD station details table so that further validation can be performed.
+
+
+
  status = error
 dest = err
 
