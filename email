@@ -1,4 +1,99 @@
+@RestController
+@RequestMapping("/onlineFeedback")
 
+public class RestOnlineFeedbackFormController {
+
+	private int SOURCE_WEBSITE = 6;
+	private String ATTACH_UPLOAD_PATH = "/data/crms/attachments/";
+	 private static final String ALGORITHM = "AES";
+
+     private static final byte[] SALT = "crmsfbenckey9636".getBytes();// THE KEY MUST BE SAME
+
+	static final Logger logger = LogManager
+			.getLogger(RestOnlineFeedbackFormController.class);
+
+	@Autowired
+	private OnlineFeedbackService onlineFeedbackService;
+
+	@Autowired
+	private StationService stationService;
+
+	@Autowired
+	private FeedbackStatusService feedbackStatusService;
+
+	@Autowired
+	private FeedbackMasterService feedbackMasterService;
+
+	@Autowired
+	private CountryService countryService;
+	
+	@Autowired
+	private ComplaintMasterService complaintMasterService;
+	
+	@Autowired
+	private FeedbackTypeService  feedbackTypeService;
+	
+	@Autowired
+	private SourcesService  sourcesService;
+
+	@RequestMapping(value = "/createFeedback", method = RequestMethod.POST)
+	@ResponseBody
+	public ServiceResponse createOnlineFeedback(
+			@ModelAttribute OnlineFeedbackDTO onlineDTO) throws JSONException {
+		System.out.println("Called...");
+		ServiceResponse serviceResponse = new ServiceResponse();
+		String successMsg = "";
+		try {
+			if (onlineDTO != null) {
+			
+				logger.info(onlineDTO.getJsonString());
+				logger.info("Attach" + onlineDTO.getAttach());
+				logger.info("Attach1" + onlineDTO.getAttach1());
+				logger.info("Attach2" + onlineDTO.getAttach2());
+				logger.info("Attach3" + onlineDTO.getAttach3());
+
+				if (!StringUtils.isBlank(onlineDTO.getJsonString())) {
+					Map<String, Object> dataMap = convertJsonArrayToMap(onlineDTO
+							.getJsonString());
+
+					List<String> receivedFiles = new ArrayList<String>();
+
+					if (!StringUtils.isEmpty(onlineDTO.getAttach())) {
+						receivedFiles.add(onlineDTO.getAttach());
+					}
+					if (!StringUtils.isEmpty(onlineDTO.getAttach1())) {
+						receivedFiles.add(onlineDTO.getAttach1());
+					}
+
+					if (!StringUtils.isEmpty(onlineDTO.getAttach2())) {
+						receivedFiles.add(onlineDTO.getAttach2());
+					}
+
+					if (!StringUtils.isEmpty(onlineDTO.getAttach3())) {
+						receivedFiles.add(onlineDTO.getAttach3());
+					}
+
+					List<Attachments> attachments = saveAndCreateAttachments(receivedFiles);
+
+					serviceResponse = createFeedbackWithMapDetails(dataMap,
+							attachments, serviceResponse);
+				}
+				logger.info(successMsg);
+
+			}
+		} catch (JSONException jse) {
+			logger.error("Error occured while parsing JSON");
+			serviceResponse.setStatus("NOK");
+			serviceResponse.setErrorMessage("Error occured while parsing JSON");
+		} catch (Exception e) {
+			logger.error(e);
+			serviceResponse.setStatus("NOK");
+			serviceResponse.setErrorMessage("Error occured while processing");
+
+		}
+		return serviceResponse;
+	}
+	}
  status = error
 dest = err
 
