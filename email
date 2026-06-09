@@ -172,69 +172,189 @@ logger.hibernate.type=ALL
 #log4j.logger.com.opensymphony.xwork2.ognl.OgnlValueStack=error
 
 
-Thank you for the call.
-
-As discussed, please confirm the following points:
-
-1. Terminal Information / Flight Information for Connecting Flights
-
-All connecting flight information belonging to the same trip group should be displayed in the check-in email. This should include:
-
-Departure Airport
-Arrival Airport
-Flight Number
-Departure Date & Time
-Check-in Terminal
-
-The terminal information should be identified using the getFlightInfo API for each connecting flight. If terminal information is not available from the API response, it is not required to display the terminal details in the connecting flight information section of the check-in email.
-
-2. Check-in Details (Terminal, Airline, Channel)
-
-Check-in Terminal
-
-The terminal should be displayed when it is available from the getFlightInfo API response.
-If terminal information is not available, it is not required to display the terminal in the check-in email.
-
-Check-in Airline
-
-The check-in airline should be displayed as "WY" for all passengers in the check-in email.
-
-Check-in Channel
-
-The check-in channel should be displayed as "Online" for all passengers in the check-in email.
-3. Customer Seat Information
-
-It is not required to display seat information in the check-in email for the time being.
-
-4. Customer Baggage Allowance
-
-The baggage allowance should be displayed as follows:
-
-If the baggage allowance is 0, display 0.
-Otherwise, display the baggage allowance along with the corresponding unit (e.g., 20 KG).
-Email Address Identification
-
-As discussed, the current flow is:
-
-Check for the email address at the reservation level.
-If not available, retrieve the email address from the passenger email attribute.
-
-Going forward, if the email address is not available at the reservation level, it should be retrieved from the CTCE SSR instead of the passenger email attribute.
-
-Example:
-
-CTCE WY HK1/SATISH.DADAMODE//OMANAIR.COM
-
-The email address should be derived from the CTCE value as:
-
-SATISH.DADAMODE@OMANAIR.COM
-
-@Prem, please share the following details as discussed:
-
-The current logic/process followed to identify and extract the email address from CTCE.
-PROD PNRs for Codeshare and Interline flights to verify the following fields where the Operating Airline Code and Marketing Airline Code are different:
-Operating Airline and Flight Number
-Marketing Airline and Flight Number
-Record Locator for the Ticketing Airline
-
-Please let us know if any of the above understanding needs to be corrected
+Json Request:
+{
+    "attach": null,
+    "attach1": null,
+    "attach2": null,
+    "attach3": null,
+    "feedbackId": null,
+    "jsonString":
+    "{
+    "name": "NAME",
+    "value": "Sam"
+  },
+  {
+    "name": "MIDDLE_NAME",
+    "value": ""
+  },
+  {
+    "name": "LAST_NAME",
+    "value": "R"
+  },
+  {
+    "name": "GENDER",
+    "value": "Male"
+  },
+  {
+    "name": "FFP_NUMBER",
+    "value": "900267712"
+  },
+  {
+    "name": "EMAIL",
+    "value": "raja@gmail.com"
+  },
+  {
+    "name": "country_val",
+    "value": "968"
+  },
+  {
+    "name": "COUNTRY",
+    "value": "Oman"
+  },
+  {
+    "name": "COUNTRY_CODE",
+    "value": "968"
+  },
+  {
+    "name": "PHONE_EXT",
+    "value": ""
+  },
+  {
+    "name": "PHONE_NUM",
+    "value": ""
+  },
+  {
+    "name": "MOBILE_PHONE",
+    "value": "7856745564"
+  },
+  {
+    "name": "FEEDBACK_TYPE",
+    "value": "10"
+  },
+  {
+    "name": "BOOKING_REFERENCE",
+    "value": "YVGVVG"
+  },
+  {
+    "name": "E_TICKET_NUM",
+    "value": "9108567456344"
+  },
+  {
+    "name": "TICKET_FROM",
+    "value": "Online"
+  },
+  {
+    "name": "AGENT_DETAILS",
+    "value": ""
+  },
+  {
+    "name": "OFFICE_DETAILS",
+    "value": ""
+  },
+  {
+    "name": "FLIGHT_NUM",
+    "value": "5765"
+  },
+  {
+    "name": "TRAVEL_CLASS",
+    "value": "Y"
+  },
+  {
+    "name": "DEPARTURE_POINT",
+    "value": "BLR"
+  },
+  {
+    "name": "ARRIVAL_POINT",
+    "value": "MCT"
+  },
+  {
+    "name": "TRAVEL_DATE",
+    "value": "01/08/2025"
+  },
+  {
+    "name": "INCIDENT_DATE",
+    "value": "01/08/2025"
+  },
+  {
+    "name": "DESCRIPTION",
+    "value": "Flight delayed for more than 2 hours"
+  },
+  {
+    "name": "TERMS_CONDITIONS",
+    "value": "on"
+  },
+  {
+    "name": "BENEFICIARY_NAME",
+    "value": "Raja"
+  },
+  {
+    "name": "BANK_NAME",
+    "value": "ABC Bank"
+  },
+  {
+    "name": "BRANCH_NAME",
+    "value": "abc"
+  },
+  {
+    "name": "ACCOUNT_NUMBER",
+    "value": "66666666666666666666"
+  },
+  {
+    "name": "Re_enter_Account_Number",
+    "value": "66666666666666666666"
+  },
+  {
+    "name": "BANK_COUNTRY",
+    "value": "India"
+  },
+  {
+    "name": "Bank_Country_val",
+    "value": "India"
+  },
+  {
+    "name": "CURRENCY",
+    "value": "INR"
+  },
+  {
+    "name": "SWIFT_CODE",
+    "value": "65556756565"
+  },
+  {
+    "name": "SORT_CODE",
+    "value": ""
+  },
+  {
+    "name": "IBAN_NUMBER",
+    "value": ""
+  },
+  {
+    "name": "IFSC_CODE",
+    "value": "F574G"
+  },
+  {
+    "name": "ABA_ROUTING",
+    "value": ""
+  },
+  {
+    "name": "OTHER_DETAILS",
+    "value": ""
+  },
+  {
+    "name": "_token",
+    "value": "3lxBtozIiCszP7vLAKbR2Dn5HjT5kN396VxKx3GC"
+  },
+  {
+    "name": "ADDITIONAL_PASSENGERS",
+    "value": [
+      {
+        "name": "PAX_FIRST_NAME",
+        "value": ""
+      },
+      {
+        "name": "PAX_LAST_NAME",
+        "value": ""
+      }
+    ]
+  }"
+}
