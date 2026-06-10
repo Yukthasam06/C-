@@ -1,58 +1,37 @@
-10 Jun 2026 16:40:18,664 INFO : org.springframework.web.context.ContextLoader:285 [] - Root WebApplicationContext: initialization started
-10 Jun 2026 16:40:20,378 INFO : org.springframework.web.context.support.XmlWebApplicationContext:513 [] - Refreshing Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
-10 Jun 2026 16:40:20,992 INFO : org.springframework.beans.factory.xml.XmlBeanDefinitionReader:316 [] - Loading XML bean definitions from ServletContext resource [/WEB-INF/applicationContext.xml]
-10 Jun 2026 16:40:23,089 INFO : org.springframework.beans.factory.xml.XmlBeanDefinitionReader:316 [] - Loading XML bean definitions from ServletContext resource [/WEB-INF/spring-servlet.xml]
-10 Jun 2026 16:40:26,796 INFO : org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer:172 [] - Loading properties file from class path resource [application.properties]
-10 Jun 2026 16:40:26,813 ERROR: org.springframework.web.context.ContextLoader:331 [] - Context initialization failed
-java.lang.NullPointerException: null
-	at org.jasypt.encryption.pbe.config.SimplePBEConfig.getPasswordCharArray(SimplePBEConfig.java:434) ~[jasypt-1.9.2.jar:?]
-	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.resolveConfigurationPassword(StandardPBEByteEncryptor.java:783) ~[jasypt-1.9.2.jar:?]
-	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.initialize(StandardPBEByteEncryptor.java:598) ~[jasypt-1.9.2.jar:?]
-	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.initialize(StandardPBEStringEncryptor.java:553) ~[jasypt-1.9.2.jar:?]
-	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.decrypt(StandardPBEStringEncryptor.java:705) ~[jasypt-1.9.2.jar:?]
-	at org.jasypt.properties.PropertyValueEncryptionUtils.decrypt(PropertyValueEncryptionUtils.java:72) ~[jasypt-1.9.2.jar:?]
-	at org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer.convertPropertyValue(EncryptablePropertyPlaceholderConfigurer.java:109) ~[jasypt-spring3-1.9.0.jar:?]
-	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperty(PropertyResourceConfigurer.java:123) ~[spring-beans-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperties(PropertyResourceConfigurer.java:106) ~[spring-beans-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.beans.factory.config.PropertyResourceConfigurer.postProcessBeanFactory(PropertyResourceConfigurer.java:83) ~[spring-beans-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:265) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:162) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:609) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:464) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:403) ~[spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:306) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:106) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4900) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5363) [catalina.jar:8.0.53]
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400) [catalina.jar:8.0.53]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_422-422]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_422-422]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_422-422]
-	at java.lang.Thread.run(Thread.java:750) [?:1.8.0_422-422]
-Jun 10, 2026 4:40:26 PM org.apache.catalina.core.StandardContext listenerStart
-SEVERE: Exception sending context initialized event to listener instance of class org.springframework.web.context.ContextLoaderListener
-java.lang.NullPointerException
-	at org.jasypt.encryption.pbe.config.SimplePBEConfig.getPasswordCharArray(SimplePBEConfig.java:434)
-	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.resolveConfigurationPassword(StandardPBEByteEncryptor.java:783)
-	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.initialize(StandardPBEByteEncryptor.java:598)
-	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.initialize(StandardPBEStringEncryptor.java:553)
-	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.decrypt(StandardPBEStringEncryptor.java:705)
-	at org.jasypt.properties.PropertyValueEncryptionUtils.decrypt(PropertyValueEncryptionUtils.java:72)
-	at org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer.convertPropertyValue(EncryptablePropertyPlaceholderConfigurer.java:109)
-	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperty(PropertyResourceConfigurer.java:123)
-	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperties(PropertyResourceConfigurer.java:106)
-	at org.springframework.beans.factory.config.PropertyResourceConfigurer.postProcessBeanFactory(PropertyResourceConfigurer.java:83)
-	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:265)
-	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:162)
-	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:609)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:464)
-	at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:403)
-	at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:306)
-	at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:106)
-	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4900)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5363)
+Jun 10, 2026 5:23:34 PM com.sun.jersey.api.core.PackagesResourceConfig init
+INFO: Scanning for root resource and provider classes in the packages:
+  aero.omanair
+  org.codehaus.jackson.jaxrs
+Jun 10, 2026 5:23:34 PM org.apache.catalina.core.ApplicationContext log
+SEVERE: StandardWrapper.Throwable
+java.lang.ArrayIndexOutOfBoundsException: 26220
+	at org.objectweb.asm.ClassReader.readClass(Unknown Source)
+	at org.objectweb.asm.ClassReader.accept(Unknown Source)
+	at org.objectweb.asm.ClassReader.accept(Unknown Source)
+	at com.sun.jersey.spi.scanning.AnnotationScannerListener.onProcess(AnnotationScannerListener.java:133)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner$1.f(FileSchemeScanner.java:86)
+	at com.sun.jersey.core.util.Closing.f(Closing.java:71)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:83)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scan(FileSchemeScanner.java:71)
+	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:223)
+	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:139)
+	at com.sun.jersey.api.core.ScanningResourceConfig.init(ScanningResourceConfig.java:80)
+	at com.sun.jersey.api.core.PackagesResourceConfig.init(PackagesResourceConfig.java:104)
+	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:78)
+	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:89)
+	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:698)
+	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:676)
+	at com.sun.jersey.spi.container.servlet.WebComponent.init(WebComponent.java:201)
+	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:373)
+	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:556)
+	at javax.servlet.GenericServlet.init(GenericServlet.java:158)
+	at org.apache.catalina.core.StandardWrapper.initServlet(StandardWrapper.java:1188)
+	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:1132)
+	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:1021)
+	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:5085)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5397)
 	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145)
 	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410)
 	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400)
@@ -61,54 +40,50 @@ java.lang.NullPointerException
 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
 	at java.lang.Thread.run(Thread.java:750)
 
-10 Jun 2026 16:40:26,893 INFO : org.springframework.web.context.support.XmlWebApplicationContext:873 [] - Closing Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
-Jun 10, 2026 4:40:26 PM org.apache.catalina.core.StandardContext startInternal
-SEVERE: One or more listeners failed to start. Full details will be found in the appropriate container log file
-Jun 10, 2026 4:40:26 PM org.apache.catalina.core.StandardContext startInternal
-SEVERE: Context [/FlightScheduleMob] startup failed due to previous errors
-Jun 10, 2026 4:40:26 PM org.apache.catalina.core.ApplicationContext log
-INFO: Closing Spring root WebApplicationContext
-10 Jun 2026 16:40:26,973 WARN : org.springframework.web.context.support.XmlWebApplicationContext:883 [] - Exception thrown from ApplicationListener handling ContextClosedEvent
-java.lang.IllegalStateException: ApplicationEventMulticaster not initialized - call 'refresh' before multicasting events via the context: Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
-	at org.springframework.context.support.AbstractApplicationContext.getApplicationEventMulticaster(AbstractApplicationContext.java:346) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:333) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.doClose(AbstractApplicationContext.java:880) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.close(AbstractApplicationContext.java:841) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoader.closeWebApplicationContext(ContextLoader.java:579) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoaderListener.contextDestroyed(ContextLoaderListener.java:115) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.apache.catalina.core.StandardContext.listenerStop(StandardContext.java:4947) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.StandardContext.stopInternal(StandardContext.java:5586) [catalina.jar:8.0.53]
-	at org.apache.catalina.util.LifecycleBase.stop(LifecycleBase.java:221) [catalina.jar:8.0.53]
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:149) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400) [catalina.jar:8.0.53]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_422-422]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_422-422]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_422-422]
-	at java.lang.Thread.run(Thread.java:750) [?:1.8.0_422-422]
-10 Jun 2026 16:40:26,973 WARN : org.springframework.web.context.support.XmlWebApplicationContext:891 [] - Exception thrown from LifecycleProcessor on context close
-java.lang.IllegalStateException: LifecycleProcessor not initialized - call 'refresh' before invoking lifecycle methods via the context: Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
-	at org.springframework.context.support.AbstractApplicationContext.getLifecycleProcessor(AbstractApplicationContext.java:359) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.doClose(AbstractApplicationContext.java:888) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.context.support.AbstractApplicationContext.close(AbstractApplicationContext.java:841) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoader.closeWebApplicationContext(ContextLoader.java:579) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.springframework.web.context.ContextLoaderListener.contextDestroyed(ContextLoaderListener.java:115) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
-	at org.apache.catalina.core.StandardContext.listenerStop(StandardContext.java:4947) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.StandardContext.stopInternal(StandardContext.java:5586) [catalina.jar:8.0.53]
-	at org.apache.catalina.util.LifecycleBase.stop(LifecycleBase.java:221) [catalina.jar:8.0.53]
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:149) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410) [catalina.jar:8.0.53]
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400) [catalina.jar:8.0.53]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_422-422]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_422-422]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_422-422]
-	at java.lang.Thread.run(Thread.java:750) [?:1.8.0_422-422]
-Jun 10, 2026 4:40:27 PM org.apache.coyote.AbstractProtocol start
+Jun 10, 2026 5:23:34 PM org.apache.catalina.core.StandardContext loadOnStartup
+SEVERE: Servlet [ServletContainer] in web application [/FlightScheduleMob] threw load() exception
+java.lang.ArrayIndexOutOfBoundsException: 26220
+	at org.objectweb.asm.ClassReader.readClass(Unknown Source)
+	at org.objectweb.asm.ClassReader.accept(Unknown Source)
+	at org.objectweb.asm.ClassReader.accept(Unknown Source)
+	at com.sun.jersey.spi.scanning.AnnotationScannerListener.onProcess(AnnotationScannerListener.java:133)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner$1.f(FileSchemeScanner.java:86)
+	at com.sun.jersey.core.util.Closing.f(Closing.java:71)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:83)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
+	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scan(FileSchemeScanner.java:71)
+	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:223)
+	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:139)
+	at com.sun.jersey.api.core.ScanningResourceConfig.init(ScanningResourceConfig.java:80)
+	at com.sun.jersey.api.core.PackagesResourceConfig.init(PackagesResourceConfig.java:104)
+	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:78)
+	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:89)
+	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:698)
+	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:676)
+	at com.sun.jersey.spi.container.servlet.WebComponent.init(WebComponent.java:201)
+	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:373)
+	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:556)
+	at javax.servlet.GenericServlet.init(GenericServlet.java:158)
+	at org.apache.catalina.core.StandardWrapper.initServlet(StandardWrapper.java:1188)
+	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:1132)
+	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:1021)
+	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:5085)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5397)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+
+Jun 10, 2026 5:23:34 PM org.apache.coyote.AbstractProtocol start
 INFO: Starting ProtocolHandler ["http-nio-1912"]
-Jun 10, 2026 4:40:27 PM org.apache.coyote.AbstractProtocol start
+Jun 10, 2026 5:23:34 PM org.apache.coyote.AbstractProtocol start
 INFO: Starting ProtocolHandler ["ajp-nio-1913"]
-Jun 10, 2026 4:40:27 PM org.apache.catalina.startup.Catalina start
-INFO: Server startup in 97140 ms
+Jun 10, 2026 5:23:34 PM org.apache.catalina.startup.Catalina start
+INFO: Server startup in 59471 ms
 
 
  status = error
