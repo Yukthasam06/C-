@@ -1,61 +1,114 @@
+10 Jun 2026 16:40:18,664 INFO : org.springframework.web.context.ContextLoader:285 [] - Root WebApplicationContext: initialization started
+10 Jun 2026 16:40:20,378 INFO : org.springframework.web.context.support.XmlWebApplicationContext:513 [] - Refreshing Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
+10 Jun 2026 16:40:20,992 INFO : org.springframework.beans.factory.xml.XmlBeanDefinitionReader:316 [] - Loading XML bean definitions from ServletContext resource [/WEB-INF/applicationContext.xml]
+10 Jun 2026 16:40:23,089 INFO : org.springframework.beans.factory.xml.XmlBeanDefinitionReader:316 [] - Loading XML bean definitions from ServletContext resource [/WEB-INF/spring-servlet.xml]
+10 Jun 2026 16:40:26,796 INFO : org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer:172 [] - Loading properties file from class path resource [application.properties]
+10 Jun 2026 16:40:26,813 ERROR: org.springframework.web.context.ContextLoader:331 [] - Context initialization failed
+java.lang.NullPointerException: null
+	at org.jasypt.encryption.pbe.config.SimplePBEConfig.getPasswordCharArray(SimplePBEConfig.java:434) ~[jasypt-1.9.2.jar:?]
+	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.resolveConfigurationPassword(StandardPBEByteEncryptor.java:783) ~[jasypt-1.9.2.jar:?]
+	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.initialize(StandardPBEByteEncryptor.java:598) ~[jasypt-1.9.2.jar:?]
+	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.initialize(StandardPBEStringEncryptor.java:553) ~[jasypt-1.9.2.jar:?]
+	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.decrypt(StandardPBEStringEncryptor.java:705) ~[jasypt-1.9.2.jar:?]
+	at org.jasypt.properties.PropertyValueEncryptionUtils.decrypt(PropertyValueEncryptionUtils.java:72) ~[jasypt-1.9.2.jar:?]
+	at org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer.convertPropertyValue(EncryptablePropertyPlaceholderConfigurer.java:109) ~[jasypt-spring3-1.9.0.jar:?]
+	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperty(PropertyResourceConfigurer.java:123) ~[spring-beans-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperties(PropertyResourceConfigurer.java:106) ~[spring-beans-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.beans.factory.config.PropertyResourceConfigurer.postProcessBeanFactory(PropertyResourceConfigurer.java:83) ~[spring-beans-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:265) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:162) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:609) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:464) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:403) ~[spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:306) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:106) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4900) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5363) [catalina.jar:8.0.53]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400) [catalina.jar:8.0.53]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_422-422]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_422-422]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_422-422]
+	at java.lang.Thread.run(Thread.java:750) [?:1.8.0_422-422]
+Jun 10, 2026 4:40:26 PM org.apache.catalina.core.StandardContext listenerStart
+SEVERE: Exception sending context initialized event to listener instance of class org.springframework.web.context.ContextLoaderListener
+java.lang.NullPointerException
+	at org.jasypt.encryption.pbe.config.SimplePBEConfig.getPasswordCharArray(SimplePBEConfig.java:434)
+	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.resolveConfigurationPassword(StandardPBEByteEncryptor.java:783)
+	at org.jasypt.encryption.pbe.StandardPBEByteEncryptor.initialize(StandardPBEByteEncryptor.java:598)
+	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.initialize(StandardPBEStringEncryptor.java:553)
+	at org.jasypt.encryption.pbe.StandardPBEStringEncryptor.decrypt(StandardPBEStringEncryptor.java:705)
+	at org.jasypt.properties.PropertyValueEncryptionUtils.decrypt(PropertyValueEncryptionUtils.java:72)
+	at org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer.convertPropertyValue(EncryptablePropertyPlaceholderConfigurer.java:109)
+	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperty(PropertyResourceConfigurer.java:123)
+	at org.springframework.beans.factory.config.PropertyResourceConfigurer.convertProperties(PropertyResourceConfigurer.java:106)
+	at org.springframework.beans.factory.config.PropertyResourceConfigurer.postProcessBeanFactory(PropertyResourceConfigurer.java:83)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:265)
+	at org.springframework.context.support.PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(PostProcessorRegistrationDelegate.java:162)
+	at org.springframework.context.support.AbstractApplicationContext.invokeBeanFactoryPostProcessors(AbstractApplicationContext.java:609)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:464)
+	at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:403)
+	at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:306)
+	at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:106)
+	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4900)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5363)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
 
-
-Analysis & Design document
-
-Analyze the feasibility of including additional check-in email fields from available API and reservation data sources.
-
-Analyze retrieval of passenger email from CTCE SSR when reservation-level email is unavailable.
-
-Analyze conditions for displaying operating and marketing airline details only for codeshare flights.
-
-Analyze retrieval and display of passenger seat assignment information from Sabre responses.
-
-Analyze inclusion of all connecting flight segments within the same trip group in the check-in email.
-
-Analyze and validate new data fields using sample CERT and PROD PNRs.
-
-Analyze email template modifications required to accommodate the new fields and business rules.
-
-Prepare the solution design document, including data mapping, processing logic, and impact analysis.
-
-For an even shorter version suitable for a project plan:
-
-Feasibility analysis for new check-in email fields.
-
-CTCE SSR email retrieval analysis.
-
-Codeshare flight information display analysis.
-
-Seat assignment information analysis.
-
-Connecting flight details inclusion analysis.
-
-CERT and PROD PNR validation analysis.
-
-Email template enhancement analysis.
-
-Solution design document preparation.
-
-
-Develoment, Unit Testing
-
-For the Development & Unit Testing section, you can summarize the activities as follows:
-
-Implement CTCE SSR email retrieval logic when reservation-level email is unavailable.
-
-Implement conditional display of operating and marketing airline details for codeshare flights.
-
-Implement retrieval and display of customer baggage allowance from the GetPassengerData API.
-
-Implement retrieval and display of passenger seat assignment information from Sabre responses.
-
-Implement display of check-in terminal information and fixed check-in airline/channel details in the email.
-
-Implement retrieval and display of connecting flight details, including terminal information from the GetFlightInfo API.
-
-Update CDG station and standard check-in email templates to incorporate all new fields and business rules.
-
-Perform unit testing, defect fixes, and prepare unit test cases and test documentation.
+10 Jun 2026 16:40:26,893 INFO : org.springframework.web.context.support.XmlWebApplicationContext:873 [] - Closing Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
+Jun 10, 2026 4:40:26 PM org.apache.catalina.core.StandardContext startInternal
+SEVERE: One or more listeners failed to start. Full details will be found in the appropriate container log file
+Jun 10, 2026 4:40:26 PM org.apache.catalina.core.StandardContext startInternal
+SEVERE: Context [/FlightScheduleMob] startup failed due to previous errors
+Jun 10, 2026 4:40:26 PM org.apache.catalina.core.ApplicationContext log
+INFO: Closing Spring root WebApplicationContext
+10 Jun 2026 16:40:26,973 WARN : org.springframework.web.context.support.XmlWebApplicationContext:883 [] - Exception thrown from ApplicationListener handling ContextClosedEvent
+java.lang.IllegalStateException: ApplicationEventMulticaster not initialized - call 'refresh' before multicasting events via the context: Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
+	at org.springframework.context.support.AbstractApplicationContext.getApplicationEventMulticaster(AbstractApplicationContext.java:346) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:333) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.doClose(AbstractApplicationContext.java:880) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.close(AbstractApplicationContext.java:841) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoader.closeWebApplicationContext(ContextLoader.java:579) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoaderListener.contextDestroyed(ContextLoaderListener.java:115) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.apache.catalina.core.StandardContext.listenerStop(StandardContext.java:4947) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.StandardContext.stopInternal(StandardContext.java:5586) [catalina.jar:8.0.53]
+	at org.apache.catalina.util.LifecycleBase.stop(LifecycleBase.java:221) [catalina.jar:8.0.53]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:149) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400) [catalina.jar:8.0.53]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_422-422]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_422-422]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_422-422]
+	at java.lang.Thread.run(Thread.java:750) [?:1.8.0_422-422]
+10 Jun 2026 16:40:26,973 WARN : org.springframework.web.context.support.XmlWebApplicationContext:891 [] - Exception thrown from LifecycleProcessor on context close
+java.lang.IllegalStateException: LifecycleProcessor not initialized - call 'refresh' before invoking lifecycle methods via the context: Root WebApplicationContext: startup date [Wed Jun 10 16:40:20 IST 2026]; root of context hierarchy
+	at org.springframework.context.support.AbstractApplicationContext.getLifecycleProcessor(AbstractApplicationContext.java:359) ~[spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.doClose(AbstractApplicationContext.java:888) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.context.support.AbstractApplicationContext.close(AbstractApplicationContext.java:841) [spring-context-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoader.closeWebApplicationContext(ContextLoader.java:579) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.springframework.web.context.ContextLoaderListener.contextDestroyed(ContextLoaderListener.java:115) [spring-web-4.0.3.RELEASE.jar:4.0.3.RELEASE]
+	at org.apache.catalina.core.StandardContext.listenerStop(StandardContext.java:4947) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.StandardContext.stopInternal(StandardContext.java:5586) [catalina.jar:8.0.53]
+	at org.apache.catalina.util.LifecycleBase.stop(LifecycleBase.java:221) [catalina.jar:8.0.53]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:149) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410) [catalina.jar:8.0.53]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400) [catalina.jar:8.0.53]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_422-422]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_422-422]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_422-422]
+	at java.lang.Thread.run(Thread.java:750) [?:1.8.0_422-422]
+Jun 10, 2026 4:40:27 PM org.apache.coyote.AbstractProtocol start
+INFO: Starting ProtocolHandler ["http-nio-1912"]
+Jun 10, 2026 4:40:27 PM org.apache.coyote.AbstractProtocol start
+INFO: Starting ProtocolHandler ["ajp-nio-1913"]
+Jun 10, 2026 4:40:27 PM org.apache.catalina.startup.Catalina start
+INFO: Server startup in 97140 ms
 
 
  status = error
