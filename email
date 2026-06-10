@@ -1,36 +1,61 @@
+
+
 Analysis & Design document
 
-1.Analyse and check the feasibility of including all the below fields in the check-in email
-- Operating airline and flight number
-- Marketing airline and flight number
-- Record locator for operating airline
-- Record locator for ticketing airline
-- Customer baggage allowance
-- Contact information for questions
-- Customer seat information
-- Check-in details (terminal, airline, channel)
-- Information where to check flight status
-- Terminal information/Flight information for connecting flights
-- How to provide feedback after travel
-2.Analyze to retrieve the email address from CTCE SSR instead of the passenger EmailAddress attribute, if it is not available at the reservation level                                                                                                                      
-3.Analyse to display the operating airline, operating flight number, marketing airline, marketing airline flight number, record locator for ticketing airline in the check-in email only when the Operating Airline Code and Marketing Airline Code are different in the TripSearch API response
-4.Analyse to display the seat information if avaialble from the sabre response along with the passenger's name in the check-in email
-5.Analyse to include all connecting flight information belonging to the same trip group to display in the check-in email. This will include: Departure Airport, Arrival Airport, Flight Number, Departure Date & Time and Check-in Terminal    
-6.Analysing all the new fields with sample CERT and PROD PNRs 
-7.Analyse all the new fields to include in the email template                                                                                                                                 
-8.Prepare Solution design document.
+Analyze the feasibility of including additional check-in email fields from available API and reservation data sources.
+
+Analyze retrieval of passenger email from CTCE SSR when reservation-level email is unavailable.
+
+Analyze conditions for displaying operating and marketing airline details only for codeshare flights.
+
+Analyze retrieval and display of passenger seat assignment information from Sabre responses.
+
+Analyze inclusion of all connecting flight segments within the same trip group in the check-in email.
+
+Analyze and validate new data fields using sample CERT and PROD PNRs.
+
+Analyze email template modifications required to accommodate the new fields and business rules.
+
+Prepare the solution design document, including data mapping, processing logic, and impact analysis.
+
+For an even shorter version suitable for a project plan:
+
+Feasibility analysis for new check-in email fields.
+
+CTCE SSR email retrieval analysis.
+
+Codeshare flight information display analysis.
+
+Seat assignment information analysis.
+
+Connecting flight details inclusion analysis.
+
+CERT and PROD PNR validation analysis.
+
+Email template enhancement analysis.
+
+Solution design document preparation.
 
 
 Develoment, Unit Testing
 
-1. To retrieve the email address from CTCE SSR instead of the passenger EmailAddress attribute, if it is not available at the reservation level  
-2. To display the operating airline, operating flight number, marketing airline, marketing airline flight number, record locator for ticketing airline in the check-in email only when the Operating Airline Code and Marketing Airline Code are different in the TripSearch API response.               
-3. To include the customer's baggage allowance in the check-in email that is obtained from the GetPassengerData API response      
-4. To display the seat information if avaialble from the sabre response along with the passenger's name in the check-in email
-5. To display the check-in terminal in the check-in email if the terminal information is available for a flight. To display check-in airline and chennel details in the check-in email with fixed data.
-6. To include all connecting flight information belonging to the same trip group to display in the check-in email. This will include: Departure Airport, Arrival Airport, Flight Number, Departure Date & Time and Check-in Terminal (Terminal information of each connecting flight will be obtained by calling getFlightInfo API
-7. To update both the CDG station email template and normal email template to include all the new fields
-8. Unit Testing and Test case document preparation
+For the Development & Unit Testing section, you can summarize the activities as follows:
+
+Implement CTCE SSR email retrieval logic when reservation-level email is unavailable.
+
+Implement conditional display of operating and marketing airline details for codeshare flights.
+
+Implement retrieval and display of customer baggage allowance from the GetPassengerData API.
+
+Implement retrieval and display of passenger seat assignment information from Sabre responses.
+
+Implement display of check-in terminal information and fixed check-in airline/channel details in the email.
+
+Implement retrieval and display of connecting flight details, including terminal information from the GetFlightInfo API.
+
+Update CDG station and standard check-in email templates to incorporate all new fields and business rules.
+
+Perform unit testing, defect fixes, and prepare unit test cases and test documentation.
 
 
  status = error
