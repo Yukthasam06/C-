@@ -1,89 +1,52 @@
-Jun 10, 2026 5:23:34 PM com.sun.jersey.api.core.PackagesResourceConfig init
-INFO: Scanning for root resource and provider classes in the packages:
-  aero.omanair
-  org.codehaus.jackson.jaxrs
-Jun 10, 2026 5:23:34 PM org.apache.catalina.core.ApplicationContext log
-SEVERE: StandardWrapper.Throwable
-java.lang.ArrayIndexOutOfBoundsException: 26220
-	at org.objectweb.asm.ClassReader.readClass(Unknown Source)
-	at org.objectweb.asm.ClassReader.accept(Unknown Source)
-	at org.objectweb.asm.ClassReader.accept(Unknown Source)
-	at com.sun.jersey.spi.scanning.AnnotationScannerListener.onProcess(AnnotationScannerListener.java:133)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner$1.f(FileSchemeScanner.java:86)
-	at com.sun.jersey.core.util.Closing.f(Closing.java:71)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:83)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scan(FileSchemeScanner.java:71)
-	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:223)
-	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:139)
-	at com.sun.jersey.api.core.ScanningResourceConfig.init(ScanningResourceConfig.java:80)
-	at com.sun.jersey.api.core.PackagesResourceConfig.init(PackagesResourceConfig.java:104)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:78)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:89)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:698)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:676)
-	at com.sun.jersey.spi.container.servlet.WebComponent.init(WebComponent.java:201)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:373)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:556)
-	at javax.servlet.GenericServlet.init(GenericServlet.java:158)
-	at org.apache.catalina.core.StandardWrapper.initServlet(StandardWrapper.java:1188)
-	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:1132)
-	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:1021)
-	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:5085)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5397)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400)
+Jun 11, 2026 11:26:22 AM org.apache.catalina.core.StandardContext listenerStart
+SEVERE: Error configuring application listener of class [org.springframework.web.context.ContextLoaderListener]
+java.lang.ClassNotFoundException: org.springframework.web.context.ContextLoaderListener
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
+	at org.apache.catalina.core.DefaultInstanceManager.loadClass(DefaultInstanceManager.java:484)
+	at org.apache.catalina.core.DefaultInstanceManager.loadClassMaybePrivileged(DefaultInstanceManager.java:466)
+	at org.apache.catalina.core.DefaultInstanceManager.newInstance(DefaultInstanceManager.java:142)
+	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:3978)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4493)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-	at java.lang.Thread.run(Thread.java:750)
-
-Jun 10, 2026 5:23:34 PM org.apache.catalina.core.StandardContext loadOnStartup
-SEVERE: Servlet [ServletContainer] in web application [/FlightScheduleMob] threw load() exception
-java.lang.ArrayIndexOutOfBoundsException: 26220
-	at org.objectweb.asm.ClassReader.readClass(Unknown Source)
-	at org.objectweb.asm.ClassReader.accept(Unknown Source)
-	at org.objectweb.asm.ClassReader.accept(Unknown Source)
-	at com.sun.jersey.spi.scanning.AnnotationScannerListener.onProcess(AnnotationScannerListener.java:133)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner$1.f(FileSchemeScanner.java:86)
-	at com.sun.jersey.core.util.Closing.f(Closing.java:71)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:83)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scanDirectory(FileSchemeScanner.java:80)
-	at com.sun.jersey.core.spi.scanning.uri.FileSchemeScanner.scan(FileSchemeScanner.java:71)
-	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:223)
-	at com.sun.jersey.core.spi.scanning.PackageNamesScanner.scan(PackageNamesScanner.java:139)
-	at com.sun.jersey.api.core.ScanningResourceConfig.init(ScanningResourceConfig.java:80)
-	at com.sun.jersey.api.core.PackagesResourceConfig.init(PackagesResourceConfig.java:104)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:78)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:89)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:698)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:676)
-	at com.sun.jersey.spi.container.servlet.WebComponent.init(WebComponent.java:201)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:373)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:556)
-	at javax.servlet.GenericServlet.init(GenericServlet.java:158)
-	at org.apache.catalina.core.StandardWrapper.initServlet(StandardWrapper.java:1188)
-	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:1132)
-	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:1021)
-	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:5085)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:5397)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:145)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1410)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1400)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
+	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:726)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-	at java.lang.Thread.run(Thread.java:750)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
+	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:209)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:872)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Catalina.start(Catalina.java:736)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342)
+	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)
 
-Jun 10, 2026 5:23:34 PM org.apache.coyote.AbstractProtocol start
-INFO: Starting ProtocolHandler ["http-nio-1912"]
-Jun 10, 2026 5:23:34 PM org.apache.coyote.AbstractProtocol start
-INFO: Starting ProtocolHandler ["ajp-nio-1913"]
-Jun 10, 2026 5:23:34 PM org.apache.catalina.startup.Catalina start
-INFO: Server startup in 59471 ms
+Jun 11, 2026 11:26:22 AM org.apache.catalina.core.StandardContext listenerStart
+SEVERE: Skipped installing application listeners due to previous error(s)
+Jun 11, 2026 11:26:22 AM org.apache.catalina.core.StandardContext startInternal
+SEVERE: One or more listeners failed to start. Full details will be found in the appropriate container log file
+Jun 11, 2026 11:26:22 AM org.apache.catalina.core.StandardContext startInternal
+SEVERE: Context [/FlightScheduleMob] startup failed due to previous errors
+Jun 11, 2026 11:26:22 AM org.apache.coyote.AbstractProtocol start
+INFO: Starting ProtocolHandler ["http-nio-4343"]
+Jun 11, 2026 11:26:22 AM org.apache.catalina.startup.Catalina start
+INFO: Server startup in [18789] milliseconds
 
 
  status = error
