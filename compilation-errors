@@ -1,3 +1,5 @@
+WARNING: Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [1,078] milliseconds.
+Jun 16, 2026 12:48:14 PM org.apache.catalina.core.ContainerBase startInternal
 SEVERE: A child container failed during start
 java.util.concurrent.ExecutionException: org.apache.catalina.LifecycleException: Failed to start component [StandardEngine[Catalina].StandardHost[localhost].StandardContext[/FlightScheduleMob]]
 	at java.util.concurrent.FutureTask.report(FutureTask.java:122)
@@ -34,18 +36,27 @@ Caused by: org.apache.catalina.LifecycleException: Failed to start component [St
 	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
 	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
 	... 21 more
-Caused by: java.lang.IllegalArgumentException: More than one fragment with the name [spring_web] was found. This is not legal with relative ordering. See section 8.2.2 2c of the Servlet specification for details. Consider using absolute ordering. Duplicate fragments found in [[file:/C:/Users/2000108345/OneDrive%20-%20Hexaware%20Technologies/Oman%20Air/FlightsWeb/workspace-new/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/FlightScheduleMob/WEB-INF/lib/spring-web-4.0.3.RELEASE.jar, file:/C:/Users/2000108345/OneDrive%20-%20Hexaware%20Technologies/Oman%20Air/FlightsWeb/workspace-new/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/FlightScheduleMob/WEB-INF/lib/spring-web-5.3.39.jar]].
-	at org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments(WebXml.java:2214)
-	at org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments(WebXml.java:2171)
-	at org.apache.catalina.startup.ContextConfig.webConfig(ContextConfig.java:1261)
-	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:971)
+Caused by: java.lang.NoClassDefFoundError: org/springframework/core/io/Resource
+	at java.lang.Class.getDeclaredFields0(Native Method)
+	at java.lang.Class.privateGetDeclaredFields(Class.java:2583)
+	at java.lang.Class.getDeclaredFields(Class.java:1916)
+	at org.apache.catalina.util.Introspection.getDeclaredFields(Introspection.java:90)
+	at org.apache.catalina.startup.WebAnnotationSet.loadFieldsAnnotation(WebAnnotationSet.java:197)
+	at org.apache.catalina.startup.WebAnnotationSet.loadApplicationListenerAnnotations(WebAnnotationSet.java:88)
+	at org.apache.catalina.startup.WebAnnotationSet.loadApplicationAnnotations(WebAnnotationSet.java:66)
+	at org.apache.catalina.startup.ContextConfig.applicationAnnotationsConfig(ContextConfig.java:317)
+	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:974)
 	at org.apache.catalina.startup.ContextConfig.lifecycleEvent(ContextConfig.java:288)
 	at org.apache.catalina.util.LifecycleBase.fireLifecycleEvent(LifecycleBase.java:109)
 	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4399)
 	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
 	... 27 more
+Caused by: java.lang.ClassNotFoundException: org.springframework.core.io.Resource
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
+	... 40 more
 
-Jun 15, 2026 12:32:31 PM org.apache.catalina.core.ContainerBase startInternal
+Jun 16, 2026 12:48:14 PM org.apache.catalina.core.ContainerBase startInternal
 SEVERE: A child container failed during start
 java.util.concurrent.ExecutionException: org.apache.catalina.LifecycleException: A child container failed during start
 	at java.util.concurrent.FutureTask.report(FutureTask.java:122)
@@ -90,18 +101,27 @@ Caused by: org.apache.catalina.LifecycleException: Failed to start component [St
 	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
 	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
 	... 21 more
-Caused by: java.lang.IllegalArgumentException: More than one fragment with the name [spring_web] was found. This is not legal with relative ordering. See section 8.2.2 2c of the Servlet specification for details. Consider using absolute ordering. Duplicate fragments found in [[file:/C:/Users/2000108345/OneDrive%20-%20Hexaware%20Technologies/Oman%20Air/FlightsWeb/workspace-new/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/FlightScheduleMob/WEB-INF/lib/spring-web-4.0.3.RELEASE.jar, file:/C:/Users/2000108345/OneDrive%20-%20Hexaware%20Technologies/Oman%20Air/FlightsWeb/workspace-new/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/FlightScheduleMob/WEB-INF/lib/spring-web-5.3.39.jar]].
-	at org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments(WebXml.java:2214)
-	at org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments(WebXml.java:2171)
-	at org.apache.catalina.startup.ContextConfig.webConfig(ContextConfig.java:1261)
-	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:971)
+Caused by: java.lang.NoClassDefFoundError: org/springframework/core/io/Resource
+	at java.lang.Class.getDeclaredFields0(Native Method)
+	at java.lang.Class.privateGetDeclaredFields(Class.java:2583)
+	at java.lang.Class.getDeclaredFields(Class.java:1916)
+	at org.apache.catalina.util.Introspection.getDeclaredFields(Introspection.java:90)
+	at org.apache.catalina.startup.WebAnnotationSet.loadFieldsAnnotation(WebAnnotationSet.java:197)
+	at org.apache.catalina.startup.WebAnnotationSet.loadApplicationListenerAnnotations(WebAnnotationSet.java:88)
+	at org.apache.catalina.startup.WebAnnotationSet.loadApplicationAnnotations(WebAnnotationSet.java:66)
+	at org.apache.catalina.startup.ContextConfig.applicationAnnotationsConfig(ContextConfig.java:317)
+	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:974)
 	at org.apache.catalina.startup.ContextConfig.lifecycleEvent(ContextConfig.java:288)
 	at org.apache.catalina.util.LifecycleBase.fireLifecycleEvent(LifecycleBase.java:109)
 	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4399)
 	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
 	... 27 more
+Caused by: java.lang.ClassNotFoundException: org.springframework.core.io.Resource
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
+	... 40 more
 
-Jun 15, 2026 12:32:31 PM org.apache.catalina.startup.Catalina start
+Jun 16, 2026 12:48:14 PM org.apache.catalina.startup.Catalina start
 SEVERE: The required Server component failed to start so Tomcat is unable to start.
 org.apache.catalina.LifecycleException: A child container failed during start
 	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:766)
@@ -149,20 +169,29 @@ Caused by: org.apache.catalina.LifecycleException: Failed to start component [St
 	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
 	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
 	... 21 more
-Caused by: java.lang.IllegalArgumentException: More than one fragment with the name [spring_web] was found. This is not legal with relative ordering. See section 8.2.2 2c of the Servlet specification for details. Consider using absolute ordering. Duplicate fragments found in [[file:/C:/Users/2000108345/OneDrive%20-%20Hexaware%20Technologies/Oman%20Air/FlightsWeb/workspace-new/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/FlightScheduleMob/WEB-INF/lib/spring-web-4.0.3.RELEASE.jar, file:/C:/Users/2000108345/OneDrive%20-%20Hexaware%20Technologies/Oman%20Air/FlightsWeb/workspace-new/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/FlightScheduleMob/WEB-INF/lib/spring-web-5.3.39.jar]].
-	at org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments(WebXml.java:2214)
-	at org.apache.tomcat.util.descriptor.web.WebXml.orderWebFragments(WebXml.java:2171)
-	at org.apache.catalina.startup.ContextConfig.webConfig(ContextConfig.java:1261)
-	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:971)
+Caused by: java.lang.NoClassDefFoundError: org/springframework/core/io/Resource
+	at java.lang.Class.getDeclaredFields0(Native Method)
+	at java.lang.Class.privateGetDeclaredFields(Class.java:2583)
+	at java.lang.Class.getDeclaredFields(Class.java:1916)
+	at org.apache.catalina.util.Introspection.getDeclaredFields(Introspection.java:90)
+	at org.apache.catalina.startup.WebAnnotationSet.loadFieldsAnnotation(WebAnnotationSet.java:197)
+	at org.apache.catalina.startup.WebAnnotationSet.loadApplicationListenerAnnotations(WebAnnotationSet.java:88)
+	at org.apache.catalina.startup.WebAnnotationSet.loadApplicationAnnotations(WebAnnotationSet.java:66)
+	at org.apache.catalina.startup.ContextConfig.applicationAnnotationsConfig(ContextConfig.java:317)
+	at org.apache.catalina.startup.ContextConfig.configureStart(ContextConfig.java:974)
 	at org.apache.catalina.startup.ContextConfig.lifecycleEvent(ContextConfig.java:288)
 	at org.apache.catalina.util.LifecycleBase.fireLifecycleEvent(LifecycleBase.java:109)
 	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4399)
 	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
 	... 27 more
+Caused by: java.lang.ClassNotFoundException: org.springframework.core.io.Resource
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
+	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
+	... 40 more
 
-Jun 15, 2026 12:32:31 PM org.apache.coyote.AbstractProtocol pause
+Jun 16, 2026 12:48:14 PM org.apache.coyote.AbstractProtocol pause
 INFO: Pausing ProtocolHandler ["http-nio-4343"]
-Jun 15, 2026 12:32:31 PM org.apache.catalina.core.StandardService stopInternal
+Jun 16, 2026 12:48:14 PM org.apache.catalina.core.StandardService stopInternal
 INFO: Stopping service [Catalina]
-Jun 15, 2026 12:32:31 PM org.apache.coyote.AbstractProtocol destroy
+Jun 16, 2026 12:48:14 PM org.apache.coyote.AbstractProtocol destroy
 INFO: Destroying ProtocolHandler ["http-nio-4343"]
