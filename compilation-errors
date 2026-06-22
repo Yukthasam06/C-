@@ -1,7 +1,8 @@
-22 Jun 2026 09:01:38,565 INFO : org.springframework.web.context.ContextLoader:257 [] - Root WebApplicationContext: initialization started
-22 Jun 2026 09:01:40,990 WARN : org.springframework.web.context.support.XmlWebApplicationContext:599 [] - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'flightBaseStationsDAO': Unsatisfied dependency expressed through field 'sessionFactory'; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.orm.hibernate4.LocalSessionFactoryBean] for bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
-22 Jun 2026 09:01:40,999 ERROR: org.springframework.web.context.ContextLoader:299 [] - Context initialization failed
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'flightBaseStationsDAO': Unsatisfied dependency expressed through field 'sessionFactory'; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.orm.hibernate4.LocalSessionFactoryBean] for bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
+INFO: Initializing Spring root WebApplicationContext
+22 Jun 2026 10:15:09,723 INFO : org.springframework.web.context.ContextLoader:257 [] - Root WebApplicationContext: initialization started
+22 Jun 2026 10:15:12,193 WARN : org.springframework.web.context.support.XmlWebApplicationContext:599 [] - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'flightBaseStationsDAO': Unsatisfied dependency expressed through field 'sessionFactory'; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.ui.velocity.VelocityEngineFactoryBean] for bean with name 'velocityEngine' defined in ServletContext resource [/WEB-INF/spring-servlet.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
+22 Jun 2026 10:15:12,196 ERROR: org.springframework.web.context.ContextLoader:299 [] - Context initialization failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'flightBaseStationsDAO': Unsatisfied dependency expressed through field 'sessionFactory'; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.ui.velocity.VelocityEngineFactoryBean] for bean with name 'velocityEngine' defined in ServletContext resource [/WEB-INF/spring-servlet.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:713) ~[spring-beans-5.3.39.jar:5.3.39]
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:693) ~[spring-beans-5.3.39.jar:5.3.39]
 	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:119) ~[spring-beans-5.3.39.jar:5.3.39]
@@ -49,7 +50,7 @@ org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating
 	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_422-422]
 	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342) [bootstrap.jar:9.0.118]
 	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473) [bootstrap.jar:9.0.118]
-Caused by: org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.orm.hibernate4.LocalSessionFactoryBean] for bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
+Caused by: org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.ui.velocity.VelocityEngineFactoryBean] for bean with name 'velocityEngine' defined in ServletContext resource [/WEB-INF/spring-servlet.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
 	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1557) ~[spring-beans-5.3.39.jar:5.3.39]
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.determineTargetType(AbstractAutowireCapableBeanFactory.java:704) ~[spring-beans-5.3.39.jar:5.3.39]
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.predictBeanType(AbstractAutowireCapableBeanFactory.java:674) ~[spring-beans-5.3.39.jar:5.3.39]
@@ -62,7 +63,7 @@ Caused by: org.springframework.beans.factory.CannotLoadBeanClassException: Canno
 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1311) ~[spring-beans-5.3.39.jar:5.3.39]
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:710) ~[spring-beans-5.3.39.jar:5.3.39]
 	... 46 more
-Caused by: java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
+Caused by: java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
 	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351) ~[catalina.jar:9.0.118]
 	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160) ~[catalina.jar:9.0.118]
 	at java.lang.Class.forName0(Native Method) ~[?:1.8.0_422-422]
@@ -82,9 +83,9 @@ Caused by: java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.
 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1311) ~[spring-beans-5.3.39.jar:5.3.39]
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:710) ~[spring-beans-5.3.39.jar:5.3.39]
 	... 46 more
-Jun 22, 2026 9:01:41 AM org.apache.catalina.core.StandardContext listenerStart
+Jun 22, 2026 10:15:12 AM org.apache.catalina.core.StandardContext listenerStart
 SEVERE: Exception sending context initialized event to listener instance of class [org.springframework.web.context.ContextLoaderListener]
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'flightBaseStationsDAO': Unsatisfied dependency expressed through field 'sessionFactory'; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.orm.hibernate4.LocalSessionFactoryBean] for bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'flightBaseStationsDAO': Unsatisfied dependency expressed through field 'sessionFactory'; nested exception is org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.ui.velocity.VelocityEngineFactoryBean] for bean with name 'velocityEngine' defined in ServletContext resource [/WEB-INF/spring-servlet.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:713)
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:693)
 	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:119)
@@ -132,7 +133,7 @@ org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating
 	at java.lang.reflect.Method.invoke(Method.java:498)
 	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342)
 	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)
-Caused by: org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.orm.hibernate4.LocalSessionFactoryBean] for bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
+Caused by: org.springframework.beans.factory.CannotLoadBeanClassException: Cannot find class [org.springframework.ui.velocity.VelocityEngineFactoryBean] for bean with name 'velocityEngine' defined in ServletContext resource [/WEB-INF/spring-servlet.xml]; nested exception is java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
 	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1557)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.determineTargetType(AbstractAutowireCapableBeanFactory.java:704)
 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.predictBeanType(AbstractAutowireCapableBeanFactory.java:674)
@@ -145,7 +146,7 @@ Caused by: org.springframework.beans.factory.CannotLoadBeanClassException: Canno
 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1311)
 	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:710)
 	... 46 more
-Caused by: java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.LocalSessionFactoryBean
+Caused by: java.lang.ClassNotFoundException: org.springframework.ui.velocity.VelocityEngineFactoryBean
 	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
 	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
 	at java.lang.Class.forName0(Native Method)
@@ -156,13 +157,13 @@ Caused by: java.lang.ClassNotFoundException: org.springframework.orm.hibernate4.
 	at org.springframework.beans.factory.support.AbstractBeanFactory.resolveBeanClass(AbstractBeanFactory.java:1549)
 	... 56 more
 
-Jun 22, 2026 9:01:41 AM org.apache.catalina.core.StandardContext startInternal
+Jun 22, 2026 10:15:12 AM org.apache.catalina.core.StandardContext startInternal
 SEVERE: One or more listeners failed to start. Full details will be found in the appropriate container log file
-Jun 22, 2026 9:01:41 AM org.apache.catalina.core.StandardContext startInternal
+Jun 22, 2026 10:15:12 AM org.apache.catalina.core.StandardContext startInternal
 SEVERE: Context [/FlightScheduleMob] startup failed due to previous errors
-Jun 22, 2026 9:01:41 AM org.apache.catalina.core.ApplicationContext log
+Jun 22, 2026 10:15:12 AM org.apache.catalina.core.ApplicationContext log
 INFO: Closing Spring root WebApplicationContext
-Jun 22, 2026 9:01:41 AM org.apache.coyote.AbstractProtocol start
+Jun 22, 2026 10:15:12 AM org.apache.coyote.AbstractProtocol start
 INFO: Starting ProtocolHandler ["http-nio-4343"]
-Jun 22, 2026 9:01:41 AM org.apache.catalina.startup.Catalina start
-INFO: Server startup in [31849] milliseconds
+Jun 22, 2026 10:15:12 AM org.apache.catalina.startup.Catalina start
+INFO: Server startup in [32862] milliseconds
