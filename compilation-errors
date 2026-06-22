@@ -428,3 +428,17 @@
 </project>
 
 Hibernate	-	4.3.5.Final → 5.6.15.Final; remove hibernate-entitymanager; Session.createCriteria() → CriteriaBuilder
+
+<servlet>
+		<servlet-name>ServletContainer</servlet-name>
+		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>aero.omanair;org.codehaus.jackson.jaxrs</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+			<param-value>aero.omanair.amadeus.ws.restful.filter.CORSFilter</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
