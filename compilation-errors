@@ -442,3 +442,6 @@ Hibernate	-	4.3.5.Final → 5.6.15.Final; remove hibernate-entitymanager; Sessio
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+5. Jersey (JAX-RS)	-	com.sun.jersey 1.13 → org.glassfish.jersey 2.43; Update web.xml, CORSFilter, imports
+
