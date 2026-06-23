@@ -18,6 +18,25 @@ hibernate.connection.pool_size=c3p0
         </property>
     </bean>
 
+<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${database.driverClassName}" />
+		<property name="url" value="${database.url}" />
+		<property name="username" value="${database.username}" />
+		<property name="password" value="${database.password}" />
+
+		<property name="maxActive" value="${database.maxActive}" />
+		<property name="maxIdle" value="${database.maxIdle}" />
+		<property name="minIdle" value="${database.minIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${database.timeBetweenEvictionRunsMillis}" />
+		<property name="minEvictableIdleTimeMillis" value="${database.minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="${database.validationQuery}" />
+		<property name="validationInterval" value="${database.validationInterval}" />
+		<property name="testOnBorrow" value="${database.testOnBorrow}" />
+		<property name="removeAbandoned" value="${database.removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${database.removeAbandonedTimeout}" />
+	</bean>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
