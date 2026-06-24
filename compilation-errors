@@ -1,9 +1,14 @@
- -------------------------------------------------------------
-[ERROR] COMPILATION ERROR : 
-[INFO] -------------------------------------------------------------
-[ERROR] \Users\2000108345\OneDrive - Hexaware Technologies\Oman Air\FlightsWeb\check-out-new\FlightScheduleMob\src\main\java\aero\omanair\flightschedule\serviceImpl\FlightStationStationServiceImpl.java:[12,23] error: package org.apache.log4j does not exist
-[ERROR] \Users\2000108345\OneDrive - Hexaware Technologies\Oman Air\FlightsWeb\check-out-new\FlightScheduleMob\src\main\java\aero\omanair\flightschedule\serviceImpl\FlightStationStationServiceImpl.java:[33,22] error: cannot find symbol
-[INFO] 2 errors 
+<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean>
+<bean id="environmentVariablesConfiguration"
+		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+		<property name="algorithm" value="PBEWithMD5AndDES" />
+		<property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD" />
+	</bean>
+<bean id="pbeStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean>
 
 database.validationQuery = SELECT 1
 database.validationInterval = 34000
