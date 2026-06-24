@@ -1,3 +1,43 @@
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
+public class DecryptPassword {
+
+    public static void main(String[] args) {
+
+        StandardPBEStringEncryptor encryptor =
+                new StandardPBEStringEncryptor();
+
+        encryptor.setPassword("your_master_password");
+
+        encryptor.setAlgorithm("PBEWithMD5AndDES");
+
+        String decrypted =
+                encryptor.decrypt("ABCDEF123456...");
+
+        System.out.println(decrypted);
+    }
+}
+
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+
+public class EncryptPassword {
+
+    public static void main(String[] args) {
+
+        StandardPBEStringEncryptor encryptor =
+                new StandardPBEStringEncryptor();
+
+        encryptor.setPassword("your_master_password");
+
+        encryptor.setAlgorithm("PBEWithMD5AndDES");
+
+        String encrypted =
+                encryptor.encrypt("MySqlPassword123");
+
+        System.out.println("ENC(" + encrypted + ")");
+    }
+}
+
 <bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
 		<property name="config" ref="environmentVariablesConfiguration" />
 	</bean>
