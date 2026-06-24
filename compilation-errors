@@ -1,3 +1,75 @@
+package aero.omanair.flightschedule.model;
+import java.io.Serializable;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+/**
+ * 
+ * @author ANANT TRIPATHI
+ *
+ */
+@Entity
+@Table(name = "FLIGHT_ROUTE_INFO")
+public class FlightRouteInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name = "ROUTE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int routeId;
+	
+	@Column(name = "FROM_STATION")
+	private String fromStation;
+	
+	@Column(name = "TO_STATION")
+	private String toStation;
+	
+	@OneToMany(mappedBy = "flightRouteInfo", cascade = CascadeType.ALL,fetch=FetchType.EAGER)
+	private Set<FlightConnectionInfo> flightConnectionInfo;
+
+	public int getRouteId() {
+		return routeId;
+	}
+
+	public void setRouteId(int routeId) {
+		this.routeId = routeId;
+	}
+
+	public String getFromStation() {
+		return fromStation;
+	}
+
+	public void setFromStation(String fromStation) {
+		this.fromStation = fromStation;
+	}
+
+	public String getToStation() {
+		return toStation;
+	}
+
+	public void setToStation(String toStation) {
+		this.toStation = toStation;
+	}
+
+	public Set<FlightConnectionInfo> getFlightConnectionInfo() {
+		return flightConnectionInfo;
+	}
+
+	public void setFlightConnectionInfo(Set<FlightConnectionInfo> flightConnectionInfo) {
+		this.flightConnectionInfo = flightConnectionInfo;
+	}
+
+}
+
 @Override
 	/**/public Set<String> getFromStations() {
 		Session session=null;
