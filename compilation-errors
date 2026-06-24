@@ -1,55 +1,14 @@
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-
-public class DecryptPassword {
-
-    public static void main(String[] args) {
-
-        StandardPBEStringEncryptor encryptor =
-                new StandardPBEStringEncryptor();
-
-        encryptor.setPassword("your_master_password");
-
-        encryptor.setAlgorithm("PBEWithMD5AndDES");
-
-        String decrypted =
-                encryptor.decrypt("ABCDEF123456...");
-
-        System.out.println(decrypted);
-    }
-}
-
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-
-public class EncryptPassword {
-
-    public static void main(String[] args) {
-
-        StandardPBEStringEncryptor encryptor =
-                new StandardPBEStringEncryptor();
-
-        encryptor.setPassword("your_master_password");
-
-        encryptor.setAlgorithm("PBEWithMD5AndDES");
-
-        String encrypted =
-                encryptor.encrypt("MySqlPassword123");
-
-        System.out.println("ENC(" + encrypted + ")");
-    }
-}
-
-<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
-		<property name="config" ref="environmentVariablesConfiguration" />
-	</bean>
-<bean id="environmentVariablesConfiguration"
-		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
-		<property name="algorithm" value="PBEWithMD5AndDES" />
-		<property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD" />
-	</bean>
-<bean id="pbeStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
-		<property name="config" ref="environmentVariablesConfiguration" />
-	</bean>
-
+Hibernate: select flightconn0_.ROUTE_ID_FK as route_id6_0_0_, flightconn0_.ID as id1_0_0_, flightconn0_.ID as id1_0_1_, flightconn0_.CIRCUILAR_BASE_STNS as circuila2_0_1_, flightconn0_.CONNECTION_BASE_STNS as connecti3_0_1_, flightconn0_.CONNECTION_TYPE as connecti4_0_1_, flightconn0_.ROUTE_ID_FK as route_id6_0_1_, flightconn0_.NO_BASE_STN as no_base_5_0_1_ from FLIGHT_CONNECTION_INFO flightconn0_ where flightconn0_.ROUTE_ID_FK=?
+24 Jun 2026 21:53:30,214 WARN : org.hibernate.engine.jdbc.spi.SqlExceptionHelper:137 [] - SQL Error: 0, SQLState: null
+24 Jun 2026 21:53:30,214 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper:142 [] - Connection has already been closed.
+24 Jun 2026 21:53:30,214 ERROR: aero.omanair.flightschedule.daoImpl.FlightToStationDAOImpl:124 [] - EXCEPTION :-org.hibernate.exception.GenericJDBCException: could not prepare statement
+javax.persistence.PersistenceException: org.hibernate.exception.GenericJDBCException: could not prepare statement
+	at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:154)
+	at org.hibernate.query.internal.AbstractProducedQuery.list(AbstractProducedQuery.java:1626)
+	at aero.omanair.flightschedule.daoImpl.FlightToStationDAOImpl.getFromStations(FlightToStationDAOImpl.java:112)
+	at aero.omanair.flightschedule.serviceImpl.FlightStationStationServiceImpl.getStations(FlightStationStationServiceImpl.java:108)
+	at aero.omanair.flightschedule.schedulerService.FlightScheduleRestController.flightBaseStationDetails(FlightScheduleRestController.java:60)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 database.validationQuery = SELECT 1
 database.validationInterval = 34000
 database.testOnBorrow = true
