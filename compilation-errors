@@ -1,3 +1,9 @@
+database.validationQuery = SELECT 1
+database.validationInterval = 34000
+database.testOnBorrow = true
+database.removeAbandoned = true
+database.removeAbandonedTimeout = 55
+
 <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 		destroy-method="close">
 		<property name="driverClassName" value="${database.driverClassName}" />
