@@ -1,3 +1,10 @@
+<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>7.0</version> <!-- Put here the version of your Java EE app, in my case 7.0 -->
+			<scope>provided</scope>
+		</dependency>
+
 database.validationQuery = SELECT 1
 database.validationInterval = 34000
 database.testOnBorrow = true
