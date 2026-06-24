@@ -1,3 +1,10 @@
+<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<version>${mysql-connector-java.version}</version>
+		</dependency>
+<mysql-connector-java.version>8.4.0</mysql-connector-java.version>
+
 Hibernate: select flightconn0_.ROUTE_ID_FK as route_id6_0_0_, flightconn0_.ID as id1_0_0_, flightconn0_.ID as id1_0_1_, flightconn0_.CIRCUILAR_BASE_STNS as circuila2_0_1_, flightconn0_.CONNECTION_BASE_STNS as connecti3_0_1_, flightconn0_.CONNECTION_TYPE as connecti4_0_1_, flightconn0_.ROUTE_ID_FK as route_id6_0_1_, flightconn0_.NO_BASE_STN as no_base_5_0_1_ from FLIGHT_CONNECTION_INFO flightconn0_ where flightconn0_.ROUTE_ID_FK=?
 24 Jun 2026 11:19:49,157 WARN : org.hibernate.engine.jdbc.spi.SqlExceptionHelper:137 [] - SQL Error: 0, SQLState: S1000
 24 Jun 2026 11:19:49,161 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper:142 [] - Not a navigable ResultSet.
