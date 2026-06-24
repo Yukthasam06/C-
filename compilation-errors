@@ -5,6 +5,164 @@
 		</dependency>
 <mysql-connector-java.version>8.4.0</mysql-connector-java.version>
 
+@Entity
+@Table(name = "FLIGHT_ROUTE_INFO")
+public class FlightRouteInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name = "ROUTE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int routeId;
+	
+	@Column(name = "FROM_STATION")
+	private String fromStation;
+	
+	@Column(name = "TO_STATION")
+	private String toStation;
+	
+	@OneToMany(mappedBy = "flightRouteInfo", cascade = CascadeType.ALL,fetch=FetchType.EAGER)
+	private Set<FlightConnectionInfo> flightConnectionInfo;
+
+	public int getRouteId() {
+		return routeId;
+	}
+
+	public void setRouteId(int routeId) {
+		this.routeId = routeId;
+	}
+
+	public String getFromStation() {
+		return fromStation;
+	}
+
+	public void setFromStation(String fromStation) {
+		this.fromStation = fromStation;
+	}
+
+	public String getToStation() {
+		return toStation;
+	}
+
+	public void setToStation(String toStation) {
+		this.toStation = toStation;
+	}
+
+	public Set<FlightConnectionInfo> getFlightConnectionInfo() {
+		return flightConnectionInfo;
+	}
+
+	public void setFlightConnectionInfo(Set<FlightConnectionInfo> flightConnectionInfo) {
+		this.flightConnectionInfo = flightConnectionInfo;
+	}
+
+}
+@Entity
+@Table(name = "FLIGHT_CONNECTION_INFO")
+public class FlightConnectionInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@Column(name = "ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int Id;
+	
+	@Column(name = "CONNECTION_TYPE")
+	private String connectionType;
+	
+	@Column(name = "NO_BASE_STN")
+	private String noOfBaseStns;
+	
+	@Column(name = "CONNECTION_BASE_STNS")
+	private String connectionBaseStns;
+	
+	@Column(name = "CIRCUILAR_BASE_STNS")
+	private String circuilarBaseStns;
+	
+	@ManyToOne
+    @JoinColumn(name = "ROUTE_ID_FK", nullable=false)
+	private FlightRouteInfo flightRouteInfo;
+
+	public int getId() {
+		return Id;
+	}
+
+	public void setId(int id) {
+		Id = id;
+	}
+
+	public String getConnectionType() {
+		return connectionType;
+	}
+
+	public void setConnectionType(String connectionType) {
+		this.connectionType = connectionType;
+	}
+
+	public String getNoOfBaseStns() {
+		return noOfBaseStns;
+	}
+
+	public void setNoOfBaseStns(String noOfBaseStns) {
+		this.noOfBaseStns = noOfBaseStns;
+	}
+
+	public String getConnectionBaseStns() {
+		return connectionBaseStns;
+	}
+
+	public void setConnectionBaseStns(String connectionBaseStns) {
+		this.connectionBaseStns = connectionBaseStns;
+	}
+
+	public String getCircuilarBaseStns() {
+		return circuilarBaseStns;
+	}
+
+	public void setCircuilarBaseStns(String circuilarBaseStns) {
+		this.circuilarBaseStns = circuilarBaseStns;
+	}
+
+	public FlightRouteInfo getFlightRouteInfo() {
+		return flightRouteInfo;
+	}
+
+	public void setFlightRouteInfo(FlightRouteInfo flightRouteInfo) {
+		this.flightRouteInfo = flightRouteInfo;
+	}
+	
+}
+
+public Set<String> getFromStations() {
+		Session session=null;
+		List<FlightRouteInfo> fromStationsList=null;
+		Set<String> stationInfo =null;
+		try {
+			session = sessionFactory.openSession();
+			Query query=session.createQuery("from FlightRouteInfo");
+			fromStationsList = query.list();
+			if(null!=fromStationsList && fromStationsList.size()>0){
+				stationInfo=new HashSet<String>();
+				for (FlightRouteInfo flightRouteVo : fromStationsList) {
+				//	LOGGER.info("CONNECTION DETAILS ==>>>"+flightRouteVo.getFlightConnectionInfo().toString());
+				//	LOGGER.info("CONNECTION LENGTH ==>>>"+flightRouteVo.getFlightConnectionInfo().size());
+					if(flightRouteVo.getFlightConnectionInfo() != null && flightRouteVo.getFlightConnectionInfo().size() >0){
+						stationInfo.add(flightRouteVo.getFromStation());
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION :-"+ e.getMessage(),e);
+		}finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		return stationInfo;
+	}
+
 Hibernate: select flightconn0_.ROUTE_ID_FK as route_id6_0_0_, flightconn0_.ID as id1_0_0_, flightconn0_.ID as id1_0_1_, flightconn0_.CIRCUILAR_BASE_STNS as circuila2_0_1_, flightconn0_.CONNECTION_BASE_STNS as connecti3_0_1_, flightconn0_.CONNECTION_TYPE as connecti4_0_1_, flightconn0_.ROUTE_ID_FK as route_id6_0_1_, flightconn0_.NO_BASE_STN as no_base_5_0_1_ from FLIGHT_CONNECTION_INFO flightconn0_ where flightconn0_.ROUTE_ID_FK=?
 24 Jun 2026 11:19:49,157 WARN : org.hibernate.engine.jdbc.spi.SqlExceptionHelper:137 [] - SQL Error: 0, SQLState: S1000
 24 Jun 2026 11:19:49,161 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper:142 [] - Not a navigable ResultSet.
