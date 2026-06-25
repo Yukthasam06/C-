@@ -1,49 +1,238 @@
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	id="flightschedulemob" version="2.5">
-	<display-name>FlightScheduleMob</display-name>
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/applicationContext.xml,/WEB-INF/spring-servlet.xml</param-value>
-	</context-param>
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>aero.omanair</groupId>
+	<artifactId>FlightScheduleMob</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>FlightScheduleMob Maven Webapp</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<spring.version>5.3.39</spring.version>
+		<jdk.version>1.8</jdk.version>
+		<hibernate-version>5.6.15.Final</hibernate-version>
+		<mysql-connector-java.version>8.4.0</mysql-connector-java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency> -->
+		
+		
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.25.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.25.4</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-jcl -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>2.25.4</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>5.6.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.olap4j</groupId>
+					<artifactId>olap4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency> -->
+		<!-- https://mvnrepository.com/artifact/com.lowagie.org.olap4j/olap4j -->
+		<!-- <dependency>
+			<groupId>org.olap4j</groupId>
+			<artifactId>olap4j</artifactId>
+			<version>0.9.7.309-JS-3</version>
+			<scope>compile</scope>
+		</dependency> -->
 
-	<servlet>
-		<servlet-name>spring</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>spring</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>ServletContainer</servlet-name>
-		<servlet-class>com.glassfish.jersey.servlet.ServletContainer</servlet-class>
-		<init-param>
-			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>aero.omanair</param-value>
-		</init-param>
-		<!-- <init-param>
-			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>aero.omanair.amadeus.ws.restful.filter.CORSFilter</param-value>
-		</init-param> -->
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ServletContainer</servlet-name>
-		<url-pattern>/REST/*</url-pattern>
-	</servlet-mapping>
+		<!-- <dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>5.6.1</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
+		</dependency> -->
+		<!-- JSTL -->
+		<!-- <dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version> just used the latest version, make sure you use the one you need
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jstl</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency> -->
+		<!-- ***<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.1</version>
+			<scope>provided</scope>
+		</dependency> -->
+		<!-- Spring framework -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
 
-	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
-	</welcome-file-list>
-</web-app>
+		<!-- <dependency>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.1.2</version>
+		</dependency> -->
 
-<!-- <dependency>
+		<!--Hibernate framework -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>1.6.1</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>org.hibernate.common</groupId>
+			<artifactId>hibernate-commons-annotations</artifactId>
+			<version>4.0.5.Final</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.1-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>javax.persistence-api</artifactId>
+			<version>2.2</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.18.1-GA</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.2.2</version>
+		</dependency> -->
+		<!-- Hibernate search -->
+		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-search</artifactId> 
+			<version>4.5.3.Final</version> </dependency> -->
+
+		<!-- Hibernate library dependecy start -->
+		<!-- <dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>1.1</version>
+		</dependency> -->
+
+		<!-- <dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency> -->
+
+
+		<!-- <dependency>
+			<groupId>antlr</groupId>
+			<artifactId>antlr</artifactId>
+			<version>2.7.7</version>
+		</dependency> -->
+
+		<!-- Hibernate query library dependecy end -->
+
+		<!--jackson jars -->
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.18.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.18.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.18.2</version>
+		</dependency>
+		<!-- <dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
 			<version>1.9.13</version>
@@ -62,213 +251,204 @@
 		<dependency>
 		    <groupId>org.glassfish.jersey.containers</groupId>
 		    <artifactId>jersey-container-servlet</artifactId>
-		    <version>2.39.1</version>
+		    <version>2.43</version>
 		</dependency>
 		
 		<dependency>
 		    <groupId>org.glassfish.jersey.media</groupId>
 		    <artifactId>jersey-media-json-jackson</artifactId>
-		    <version>2.39.1</version>
+		    <version>2.43</version>
 		</dependency>
 		
 		<dependency>
 		    <groupId>org.glassfish.jersey.inject</groupId>
 		    <artifactId>jersey-hk2</artifactId>
-		    <version>2.39.1</version>
+		    <version>2.43</version>
 		</dependency>
 		<!-- <dependency>
 			<groupId>asm</groupId>
 			<artifactId>asm</artifactId>
 			<version>3.3.1</version>
 		</dependency> -->
+		<!-- jackson end -->
+		<!-- <dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>7.0</version> Put here the version of your Java EE app, in my case 7.0
+			<scope>provided</scope>
+		</dependency> -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.6.4</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.7</version>
+		</dependency> -->
 
-Jun 25, 2026 11:34:49 AM org.apache.catalina.core.ApplicationContext log
-INFO: Marking servlet [ServletContainer] as unavailable
-Jun 25, 2026 11:34:49 AM org.apache.catalina.core.StandardContext loadOnStartup
-SEVERE: Servlet [ServletContainer] in web application [/FlightScheduleMob] threw load() exception
-java.lang.ClassNotFoundException: com.glassfish.jersey.servlet.ServletContainer
-	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
-	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
-	at org.apache.catalina.core.DefaultInstanceManager.loadClass(DefaultInstanceManager.java:484)
-	at org.apache.catalina.core.DefaultInstanceManager.loadClassMaybePrivileged(DefaultInstanceManager.java:466)
-	at org.apache.catalina.core.DefaultInstanceManager.newInstance(DefaultInstanceManager.java:142)
-	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:900)
-	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:840)
-	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:4226)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4527)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
-	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
-	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:726)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
-	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
-	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:209)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:872)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.startup.Catalina.start(Catalina.java:736)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342)
-	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt-spring3</artifactId>
+			<version>1.9.3</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.2.0.Alpha1</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-api</artifactId>
+			<version>7.0.37</version>
+			<scope>provided</scope>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.5.5</version>
+		</dependency> -->
+		<!-- Quartz scheduler -->
+		<!-- <dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.1.5</version>
+		</dependency> -->
 
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	id="flightschedulemob" version="2.5">
-	<display-name>FlightScheduleMob</display-name>
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/applicationContext.xml,/WEB-INF/spring-servlet.xml</param-value>
-	</context-param>
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
+		<!-- <dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jobs</artifactId>
+			<version>2.2.0</version>
+		</dependency> -->
 
-	<servlet>
-		<servlet-name>spring</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>spring</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>ServletContainer</servlet-name>
-		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-		<init-param>
-			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>aero.omanair;org.codehaus.jackson.jaxrs</param-value>
-		</init-param>
-		<init-param>
-			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>aero.omanair.amadeus.ws.restful.filter.CORSFilter</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ServletContainer</servlet-name>
-		<url-pattern>/REST/*</url-pattern>
-	</servlet-mapping>
+		<!-- velocity -->
+		<!-- <dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity-tools</artifactId>
+			<version>2.0</version>
+		</dependency> -->
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<!-- MySQL database driver -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<version>${mysql-connector-java.version}</version>
+		</dependency>
 
-	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
-	</welcome-file-list>
-</web-app>
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>1.9.3</version>
+		</dependency>
+		<!-- EhCache Core APIs -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
+			<version>2.6.11</version>
+		</dependency>
+		<!-- Hibernate Integration EhCache API -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency>
+		<!-- Gson Dependency -->
 
-Jun 25, 2026 10:33:08 AM org.apache.catalina.core.ApplicationContext log
-SEVERE: Servlet.init() for servlet [ServletContainer] threw exception
-java.lang.NoClassDefFoundError: org/objectweb/asm/ClassVisitor
-	at com.sun.jersey.api.core.ScanningResourceConfig.init(ScanningResourceConfig.java:79)
-	at com.sun.jersey.api.core.PackagesResourceConfig.init(PackagesResourceConfig.java:104)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:78)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:89)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:698)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:676)
-	at com.sun.jersey.spi.container.servlet.WebComponent.init(WebComponent.java:201)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:373)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:556)
-	at javax.servlet.GenericServlet.init(GenericServlet.java:143)
-	at org.apache.catalina.core.StandardWrapper.initServlet(StandardWrapper.java:986)
-	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:943)
-	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:840)
-	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:4226)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4527)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
-	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
-	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:726)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
-	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
-	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:209)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:872)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.startup.Catalina.start(Catalina.java:736)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342)
-	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)
-Caused by: java.lang.ClassNotFoundException: org.objectweb.asm.ClassVisitor
-	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
-	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
-	... 43 more
+		<!-- <dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.7</version>
+		</dependency> -->
 
-Jun 25, 2026 10:33:08 AM org.apache.catalina.core.StandardContext loadOnStartup
-SEVERE: Servlet [ServletContainer] in web application [/FlightScheduleMob] threw load() exception
-java.lang.ClassNotFoundException: org.objectweb.asm.ClassVisitor
-	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1351)
-	at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1160)
-	at com.sun.jersey.api.core.ScanningResourceConfig.init(ScanningResourceConfig.java:79)
-	at com.sun.jersey.api.core.PackagesResourceConfig.init(PackagesResourceConfig.java:104)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:78)
-	at com.sun.jersey.api.core.PackagesResourceConfig.<init>(PackagesResourceConfig.java:89)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:698)
-	at com.sun.jersey.spi.container.servlet.WebComponent.createResourceConfig(WebComponent.java:676)
-	at com.sun.jersey.spi.container.servlet.WebComponent.init(WebComponent.java:201)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:373)
-	at com.sun.jersey.spi.container.servlet.ServletContainer.init(ServletContainer.java:556)
-	at javax.servlet.GenericServlet.init(GenericServlet.java:143)
-	at org.apache.catalina.core.StandardWrapper.initServlet(StandardWrapper.java:986)
-	at org.apache.catalina.core.StandardWrapper.loadServlet(StandardWrapper.java:943)
-	at org.apache.catalina.core.StandardWrapper.load(StandardWrapper.java:840)
-	at org.apache.catalina.core.StandardContext.loadOnStartup(StandardContext.java:4226)
-	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4527)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
-	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
-	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:726)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
-	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
-	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
-	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
-	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:209)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:872)
-	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
-	at org.apache.catalina.startup.Catalina.start(Catalina.java:736)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342)
-	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)
+	</dependencies>
+	<repositories>
+		<repository>
+		<id>flightsweb-repo</id>
+		<url>https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+		</repository>
+	</repositories>
+	<distributionManagement>
+		<repository>
+		<id>flightsweb-repo</id>
+		<url>https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+		</repository>	  
+	</distributionManagement>
+
+	<build>
+		<finalName>FlightScheduleMob</finalName>
+		<plugins>
+			<!-- Eclipse project -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<!-- Always download and attach dependencies source code -->
+					<downloadSources>false</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+					<!-- Avoid type mvn eclipse:eclipse -Dwtpversion=2.0 -->
+					<wtpversion>2.0</wtpversion>
+
+					<useProjectReferences>true</useProjectReferences>
+				</configuration>
+			</plugin>
+
+			<!-- Set JDK Compiler Level -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<encoding>Cp1252</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<packagingIncludes></packagingIncludes>
+					<!-- <packagingExcludes>
+						%regex[WEB-INF/lib/(mysql-connector-java-5.*.jar).*]
+					</packagingExcludes> -->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
 
 
 database.initialSize = 25
