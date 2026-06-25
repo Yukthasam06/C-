@@ -1,11 +1,10 @@
 
-@RequestMapping(value = "/stations", method = RequestMethod.POST)
-	public @ResponseBody ResponseMessageSingle flightBaseStationDetails() {
-		
-@RequestMapping(value = "/flightSearchInformation", method = RequestMethod.POST)
-	public @ResponseBody ResponseMessageSingle getFlightSearchInformation(
-			@RequestParam("fromStation") String fromStation, @RequestParam("toStation") String toStation) {
-	
+Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.3.2:compile (default-compile) on project FlightScheduleMob: Compilation failure: Compilation failure:
+[ERROR] \Users\2000108345\OneDrive - Hexaware Technologies\Oman Air\FlightsWeb\check-out-new\FlightScheduleMob\src\main\java\aero\omanair\flightschedule\serviceImpl\FlightStationStationServiceImpl.java:[12,23] error: package org.apache.log4j does not exist
+[ERROR] \Users\2000108345\OneDrive - Hexaware Technologies\Oman Air\FlightsWeb\check-out-new\FlightScheduleMob\src\main\java\aero\omanair\flightschedule\serviceImpl\FlightStationStationServiceImpl.java:[33,22] error: cannot find symbol
+[ERROR] -> [Help 1]
+[ERROR] 
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
