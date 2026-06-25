@@ -1,9 +1,19 @@
 
-Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.3.2:compile (default-compile) on project FlightScheduleMob: Compilation failure: Compilation failure:
-[ERROR] \Users\2000108345\OneDrive - Hexaware Technologies\Oman Air\FlightsWeb\check-out-new\FlightScheduleMob\src\main\java\aero\omanair\flightschedule\serviceImpl\FlightStationStationServiceImpl.java:[12,23] error: package org.apache.log4j does not exist
-[ERROR] \Users\2000108345\OneDrive - Hexaware Technologies\Oman Air\FlightsWeb\check-out-new\FlightScheduleMob\src\main\java\aero\omanair\flightschedule\serviceImpl\FlightStationStationServiceImpl.java:[33,22] error: cannot find symbol
-[ERROR] -> [Help 1]
-[ERROR] 
+<bean
+		class="org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer">
+		<constructor-arg ref="configurationEncryptor" />
+		<property name="location"
+			value="classpath:/application.properties" />
+	</bean>
+
+	<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean>
+	<bean id="environmentVariablesConfiguration"
+		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+		<property name="algorithm" value="PBEWithMD5AndDES" />
+		<property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD" />
+	</bean>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
