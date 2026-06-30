@@ -1,14 +1,113 @@
-0 Jun 2026 15:44:48,170 ERROR: aero.omanair.flightschedule.daoImpl.FlightToStationDAOImpl:124 [] - EXCEPTION :-Could not obtain transaction-synchronized Session for current thread
-org.hibernate.HibernateException: Could not obtain transaction-synchronized Session for current thread
-	at org.springframework.orm.hibernate5.SpringSessionContext.currentSession(SpringSessionContext.java:142)
-	at org.hibernate.internal.SessionFactoryImpl.getCurrentSession(SessionFactoryImpl.java:508)
-	at aero.omanair.flightschedule.daoImpl.FlightToStationDAOImpl.getFromStations(FlightToStationDAOImpl.java:110)
-	at aero.omanair.flightschedule.serviceImpl.FlightStationStationServiceImpl.getStations(FlightStationStationServiceImpl.java:111)
-	at aero.omanair.flightschedule.schedulerService.FlightScheduleRestController.flightBaseStationDetails(FlightScheduleRestController.java:60)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.re
+package aero.omanair.flightschedule.serviceImpl;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import aero.omanair.flightschedule.dao.FlightScheduleDAO;
+import aero.omanair.flightschedule.dao.FlightStationsDAO;
+import aero.omanair.flightschedule.dao.FlightToStationDAO;
+import aero.omanair.flightschedule.model.FlightRouteInfo;
+import aero.omanair.flightschedule.model.Stations;
+import aero.omanair.flightschedule.service.FlightStationStationService;
+import aero.omanair.flightschedule.util.DataConversionHelper;
+import aero.omanair.flightschedule.util.DataFormatUtils;
+//import aero.omanair.flightschedule.vo.FlightToStationVo;
+import aero.omanair.flightschedule.vo.StationsVo;
+
+/**
+ * @author ANANT TRIPATHI
+ *
+ */
+@Service("flightToStationService")
+public class FlightStationStationServiceImpl implements FlightStationStationService {
+
+	private static final Logger LOGGER = LogManager.getLogger(FlightStationStationServiceImpl.class);
+
+	@Resource(name = "flightToStationDAO")
+	private FlightToStationDAO flightToStationDAO;
+
+	@Resource(name = "flightScheduleDAO")
+	private FlightScheduleDAO flightScheduleDAO;
+
+	@Resource(name = "flightStationsDAO")
+	private FlightStationsDAO flightStationsDAO;
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see aero.omanair.flightschedule.service.FlightScheduleService#findAll()
+	 */
+	@Transactional(readOnly = true)
+	/**/public List<StationsVo> getStations() {
+		List<StationsVo> populateStation = null;
+		Set<String> toFlightList = null;
+		try {
+			List<Stations> stations= flightStationsDAO.getStations();
+			toFlightList = flightToStationDAO.getFromStations();
+			if (null != stations && stations.size()>0){
+				populateStation = DataConversionHelper.populateStationInformations(stations,toFlightList);
+				LOGGER.info("stationInfo list : -"+populateStation.size());
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN GETSTATIONS :-" + e.getMessage(), e);
+		}
+		return populateStation;
+	}
+}
+
+public interface FlightStationStationService {
+	
+	public List<StationsVo> getStations();
+}
+
+@Controller
+@RequestMapping("/flightSearch")
+public class FlightScheduleRestController {
+
+	private static final Logger LOGGER = LogManager.getLogger(FlightScheduleRestController.class);
+
+	@Resource(name = "flightScheduleService")
+	private FlightScheduleService flightScheduleService;
+
+	@Resource(name = "flightToStationService")
+	private FlightStationStationService flightStationService;
+@RequestMapping(value = "/stations", method = RequestMethod.POST)
+	public @ResponseBody ResponseMessageSingle flightBaseStationDetails() {
+		LOGGER.info("#########################FLIGHT SEARCH RENDERING####################################");
+		ResponseMessageSingle response = new ResponseMessageSingle();
+		List<StationsVo> stationList = null;
+		try {
+			stationList = flightStationService.getStations();
+		}catch (Exception e) {
+			LOGGER.error("EXCEPTION :-" + e.getMessage(), e);
+			response.setStatus("EXCEPTION" + e.getMessage());
+			response.setMsg("Internal  server error,");
+			response.setCode("500");
+			response.setData(" ");
+			return response;
+		}
+		LOGGER.info("fromStationList" + stationList.size());
+		LOGGER.info("#########################FLIGHT SEARCH END ####################################");
+		response.setStatus("success");
+		response.setMsg("stationList");
+		response.setCode("200");
+		response.setData(stationList);
+		return response;
+	}
+}
+
+	
 <beans
     xmlns="http://www.springframework.org/schema/beans"
     xmlns:context="http://www.springframework.org/schema/context"
