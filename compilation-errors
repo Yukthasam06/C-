@@ -1,3 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+	<task:annotation-driven />
+	<context:component-scan base-package="aero.omanair"></context:component-scan>
+	<context:annotation-config/>
+	<!-- <context:property-placeholder location="classpath:/db.properties" /> -->
+	
+	
+	 <bean
+		class="org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer">
+		<constructor-arg ref="configurationEncryptor" />
+		<property name="location"
+			value="classpath:/application.properties" />
+	</bean>
+
+	<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean>
+	<bean id="environmentVariablesConfiguration"
+		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+		<property name="algorithm" value="PBEWithMD5AndDES" />
+		<property name="passwordEnvName" value="APP_ENCRYPTION_PASSWORD" />
+		<!-- <property name="password" value="ffpenckey"/> -->
+	</bean>
+	<bean id="pbeStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+		<property name="config" ref="environmentVariablesConfiguration" />
+	</bean> 
+
+	<!-- Hibernate session factory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="aero.omanair.flightschedule.model" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.connection.pool_size">${hibernate.connection.pool_size}</prop>
+                <prop key="hibernate.cache.use_second_level_cache">${hibernate.cache.use_second_level_cache}</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">${net.sf.ehcache.configurationResourceName}</prop>
+                <prop key="hibernate.cache.region.factory_class">${hibernate.cache.region.factory_class}</prop>
+                
+            </props>
+        </property>
+    </bean>
+
+	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${database.driverClassName}" />
+		<property name="url" value="${database.url}" />
+		<property name="username" value="${database.username}" />
+		<property name="password" value="${database.password}" />
+
+		<property name="maxActive" value="${database.maxActive}" />
+		<property name="maxIdle" value="${database.maxIdle}" />
+		<property name="minIdle" value="${database.minIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${database.timeBetweenEvictionRunsMillis}" />
+		<property name="minEvictableIdleTimeMillis" value="${database.minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="${database.validationQuery}" />
+		<property name="validationInterval" value="${database.validationInterval}" />
+		<property name="testOnBorrow" value="${database.testOnBorrow}" />
+		<property name="removeAbandoned" value="${database.removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${database.removeAbandonedTimeout}" />
+	</bean>
+</beans>
+
 Jun 2026 14:47:55,949 WARN : org.hibernate.engine.jdbc.spi.SqlExceptionHelper:137 [] - SQL Error: 0, SQLState: S1000
 30 Jun 2026 14:47:56,008 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper:142 [] - Operation not allowed after ResultSet closed
 30 Jun 2026 14:47:56,342 ERROR: aero.omanair.flightschedule.daoImpl.FlightToStationDAOImpl:124 [] - EXCEPTION :-org.hibernate.exception.GenericJDBCException: could not initialize a collection: [aero.omanair.flightschedule.model.FlightRouteInfo.flightConnectionInfo#10189]
