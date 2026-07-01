@@ -1,3 +1,35 @@
+@Service("flightToStationService")
+@Transactional(readOnly = true)
+public class FlightStationStationServiceImpl implements FlightStationStationService {
+
+	private static final Logger LOGGER = LogManager.getLogger(FlightStationStationServiceImpl.class);
+
+	@Resource(name = "flightToStationDAO")
+	private FlightToStationDAO flightToStationDAO;
+
+	@Resource(name = "flightScheduleDAO")
+	private FlightScheduleDAO flightScheduleDAO;
+
+	@Resource(name = "flightStationsDAO")
+	private FlightStationsDAO flightStationsDAO;
+	/**/public List<StationsVo> getStations() {
+		List<StationsVo> populateStation = null;
+		Set<String> toFlightList = null;
+		try {
+			List<Stations> stations= flightStationsDAO.getStations();
+			toFlightList = flightToStationDAO.getFromStations();
+			if (null != stations && stations.size()>0){
+				populateStation = DataConversionHelper.populateStationInformations(stations,toFlightList);
+				LOGGER.info("stationInfo list : -"+populateStation.size());
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN GETSTATIONS :-" + e.getMessage(), e);
+		}
+		return populateStation;
+	}
+	
+	
+}
 @Override
 	/**/public Set<String> getFromStations() {
 		Session session=null;
