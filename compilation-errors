@@ -1,3 +1,18 @@
+database.driverClassName = com.mysql.cj.jdbc.Driver
+database.url = jdbc:mysql://10.241.3.156:3306/flight_schedule_db
+database.type = javax.sql.DataSource
+database.initialSize = 25
+database.maxActive = 377
+database.maxIdle = 233
+database.minIdle = 89
+database.timeBetweenEvictionRunsMillis = 34000
+database.minEvictableIdleTimeMillis = 55000
+database.validationQuery = SELECT 1
+database.validationInterval = 34000
+database.testOnBorrow = true
+database.removeAbandoned = true
+database.removeAbandonedTimeout = 120
+
 @Override
 	/**/public Set<String> getFromStations() {
 		Session session=null;
