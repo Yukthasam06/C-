@@ -1,3 +1,5 @@
+aero.omanair.flightschedule.model.FlightRouteInfo@c56bca8
+
 @Entity
 @Table(name = "FLIGHT_ROUTE_INFO")
 public class FlightRouteInfo implements Serializable {
