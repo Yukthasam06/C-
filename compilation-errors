@@ -1,3 +1,12 @@
+hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+hibernate.hbm2ddl.auto=update
+hibernate.show_sql=true
+hibernate.connection.pool_size=c3p0
+hibernate.cache.use_second_level_cache=true
+net.sf.ehcache.configurationResourceName=ehcache.xml
+hibernate.cache.region.factory_class=org.hibernate.cache.ehcache.EhCacheRegionFactory
+hibernate.current_session_context_class=org.springframework.orm.hibernate5.SpringSessionContext
+
 System.out.println(Hibernate.isInitialized(route.getFlightConnectionInfo()));
 
 Hibernate.initialize(route.getFlightConnectionInfo());
