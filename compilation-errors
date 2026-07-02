@@ -1,3 +1,145 @@
+@Entity
+@Table(name="st_ssim_record_type_new3")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+public class SSIMRecordType3 implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+    @Column(name = "UNIQ_ID")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+	private int uniqueId;
+	
+	@Column(name = "ARLN_DSGNTR_CD")
+	private  String airlineDesignator;
+	
+	@Column(name = "FLIGHT_NBR")
+	private String flightNo;
+	
+	@Column(name = "ITNR_VRTN_ID")
+	private String itineraryVariationId;
+	
+	@Column(name = "LEG_SQNC_NBR")
+	private String legSequenceNo;
+	
+	@Column(name = "SVC_TYP_CD")
+	private String serviceType;
+	
+	@Column(name = "PRD_OPRN_FROM_DT")
+	private Date periodOfOperFrom;
+	
+	@Column(name = "PRD_OPRN_TO_DT")
+	private Date periodOfOperTo;
+	
+	@Column(name = "DAYS_OF_OPRN_VAL")
+	private String daysOfOper;
+	
+	@Column(name = "DAYS_OF_OPRN_LCL_VAL")
+	private String localDaysOfOper;
+	
+	@Column(name = "FRQNC_RT")
+	private String frequencyRate; 
+	
+	@Column(name = "FROM_STATION")
+	private String departStation;
+	
+	@Column(name = "PSNGR_STD")
+	private String psngrSTD;
+	
+	@Column(name = "SCHDLD_ARCRFT_DPRTR_TM")
+	private String scheduledTimeOfAircraftDepart;
+	
+	@Column(name = "UTC_LCL_VRTN_FOR_DPRTR_TM")
+	private String UTCLocalTimeVarForDepartSt;
+	
+	@Column(name = "DPRTR_LCL_TM")
+	private String departLocalTime;
+	
+	@Column(name = "PSNGR_TRMNL_FOR_DPRTR")
+	private String psngrTerminalfForDepartSt;
+	
+	@Column(name = "TO_STATION")
+	private String arrvlStation;;
+	
+	@Column(name = "SCHDLD_ARCRFT_ARRVL_TM")
+	private String scheduledTimeofAircraftArrvl;
+	
+	@Column(name = "PSNGR_STA")
+	private String psngrSTA;
+	
+	@Column(name = "UTC_LCL_VRTN_FOR_ARRVL_TM")
+	private String UTCLocalTimeVarForArrvlSt;
+	
+	@Column(name = "ARRVL_LCL_TM")
+	private String arrvlLocalTime;
+	
+	@Column(name = "PSNGR_TRMNL_FOR_ARRVL")
+	private String psngrTerminalfForArrvlSt;
+	
+	@Column(name = "ARCRFT_TYP_CD")
+	private String aircraftType;
+	
+	@Column(name = "PSNGR_RSRVN_BKNG_DSGNTR_TXT")
+	private String psngrReservationBookingDesignatorTXT;
+	
+	@Column(name = "PSNGR_RSRVN_BKNG_MDFR_TXT")
+	private String psngrReservationBookingMdfrTXT;
+	
+	@Column(name = "ML_SVC_NT")
+	private String mealServiceNote;
+	
+	@Column(name = "JNT_OPRN_ARLN_DSGNTR_CD")
+	private String jointOperAirlineDesignators;
+	
+	@Column(name = "ITNR_VRTN_IDNTFR_OVRFLW")
+	private String itineraryVarIdOvrflw;
+	
+	@Column(name = "ARCRFT_OWNR_CD")
+	private String aircraftOwner ;
+	
+	@Column(name = "CKPT_CRW_EMLYR")
+	private String cockpitCrewEmployer;
+	
+	@Column(name = "CBN_CRW_EMPLYR")
+	private String cabinCrewEmployer;
+	
+	@Column(name = "ONWRD_FLIGHT_ARLN_DSGNTR_CD")
+	private String onwardFlightAirlineDesignator;
+	
+	@Column(name = "ONWRD_FLIGHT_FLIGHT_NBR")
+	private String onwardFlightNo;
+	
+	@Column(name = "ARCRFT_RTTN_LAYOVR")
+	private String aircraftRotationLayover;
+	
+	@Column(name = "OPRTNL_SFFX")
+	private String operationalSuffix;
+	
+	@Column(name = "DPLCT_NON_OPRTNL_LG_MRKR")
+	private String DuplicateNonOperationalLegMarker;
+	
+	@Column(name = "FLIGHT_TRNST_LYOVR")
+	private String flightTransitLayover;
+	
+	@Column(name = "CD_SHRNG_CMMRCL_DPLCT")
+	private String codeSharingCmmrclDuplicate;
+	
+	@Column(name = "TRFFC_RSTRCTN_CD")
+	private String trafficRestrictionCode;
+	
+	@Column(name = "TRFFC_RSTRCTN_CD_LG_OVRFLW_IND")
+	private String trafficRestrictionCodeLegOvrflwIndicator;
+	
+	@Column(name = "ARCRFT_CFG_VER")
+	private String aircraftConfigVersion;
+	
+	@Column(name = "BLTRL_INFRMTN")
+	private String bilateralInfo;
+	
+	@Column(name = "RCRD_SRL_NBR")
+	private String recordSerialNo;
+}
+
 @SuppressWarnings("unchecked")
 	/**/private List<SSIMRecordType3> executeQuery(final int type,
 			final String param1, final String param2, final String param3,
