@@ -1,3 +1,126 @@
+@SuppressWarnings("unchecked")
+	/**/private List<SSIMRecordType3> executeQuery(final int type,
+			final String param1, final String param2, final String param3,
+			final String param4, final Date param5, final Date param6,final boolean param7) {
+		Session session = null;
+		Query query = null;
+		try {
+			session = sessionFactory.openSession();
+			query = session.createQuery(prepareQuery(type, param3, param4, param5, param6,param7).toString());
+			query.setParameter("param1", param1);
+			query.setParameter("param2", param2);
+
+			if (type == 6) {
+				query.setParameter("param3", param3);
+				query.setParameter("param4", param4);
+				query.setParameter("param5", param5);
+				if(null !=param6){
+					query.setParameter("param6", param6);
+				}
+			}
+			query.setCacheable(true);
+			return query.list();
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION OF TYPE (" + type + "):-" + e.getMessage(),
+					e);
+		} finally {
+			if (null != session) {
+				session.close();
+			}
+		}
+		return getRecordType();
+	}
+
+return query.list(); is the 215th line
+
+public StringBuilder prepareQuery(final int type, final String param3,
+			final String param4, final Date param5, final Date param6,final boolean param7) {
+		StringBuilder queryBuilder = new StringBuilder(30);
+		String ssimQuery =null;
+		try {
+			if(param7){
+				ssimQuery = "FROM SSIMRecordType3 ss WHERE ss.departStation=:param1 AND ss.arrvlStation=:param2 <cond1>";
+			}else{
+				ssimQuery = "FROM SSIMRecordType3 ss WHERE  ss.trafficRestrictionCode!='A' AND ss.departStation=:param1 AND ss.arrvlStation=:param2 <cond1> GROUP BY <cond2>";
+			}
+			Matcher match = Pattern.compile("<\\S+>").matcher(ssimQuery);
+			while (match.find()) {
+				if (match.group().contains("<cond1>")) {
+					queryBuilder.append(parsingFirstCondQuery(ssimQuery, type,
+							match.start(), param3, param4, param5, param6));
+				}
+				if (match.group().contains("<cond2>")) {
+					queryBuilder.append(parsingSecondCondQuery(ssimQuery, type,
+							match.start()));
+				}
+			}
+			
+			if(null != queryBuilder && queryBuilder.toString().equals("")){
+				queryBuilder.append(ssimQuery);
+			}
+		} catch (Exception e) {
+			LOGGER.error(
+					"EXCEPTION WHILE PARSING QUERY (" + type + "):-"
+							+ e.getMessage(), e);
+		}
+		return queryBuilder;
+	}
+private StringBuilder parsingFirstCondQuery(final String ssimQuery,
+			final int type, final int start, final String param3,
+			final String param4, final Date param5, final Date param6) {
+		StringBuilder queryBuilder = new StringBuilder(20);
+		queryBuilder.append(ssimQuery.substring(0, start));
+		if (checkCommonInt1(type)) {
+			queryBuilder.append(" ");
+		} else {
+			if (type == 6) {
+				queryBuilder.append(" AND ss.legSequenceNo = :param3 ");
+				queryBuilder
+						.append(" AND ss.flightNo = :param4 and ss.periodOfOperFrom >= :param5");
+				if (param6 != null) {
+					queryBuilder.append(" and (ss.periodOfOperTo >= :param6 or ss.periodOfOperTo is null)");
+				} 
+			}
+		}
+
+		return queryBuilder;
+	}
+
+private static final int[] common1 = { 1, 2, 3, 4 };
+private boolean checkCommonInt1(final int type) {
+		for (int singleDigit : common1) {
+			if (singleDigit == type)
+				return true;
+		}
+		return false;
+	}
+private static final int[] common = { 1, 2, 3, 4, 5 };
+private boolean checkCommonInt(final int type) {
+		for (int singleDigit : common) {
+			if (singleDigit == type)
+				return true;
+		}
+		return false;
+	}
+
+private StringBuilder parsingSecondCondQuery(final String ssimQuery,
+			final int type, final int start) {
+		StringBuilder queryBuilder = new StringBuilder(20);
+		queryBuilder.append(ssimQuery.substring(
+				ssimQuery.lastIndexOf(" GROUP BY"), start));
+
+		if (checkCommonInt(type)) {
+			queryBuilder.append("ss.departLocalTime, ss.arrvlLocalTime,ss.flightNo,ss.periodOfOperFrom, ss.periodOfOperTo,ss.daysOfOper");
+//					.append(" ss.flightNo,ss.departLocalTime, ss.arrvlLocalTime, ss.periodOfOperFrom, ss.periodOfOperTo,ss.daysOfOper");
+		} else {
+			queryBuilder.append(" ss.departLocalTime, ss.arrvlLocalTime");
+		}
+
+		return queryBuilder;
+	}
+
+
+
 02 Jul 2026 17:20:43,133 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper:142 [] - Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'flight_schedule_db.ssimrecord0_.UNIQ_ID' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 02 Jul 2026 17:21:11,256 ERROR: aero.omanair.flightschedule.daoImpl.FlightSearchDAOImpl:217 [] - EXCEPTION OF TYPE (1):-org.hibernate.exception.SQLGrammarException: could not extract ResultSet
 javax.persistence.PersistenceException: org.hibernate.exception.SQLGrammarException: could not extract ResultSet
