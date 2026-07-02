@@ -1,3 +1,9 @@
+System.out.println(Hibernate.isInitialized(route.getFlightConnectionInfo()));
+
+Hibernate.initialize(route.getFlightConnectionInfo());
+
+System.out.println(Hibernate.isInitialized(route.getFlightConnectionInfo()));
+
 aero.omanair.flightschedule.model.FlightRouteInfo@c56bca8
 
 @Entity
