@@ -1,3 +1,108 @@
+@Controller
+@RequestMapping("/flightSearch")
+public class FlightScheduleRestController {
+
+	private static final Logger LOGGER = LogManager.getLogger(FlightScheduleService.class);
+
+	@Resource(name = "flightScheduleService")
+	private FlightScheduleService flightScheduleService;
+
+	@Resource(name = "flightToStationService")
+	private FlightStationStationService flightStationService;
+	@RequestMapping(value = "/stations", method = RequestMethod.POST)
+	public @ResponseBody ResponseMessageSingle flightBaseStationDetails() {
+		LOGGER.info("#########################FLIGHT SEARCH RENDERING####################################");
+		ResponseMessageSingle response = new ResponseMessageSingle();
+		List<StationsVo> stationList = null;
+		try {
+			LOGGER.info("Service class = " + flightStationService.getClass());
+			stationList = flightStationService.getStations();
+		}catch (Exception e) {
+			LOGGER.error("EXCEPTION :-" + e.getMessage(), e);
+			response.setStatus("EXCEPTION" + e.getMessage());
+			response.setMsg("Internal  server error,");
+			response.setCode("500");
+			response.setData(" ");
+			return response;
+		}
+		LOGGER.info("fromStationList" + stationList.size());
+		LOGGER.info("#########################FLIGHT SEARCH END ####################################");
+		response.setStatus("success");
+		response.setMsg("stationList");
+		response.setCode("200");
+		response.setData(stationList);
+		return response;
+	}
+	
+@Service("flightToStationService")
+public class FlightStationStationServiceImpl implements FlightStationStationService {
+
+	private static final Logger LOGGER = LogManager.getLogger(FlightStationStationServiceImpl.class);
+
+	@Resource(name = "flightToStationDAO")
+	private FlightToStationDAO flightToStationDAO;
+
+	@Resource(name = "flightScheduleDAO")
+	private FlightScheduleDAO flightScheduleDAO;
+
+	@Resource(name = "flightStationsDAO")
+	private FlightStationsDAO flightStationsDAO;
+	@Transactional(readOnly = true)
+	/**/public List<StationsVo> getStations() {
+		List<StationsVo> populateStation = null;
+		Set<String> toFlightList = null;
+		try {
+			//LOGGER.info("Transaction active: " + TransactionSynchronizationManager.isActualTransactionActive());
+			List<Stations> stations= flightStationsDAO.getStations();
+			toFlightList = flightToStationDAO.getFromStations();
+			if (null != stations && stations.size()>0){
+				populateStation = DataConversionHelper.populateStationInformations(stations,toFlightList);
+				LOGGER.info("stationInfo list : -"+populateStation.size());
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN GETSTATIONS :-" + e.getMessage(), e);
+		}
+		return populateStation;
+	}	
+}
+@Repository("flightToStationDAO")
+public class FlightToStationDAOImpl implements FlightToStationDAO {
+	
+	private static final Logger LOGGER = LogManager.getLogger(FlightToStationDAOImpl.class);
+	 
+	@Autowired
+	private SessionFactory sessionFactory;
+@Override
+	/**/public Set<String> getFromStations() {
+		Session session=null;
+		List<FlightRouteInfo> fromStationsList=null;
+		Set<String> stationInfo =null;
+		try {
+			session = sessionFactory.getCurrentSession();
+			Query<FlightRouteInfo> query=session.createQuery("select distinct f from FlightRouteInfo f", FlightRouteInfo.class);
+			fromStationsList = query.getResultList();
+			System.out.println(fromStationsList.size());
+			if(null!=fromStationsList && fromStationsList.size()>0){
+				stationInfo=new HashSet<String>();
+				for (FlightRouteInfo flightRouteVo : fromStationsList) {
+				//	LOGGER.info("CONNECTION DETAILS ==>>>"+flightRouteVo.getFlightConnectionInfo().toString());
+				//	LOGGER.info("CONNECTION LENGTH ==>>>"+flightRouteVo.getFlightConnectionInfo().size());
+					if(flightRouteVo.getFlightConnectionInfo() != null && flightRouteVo.getFlightConnectionInfo().size() >0){
+						stationInfo.add(flightRouteVo.getFromStation());
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION :-"+ e.getMessage(),e);
+		}/*finally {
+			if (session != null) {
+				session.close();
+			}
+		}*/
+		return stationInfo;
+	}	
+}
+
 Hibernate: select country0_.COUNTRY_ID as country_1_2_0_, country0_.COUNTRY as country2_2_0_ from ST_COUNTRY country0_ where country0_.COUNTRY_ID=?
 02 Jul 2026 07:55:20,370 ERROR: aero.omanair.flightschedule.daoImpl.FlightToStationDAOImpl:126 [] - EXCEPTION :-Could not obtain transaction-synchronized Session for current thread
 org.hibernate.HibernateException: Could not obtain transaction-synchronized Session for current thread
