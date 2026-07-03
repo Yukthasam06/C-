@@ -1,3 +1,81 @@
+@Override
+	/**/public Set<String> getFromStations() {
+		Session session=null;
+		List<FlightRouteInfo> fromStationsList=null;
+		Set<String> stationInfo =null;
+		try {
+			session = sessionFactory.openSession();
+			Query query=session.createQuery("from FlightRouteInfo");
+			query.setMaxResults(500);
+			fromStationsList = query.list();
+			System.out.println(fromStationsList.size());
+			if(null!=fromStationsList && fromStationsList.size()>0){
+				stationInfo=new HashSet<String>();
+				for (FlightRouteInfo flightRouteVo : fromStationsList) {
+					if(flightRouteVo.getFlightConnectionInfo() != null && flightRouteVo.getFlightConnectionInfo().size() >0){
+						stationInfo.add(flightRouteVo.getFromStation());
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION :-"+ e.getMessage(),e);
+		}finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		return stationInfo;
+	}
+Currently this query is consuming about 20 minutes during execution. This is because FlightRouteInfo table has 10,600 records which leads to this slowness. Please provide me the modified query with the right solution so that I should get same records as a result as before. Below are the entity classes.
+@Entity
+@Table(name = "FLIGHT_ROUTE_INFO")
+public class FlightRouteInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name = "ROUTE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int routeId;
+	
+	@Column(name = "FROM_STATION")
+	private String fromStation;
+	
+	@Column(name = "TO_STATION")
+	private String toStation;
+	
+	@OneToMany(mappedBy = "flightRouteInfo", cascade = CascadeType.ALL,fetch=FetchType.EAGER)
+	private Set<FlightConnectionInfo> flightConnectionInfo;
+}
+@Entity
+@Table(name = "FLIGHT_CONNECTION_INFO_bkp")
+public class FlightConnectionInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@Column(name = "ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int Id;
+	
+	@Column(name = "CONNECTION_TYPE")
+	private String connectionType;
+	
+	@Column(name = "NO_BASE_STN")
+	private String noOfBaseStns;
+	
+	@Column(name = "CONNECTION_BASE_STNS")
+	private String connectionBaseStns;
+	
+	@Column(name = "CIRCUILAR_BASE_STNS")
+	private String circuilarBaseStns;
+	
+	@ManyToOne
+    @JoinColumn(name = "ROUTE_ID_FK", nullable=false)
+	private FlightRouteInfo flightRouteInfo;
+}
+
+
 @Entity
 @Table(name="st_ssim_record_type_new3")
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
