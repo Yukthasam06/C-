@@ -1,4 +1,19 @@
 @Override
+	/**/public List<SSIMRecordType3> getDirectFlightDetails(String fromStation,
+			String toStation) {
+		try {
+			return executeQuery(1, fromStation, toStation, null, null, null,
+					null,false);
+		} catch (HibernateException e) {
+			LOGGER.error(
+					"EXCEPTION WHILE GETTING DETAILS FROM SSIM :-"
+							+ e.getMessage(), e);
+
+		}
+		return getRecordType();
+	}
+
+@Override
 	/**/public Set<String> getFromStations() {
 		Session session=null;
 		List<FlightRouteInfo> fromStationsList=null;
