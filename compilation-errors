@@ -1,3 +1,67 @@
+public StringBuilder prepareQuery(final int type,
+                                  final String param3,
+                                  final String param4,
+                                  final Date param5,
+                                  final Date param6,
+                                  final boolean param7) {
+
+    StringBuilder queryBuilder = new StringBuilder();
+
+    if (param7) {
+        // Existing logic
+        queryBuilder.append("FROM SSIMRecordType3 ss ");
+        queryBuilder.append("WHERE ss.departStation=:param1 ");
+        queryBuilder.append("AND ss.arrvlStation=:param2 ");
+
+        if (type == 6) {
+            queryBuilder.append("AND ss.legSequenceNo = :param3 ");
+            queryBuilder.append("AND ss.flightNo = :param4 ");
+            queryBuilder.append("AND ss.periodOfOperFrom >= :param5 ");
+
+            if (param6 != null) {
+                queryBuilder.append("AND (ss.periodOfOperTo >= :param6 OR ss.periodOfOperTo IS NULL) ");
+            }
+        }
+
+        return queryBuilder;
+    }
+
+    // -------------------------
+    // MySQL 8 Compatible Query
+    // -------------------------
+
+    queryBuilder.append("FROM SSIMRecordType3 ss ");
+    queryBuilder.append("WHERE ss.uniqueId IN (");
+    queryBuilder.append(" SELECT MIN(ss2.uniqueId) ");
+    queryBuilder.append(" FROM SSIMRecordType3 ss2 ");
+    queryBuilder.append(" WHERE ss2.trafficRestrictionCode <> 'A' ");
+    queryBuilder.append(" AND ss2.departStation = :param1 ");
+    queryBuilder.append(" AND ss2.arrvlStation = :param2 ");
+
+    if (type == 6) {
+        queryBuilder.append(" AND ss2.legSequenceNo = :param3 ");
+        queryBuilder.append(" AND ss2.flightNo = :param4 ");
+        queryBuilder.append(" AND ss2.periodOfOperFrom >= :param5 ");
+
+        if (param6 != null) {
+            queryBuilder.append(" AND (ss2.periodOfOperTo >= :param6 OR ss2.periodOfOperTo IS NULL) ");
+        }
+    }
+
+    queryBuilder.append(" GROUP BY ");
+    queryBuilder.append(" ss2.departLocalTime,");
+    queryBuilder.append(" ss2.arrvlLocalTime,");
+    queryBuilder.append(" ss2.flightNo,");
+    queryBuilder.append(" ss2.periodOfOperFrom,");
+    queryBuilder.append(" ss2.periodOfOperTo,");
+    queryBuilder.append(" ss2.daysOfOper");
+
+    queryBuilder.append(")");
+
+    return queryBuilder;
+}
+
+
 INSERT INTO st_ssim_record_type_new3 (
 ARLN_DSGNTR_CD,
 FLIGHT_NBR,
