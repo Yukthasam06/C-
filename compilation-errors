@@ -1,3 +1,79 @@
+FROM SSIMRecordType3 ss
+WHERE ss.trafficRestrictionCode != 'A'
+AND ss.departStation = :param1
+AND ss.arrvlStation = :param2
+GROUP BY
+    ss.departLocalTime,
+    ss.arrvlLocalTime,
+    ss.flightNo,
+    ss.periodOfOperFrom,
+    ss.periodOfOperTo,
+    ss.daysOfOper
+
+SELECT
+    MIN(UNIQ_ID),
+    COUNT(*)
+FROM st_ssim_record_type_new3
+WHERE TRFFC_RSTRCTN_CD <> 'A'
+AND FROM_STATION = ?
+AND TO_STATION = ?
+GROUP BY
+    DPRTR_LCL_TM,
+    ARRVL_LCL_TM,
+    FLIGHT_NBR,
+    PRD_OPRN_FROM_DT,
+    PRD_OPRN_TO_DT,
+    DAYS_OF_OPRN_VAL;
+
+SELECT COUNT(*)
+FROM (
+    SELECT
+        MIN(UNIQ_ID)
+    FROM st_ssim_record_type_new3
+    WHERE TRFFC_RSTRCTN_CD <> 'A'
+    AND FROM_STATION = ?
+    AND TO_STATION = ?
+    GROUP BY
+        DPRTR_LCL_TM,
+        ARRVL_LCL_TM,
+        FLIGHT_NBR,
+        PRD_OPRN_FROM_DT,
+        PRD_OPRN_TO_DT,
+        DAYS_OF_OPRN_VAL
+) x;
+
+SELECT
+    MIN(UNIQ_ID)
+FROM st_ssim_record_type_new3
+WHERE TRFFC_RSTRCTN_CD <> 'A'
+AND FROM_STATION=?
+AND TO_STATION=?
+GROUP BY
+    DPRTR_LCL_TM,
+    ARRVL_LCL_TM,
+    FLIGHT_NBR,
+    PRD_OPRN_FROM_DT,
+    PRD_OPRN_TO_DT,
+    DAYS_OF_OPRN_VAL;
+
+FROM SSIMRecordType3 ss
+WHERE ss.uniqueId IN (
+    SELECT MIN(ss2.uniqueId)
+    FROM SSIMRecordType3 ss2
+    WHERE ss2.trafficRestrictionCode <> 'A'
+      AND ss2.departStation = :param1
+      AND ss2.arrvlStation = :param2
+    GROUP BY
+        ss2.departLocalTime,
+        ss2.arrvlLocalTime,
+        ss2.flightNo,
+        ss2.periodOfOperFrom,
+        ss2.periodOfOperTo,
+        ss2.daysOfOper
+)
+
+
+
 @Override
 	/**/public List<SSIMRecordType3> getDirectFlightDetails(String fromStation,
 			String toStation) {
