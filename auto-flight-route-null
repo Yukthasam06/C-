@@ -1,138 +1,372 @@
-public void updateRoutes(Connection connection, List<Long> flightIds, List<Long> inBoundIds) {
+[INFO] Building FlightSchedule Maven Webapp 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] Downloading: https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1/org/springframework/integration/spring-integration-sftp/5.3.39/spring-integration-sftp-5.3.39.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 14.422 s
+[INFO] Finished at: 2026-07-05T16:41:01+05:30
+[INFO] Final Memory: 13M/203M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project FlightScheduleWeb: Could not resolve dependencies for project aero.omanair:FlightScheduleWeb:war:0.0.1-SNAPSHOT: Failed to collect dependencies at org.springframework.integration:spring-integration-sftp:jar:5.3.39: Failed to read artifact descriptor for org.springframework.integration:spring-integration-sftp:jar:5.3.39: Could not transfer artifact org.springframework.integration:spring-integration-sftp:pom:5.3.39 from/to flightsweb-repo (https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1): Access denied to https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1/org/springframework/integration/spring-integration-sftp/5.3.39/spring-integration-sftp-5.3.39.pom. Error code 401, -> [Help 1]
+[ERROR] 
+
+<properties>
+		<spring.version>5.3.39</spring.version>
+		<jdk.version>1.8</jdk.version>
+		<spring.security.version>5.8.14</spring.security.version>
+		<hibernate-version>5.6.15.Final</hibernate-version>
+		<!-- <mysql-connector-java.version>5.1.34</mysql-connector-java.version> -->
+	</properties>
+	<dependencies>
+		<!-- <dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency> -->
 		
-		List<Long> allFlightIds = new ArrayList<>(flightIds);
-		allFlightIds.addAll(inBoundIds);
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.17.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.17.1</version>
+		</dependency>
 		
-		String filteredFlightIds = allFlightIds.stream().map(id -> "?")
-				.collect(Collectors.joining(","));
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-jcl -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>2.17.1</version>
+		</dependency>
 		
-		String finalFlightQuery = "SELECT FLIGHT_ID, IN_FLIGHT_ID, FLIGHT_DATE, TAIL_REGN, AIRCRAFT_CODE, FL_FROM, FL_TO, STD, STA, FLIGHT_TYPE, STA_UTC, STD_UTC, PSEUDO_YN, FLIGHT_NO FROM PAX_FLIGHT WHERE FLIGHT_ID IN ("
-				+ filteredFlightIds + ") ORDER BY STD_UTC";
+		
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>5.6.1</version>
 			
-        List<FlightTO> flightTos = new ArrayList<>();
-    	FlightTO flightTo;
-    	Map<Long, FlightTO> allNewFlights = new HashMap<>();
-		Map<Long, List<FlightTO>> inFlightIdIndex = new HashMap<>();
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.olap4j</groupId>
+					<artifactId>olap4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>5.6.1</version>
+		</dependency>
 		
-	    try(PreparedStatement pstmt = connection.prepareStatement(finalFlightQuery);){
-				int index = 1;
-				for(Long id : allFlightIds) {
-					pstmt.setLong(index++, id);
-				}
-				
-			    try(ResultSet rs = pstmt.executeQuery();){
-			    	while (rs.next()) {
-						flightTo = new FlightTO();
-						flightTo.setFlightId(rs.getLong("FLIGHT_ID"));
-						
-						long inFlightId = rs.getLong("IN_FLIGHT_ID");
-						if(!rs.wasNull()) {
-							flightTo.setInFlightId(inFlightId);
-						}
-						flightTo.setFlightDate(rs.getDate("FLIGHT_DATE"));
-						flightTo.setTailReg(rs.getString("TAIL_REGN"));
-						flightTo.setAircraftType(rs.getString("AIRCRAFT_CODE"));
-						flightTo.setFltFrom(rs.getString("FL_FROM"));
-						flightTo.setFltTo(rs.getString("FL_TO"));
-						flightTo.setSchedArrive(rs.getTimestamp("STA"));
-						flightTo.setSchedDepart(rs.getTimestamp("STD"));
-						flightTo.setFlightType(rs.getString("FLIGHT_TYPE"));
-						flightTo.setStaUtc(rs.getTimestamp("STA_UTC"));
-						flightTo.setStdUtc(rs.getTimestamp("STD_UTC"));
-						flightTo.setFlightNo(rs.getString("FLIGHT_NO"));
-						flightTo.setPseudoYn(rs.getString("PSEUDO_YN"));
-						flightTos.add(flightTo);
-						allNewFlights.put(flightTo.getFlightId(), flightTo);
-						if(flightTo.getInFlightId() != null) {
-							inFlightIdIndex.computeIfAbsent(flightTo.getInFlightId(), k -> new ArrayList<>()).add(flightTo);
-						}
-				    }
-			    	logger.info("The flight records that will be updated with their routes are: "+flightTos);
-			    	
-			    } catch(SQLException e) {
-					logger.error("Error while fetching flights data for routes update", e);
-					e.printStackTrace();
-				}
-			     
-				for(FlightTO rootFlight : allNewFlights.values()) {
-					if(rootFlight.getInFlightId() == null) {
-						List<FlightTO> flightChain = new ArrayList<>();
-						FlightTO currentFlight = rootFlight;
-						
-						while(currentFlight != null) {
-							flightChain.add(currentFlight);
-							List<FlightTO> nextFlights = inFlightIdIndex.get(currentFlight.getFlightId());
-							if(nextFlights != null && !nextFlights.isEmpty()) {
-								currentFlight = nextFlights.get(0);
-							} else {
-								currentFlight = null;
-							}
-						}
-						StringBuilder route = new StringBuilder();
-						for(int i = 0; i < flightChain.size(); i++) {
-							if(i == 0) {
-								route.append(flightChain.get(i).getFltFrom());
-							}
-							route.append("-").append(flightChain.get(i).getFltTo());
-						}
-						
-						String finalRoute = route.toString();
-						Timestamp baseStd = rootFlight.getStdUtc();
-						String flightNo = rootFlight.getFlightNo();
-						Long parentFlightId = rootFlight.getFlightId();
-						
-						for(FlightTO flight : flightChain) {
-							String updateRoutes = "UPDATE PAX_FLIGHT SET ROUTE = ?, BASE_STD_UTC = ?,"
-									+ "BASE_FLIGHT_NO = ?, BASE_FLIGHT_ID = ?, MODIFIED_BY = 'AutoFlight', MODIFIED_DATE = SYSDATE "
-									+ "WHERE FLIGHT_ID = ?";
-							try(PreparedStatement ps = connection.prepareStatement(updateRoutes)){
-								ps.setString(1, finalRoute);
-								ps.setTimestamp(2, baseStd);
-								ps.setString(3, flightNo);
-								ps.setLong(4, parentFlightId);
-								ps.setLong(5, flight.getFlightId());
-								ps.executeUpdate();
-							} catch(SQLException e) {
-								logger.error("SQLException while updating route for flight ID: {}", flight.getFlightId(), e);
-								e.printStackTrace();
-								try {
-									connection.rollback();
-								} catch(SQLException e1) {
-									logger.error("Rollback failed: ", e1);
-									e.printStackTrace();
-								}
-							} catch(Exception e) {
-								logger.error("Exception while updating route for flight ID: {}", flight.getFlightId(), e);
-								e.printStackTrace();
-								try {
-									connection.rollback();
-								} catch(SQLException e1) {
-									logger.error("Rollback failed: ", e1);
-									e.printStackTrace();
-								}
-							}
-						}
-					}
-				}
-				logger.info("The routes has been updated successfully...");
-			
-		} catch(SQLException e) {
-			logger.error("SQLException occured in updateRoutes,", e);
-			e.printStackTrace();
-			try {
-				connection.rollback();
-			} catch(SQLException e1) {
-				logger.error("Rollback failed: ", e1);
-				e.printStackTrace();
-			}
-		} catch(Exception e) {
-			logger.error("Exception occured in updateRoutes", e);
-			e.printStackTrace();
-			try {
-				connection.rollback();
-			} catch(SQLException e1) {
-				logger.error("Rollback failed: ", e1);
-				e.printStackTrace();
-			}
-		}
-	}
+		
+		
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<!-- JSTL -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version> <!-- just used the latest version, make sure you use the one you need -->
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jstl</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- Spring framework -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.1.2</version>
+		</dependency>
+
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tuckey</groupId>
+			<artifactId>urlrewritefilter</artifactId>
+			<version>4.0.4</version>
+		</dependency>
+		<!-- Jackson -->
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.10</version>
+		</dependency>
+		<!-- Apache Common -IO -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<!-- Apache Commons FileUpload -->
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+		<!--Hibernate framework -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency> -->
+		<dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.common</groupId>
+			<artifactId>hibernate-commons-annotations</artifactId>
+			<version>4.0.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.1-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.18.1-GA</version>
+		</dependency>
+
+		<!-- Hibernate search -->
+		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-search</artifactId> 
+			<version>4.5.3.Final</version> </dependency> -->
+
+		<!-- Hibernate library dependecy start -->
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>antlr</groupId>
+			<artifactId>antlr</artifactId>
+			<version>2.7.7</version>
+		</dependency>
+
+		<!-- Hibernate query library dependecy end -->
+
+		<!--jackson jars -->
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-web-api</artifactId>
+			<version>7.0</version> <!-- Put here the version of your Java EE app, in my case 7.0 -->
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>1.9.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt-spring3</artifactId>
+			<version>1.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.2.0.Alpha1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-api</artifactId>
+			<version>7.0.37</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.5.5</version>
+		</dependency>
+		
+	
+		
+		<!-- Quartz scheduler -->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.1.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jobs</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+		<!-- velocity -->
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<!-- MySQL database driver -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<version>8.4.0</version>
+		</dependency>
+		<!-- EhCache Core APIs -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
+			<version>2.6.9</version>
+		</dependency>
+		<!-- Hibernate Integration EhCache API -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>${hibernate-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.7</version>
+		</dependency>
+		<!-- SFTP Server Accessing. -->
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-sftp</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+	</dependencies>
+	
