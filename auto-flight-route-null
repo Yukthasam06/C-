@@ -1,3 +1,13 @@
+MultiActionController cannot be resolved to a type
+PlaintextPasswordEncoder cannot be resolved to a type
+PasswordEncoder cannot be resolved to a type
+SaltSource cannot be resolved to a type
+The constructor BadCredentialsException(String, UserDetails) is undefined
+The method encodePassword(String, Object) of type new PasswordEncoder(){} must override or implement a supertype method
+The method isPasswordValid(String, String, Object) of type new PasswordEncoder(){} must override or implement a supertype method
+When I change the spring-integration-sftp version from 4.0.3.RELEASE to 5.5.20, I'm getting the above errors in my code. How to resolve it. If I change it to the old version these errors disappears.
+
+
 [INFO] Building FlightSchedule Maven Webapp 0.0.1-SNAPSHOT
 [INFO] ------------------------------------------------------------------------
 [INFO] Downloading: https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1/org/springframework/integration/spring-integration-sftp/5.3.39/spring-integration-sftp-5.3.39.pom
