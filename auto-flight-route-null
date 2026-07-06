@@ -1,3 +1,67 @@
+package aero.omanair.flightschedule.controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
+
+import aero.omanair.flightschedule.constants.FlightScheduleConstants;
+import aero.omanair.flightschedule.model.MailConfig;
+import aero.omanair.flightschedule.service.MailManagerService;
+
+@Controller
+@RequestMapping("/manageMailSettings")
+public class MailConfigController extends MultiActionController implements FlightScheduleConstants{
+	
+	static final Logger LOGGER = LogManager.getLogger(MailConfigController.class);
+	
+	@Resource(name = "mailManagerService")
+	private MailManagerService mailManagerService;
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public ModelAndView showMailSettingsForm(HttpServletRequest request,HttpServletResponse response,
+			Model model,@ModelAttribute("mailConfig") MailConfig mailConfig) {	
+		try {
+			mailConfig=mailManagerService.getMailConfig();
+			model.addAttribute("mailConfig",mailConfig);
+		} catch (Exception e) {
+			LOGGER.error("Error in addding object");
+		}
+		return new ModelAndView("manageMailsettings");
+	}
+	
+	@RequestMapping(method = RequestMethod.POST)
+	public ModelAndView saveSettings(HttpServletRequest request,HttpServletResponse response,
+			Model model,@ModelAttribute("mailConfig") MailConfig mailConfig) {	
+		try{
+			mailManagerService.upDateMailConfig(mailConfig);
+			model.addAttribute("mailConfig",mailConfig);
+			model.addAttribute("successMsg", "Mail configuration updated successfully");
+		}catch (NumberFormatException e) {
+			logger.error(e);
+			request.setAttribute("errorMsg", "Exception while update,Please enter valid port number");
+		}catch (Exception e) {
+			logger.error(e);
+			request.setAttribute("errorMsg", "Exception while update");
+		}
+		return new ModelAndView("manageMailsettings");
+		
+	}
+}
+MultiActionController cannot be resolved to a type
+logger cannot be resolved
+
+
+
 06 Jul 2026 11:24:25,410 INFO : org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer:172 [] - Loading properties file from class path resource [application.properties]
 06 Jul 2026 11:24:25,635 INFO : org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor:141 [] - JSR-330 'javax.inject.Inject' annotation found and supported for autowiring
 06 Jul 2026 11:24:25,869 ERROR: org.springframework.web.context.ContextLoader:331 [] - Context initialization failed
