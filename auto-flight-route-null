@@ -21,6 +21,23 @@ When I change the spring-integration-sftp version from 4.0.3.RELEASE to 5.5.20, 
 [ERROR] Failed to execute goal on project FlightScheduleWeb: Could not resolve dependencies for project aero.omanair:FlightScheduleWeb:war:0.0.1-SNAPSHOT: Failed to collect dependencies at org.springframework.integration:spring-integration-sftp:jar:5.3.39: Failed to read artifact descriptor for org.springframework.integration:spring-integration-sftp:jar:5.3.39: Could not transfer artifact org.springframework.integration:spring-integration-sftp:pom:5.3.39 from/to flightsweb-repo (https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1): Access denied to https://pkgs.dev.azure.com/wydevops/FlightsWeb/_packaging/flightsweb-repo/maven/v1/org/springframework/integration/spring-integration-sftp/5.3.39/spring-integration-sftp-5.3.39.pom. Error code 401, -> [Help 1]
 [ERROR] 
 
+
+Previous version:
+<properties>
+		<spring.version>4.0.3.RELEASE</spring.version>
+		<jdk.version>1.8</jdk.version>
+		<spring.security.version>3.2.3.RELEASE</spring.security.version>
+		<hibernate-version>4.3.5.Final</hibernate-version>
+		<!-- <mysql-connector-java.version>5.1.34</mysql-connector-java.version> -->
+	</properties>
+
+<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-sftp</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+Updated version:
 <properties>
 		<spring.version>5.3.39</spring.version>
 		<jdk.version>1.8</jdk.version>
@@ -376,7 +393,6 @@ When I change the spring-integration-sftp version from 4.0.3.RELEASE to 5.5.20, 
 		<dependency>
 			<groupId>org.springframework.integration</groupId>
 			<artifactId>spring-integration-sftp</artifactId>
-			<version>${spring.version}</version>
+			<version>5.5.20</version>
 		</dependency>
 	</dependencies>
-	
