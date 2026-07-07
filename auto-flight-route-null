@@ -1,3 +1,149 @@
+07 Jul 2026 13:24:17,248 WARN : org.springframework.web.context.support.XmlWebApplicationContext:599 [] - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]: Invocation of init method failed; nested exception is java.lang.NoSuchMethodError: org.hibernate.annotations.common.reflection.ReflectionManager.reset()V
+07 Jul 2026 13:24:17,248 ERROR: org.springframework.web.context.ContextLoader:299 [] - Context initialization failed
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]: Invocation of init method failed; nested exception is java.lang.NoSuchMethodError: org.hibernate.annotations.common.reflection.ReflectionManager.reset()V
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1804) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:620) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:542) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:336) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:334) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:209) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:936) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:932) ~[spring-context-5.3.39.jar:5.3.39]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:591) ~[spring-context-5.3.39.jar:5.3.39]
+	at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:399) ~[spring-web-5.3.39.jar:5.3.39]
+	at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:278) [spring-web-5.3.39.jar:5.3.39]
+	at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:103) [spring-web-5.3.39.jar:5.3.39]
+	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4051) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4493) [catalina.jar:9.0.118]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191) [catalina.jar:9.0.118]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_492]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82) [tomcat-util.jar:9.0.118]
+	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134) [?:1.8.0_492]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:726) [catalina.jar:9.0.118]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191) [catalina.jar:9.0.118]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_492]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82) [tomcat-util.jar:9.0.118]
+	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134) [?:1.8.0_492]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:209) [catalina.jar:9.0.118]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410) [catalina.jar:9.0.118]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) [catalina.jar:9.0.118]
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:872) [catalina.jar:9.0.118]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) [catalina.jar:9.0.118]
+	at org.apache.catalina.startup.Catalina.start(Catalina.java:736) [catalina.jar:9.0.118]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_492]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_492]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_492]
+	at java.lang.reflect.Method.invoke(Method.java:498) ~[?:1.8.0_492]
+	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342) [bootstrap.jar:9.0.118]
+	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473) [bootstrap.jar:9.0.118]
+Caused by: java.lang.NoSuchMethodError: org.hibernate.annotations.common.reflection.ReflectionManager.reset()V
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:414) ~[hibernate-core-5.6.15.Final.jar:5.6.15.Final]
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:471) ~[hibernate-core-5.6.15.Final.jar:5.6.15.Final]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:728) ~[hibernate-core-5.6.15.Final.jar:5.6.15.Final]
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:746) ~[hibernate-core-5.6.15.Final.jar:5.6.15.Final]
+	at org.springframework.orm.hibernate5.LocalSessionFactoryBean.buildSessionFactory(LocalSessionFactoryBean.java:616) ~[spring-orm-5.3.39.jar:5.3.39]
+	at org.springframework.orm.hibernate5.LocalSessionFactoryBean.afterPropertiesSet(LocalSessionFactoryBean.java:600) ~[spring-orm-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1863) ~[spring-beans-5.3.39.jar:5.3.39]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1800) ~[spring-beans-5.3.39.jar:5.3.39]
+	... 42 more
+Jul 07, 2026 1:24:17 PM org.apache.catalina.core.StandardContext listenerStart
+SEVERE: Exception sending context initialized event to listener instance of class [org.springframework.web.context.ContextLoaderListener]
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sessionFactory' defined in ServletContext resource [/WEB-INF/applicationContext.xml]: Invocation of init method failed; nested exception is java.lang.NoSuchMethodError: org.hibernate.annotations.common.reflection.ReflectionManager.reset()V
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1804)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:620)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:542)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:336)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:334)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:209)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:936)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:932)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:591)
+	at org.springframework.web.context.ContextLoader.configureAndRefreshWebApplicationContext(ContextLoader.java:399)
+	at org.springframework.web.context.ContextLoader.initWebApplicationContext(ContextLoader.java:278)
+	at org.springframework.web.context.ContextLoaderListener.contextInitialized(ContextLoaderListener.java:103)
+	at org.apache.catalina.core.StandardContext.listenerStart(StandardContext.java:4051)
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4493)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
+	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:726)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1201)
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1191)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:82)
+	at java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:134)
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:747)
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:209)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:410)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:872)
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164)
+	at org.apache.catalina.startup.Catalina.start(Catalina.java:736)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.catalina.startup.Bootstrap.start(Bootstrap.java:342)
+	at org.apache.catalina.startup.Bootstrap.main(Bootstrap.java:473)
+Caused by: java.lang.NoSuchMethodError: org.hibernate.annotations.common.reflection.ReflectionManager.reset()V
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:414)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:471)
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:728)
+	at org.hibernate.cfg.Configuration.buildSessionFactory(Configuration.java:746)
+	at org.springframework.orm.hibernate5.LocalSessionFactoryBean.buildSessionFactory(LocalSessionFactoryBean.java:616)
+	at org.springframework.orm.hibernate5.LocalSessionFactoryBean.afterPropertiesSet(LocalSessionFactoryBean.java:600)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1863)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1800)
+	... 42 more
+
+Jul 07, 2026 1:24:17 PM org.apache.catalina.core.StandardContext startInternal
+SEVERE: One or more listeners failed to start. Full details will be found in the appropriate container log file
+Jul 07, 2026 1:24:17 PM org.apache.catalina.core.StandardContext startInternal
+SEVERE: Context [/FlightScheduleWeb] startup failed due to previous errors
+Jul 07, 2026 1:24:17 PM org.apache.catalina.core.ApplicationContext log
+INFO: Closing Spring root WebApplicationContext
+Jul 07, 2026 1:24:17 PM org.apache.catalina.loader.WebappClassLoaderBase clearReferencesJdbc
+WARNING: The web application [FlightScheduleWeb] registered the JDBC driver [com.mysql.cj.jdbc.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+Jul 07, 2026 1:24:17 PM org.apache.catalina.loader.WebappClassLoaderBase clearReferencesThreads
+WARNING: The web application [FlightScheduleWeb] appears to have started a thread named [mysql-cj-abandoned-connection-cleanup] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Object.wait(Native Method)
+ java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:144)
+ com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.run(AbandonedConnectionCleanupThread.java:84)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:750)
+Jul 07, 2026 1:24:17 PM org.apache.coyote.AbstractProtocol start
+INFO: Starting ProtocolHandler ["http-nio-3135"]
+Jul 07, 2026 1:24:17 PM org.apache.catalina.startup.Catalina start
+INFO: Server startup in [107417] milliseconds
+Jul 07, 2026 1:24:20 PM org.apache.catalina.loader.WebappClassLoaderBase checkStateForResourceLoading
+INFO: Illegal access: this web application instance has been stopped already. Could not load []. The following stack trace is thrown for debugging purposes as well as to attempt to terminate the thread which caused the illegal access.
+java.lang.IllegalStateException: Illegal access: this web application instance has been stopped already. Could not load []. The following stack trace is thrown for debugging purposes as well as to attempt to terminate the thread which caused the illegal access.
+	at org.apache.catalina.loader.WebappClassLoaderBase.checkStateForResourceLoading(WebappClassLoaderBase.java:1370)
+	at org.apache.catalina.loader.WebappClassLoaderBase.getResource(WebappClassLoaderBase.java:994)
+	at com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkThreadContextClassLoader(AbandonedConnectionCleanupThread.java:116)
+	at com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.run(AbandonedConnectionCleanupThread.java:83)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:750)
+
+
+
 package aero.omanair.flightschedule.controller;
 
 import javax.annotation.Resource;
