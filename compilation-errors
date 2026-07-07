@@ -1,3 +1,9 @@
+<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-bundle</artifactId>
+			<version>1.13-b01</version>
+		</dependency>
+
 public StringBuilder prepareQuery(final int type,
                                   final String param3,
                                   final String param4,
