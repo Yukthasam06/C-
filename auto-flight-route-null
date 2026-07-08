@@ -1,3 +1,24 @@
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@SuppressWarnings("deprecation")
+private PasswordEncoder passwordEncoder = NoOpPasswordEncoder.getInstance();
+
+if (!passwordEncoder.matches(
+        presentedPassword,
+        userDetails.getPassword()))
+
+throw new BadCredentialsException(
+        messages.getMessage(
+                "AbstractUserDetailsAuthenticationProvider.badCredentials",
+                "Bad credentials"));
+
+public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    Assert.notNull(passwordEncoder, "passwordEncoder cannot be null");
+    this.passwordEncoder = passwordEncoder;
+}
+
+
 package aero.omanair.flightschedule.security;
 
 import java.util.ArrayList;
