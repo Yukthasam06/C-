@@ -1,3 +1,61 @@
+public List<FlightRouteInfoVo> getFlightRouteInformation() {
+		List<FlightRouteInfoVo> populateFlightRouteInfo = null;
+		try {
+			List<FlightRouteInfo> route = flightRouteInfoDAO.getFlightRouteInformation();
+			if (null != route) {
+				populateFlightRouteInfo = DataConversionHelper.populateFlightRouteInfo(route);
+			}
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN GETFLIGHTDETAILSINFORMATION :-" + e.getMessage(), e);
+		}
+		return populateFlightRouteInfo;
+	}
+@Override
+		public List<FlightRouteInfo> getFlightRouteInformation() {
+			Session session=null;
+			List<FlightRouteInfo> flightList=null;
+			try {
+				flightList=new ArrayList<FlightRouteInfo>();
+				session = sessionFactory.openSession();
+				Query query=session.createQuery("from FlightRouteInfo");
+				flightList =query.list();
+			} catch (Exception e) {
+				LOGGER.error("EXCEPTION :-"+ e.getMessage(),e);
+			}finally {
+				if (session != null) {
+					session.close();
+				}
+			}
+			return flightList;
+		}
+public static List<FlightRouteInfoVo> populateFlightRouteInfo(List<FlightRouteInfo> flightRouteInfoList){
+		 List<FlightRouteInfoVo> routeVO=new ArrayList<FlightRouteInfoVo>();
+		 FlightRouteInfoVo routeInfo=null;
+		try {
+			for (FlightRouteInfo flightRoute : flightRouteInfoList) {
+				if(null != flightRoute.getFlightConnectionInfo()){
+					Set<FlightConnectionInfo> flightConnectionInfo = flightRoute.getFlightConnectionInfo();
+					for (FlightConnectionInfo connection: flightConnectionInfo) {
+						routeInfo=new FlightRouteInfoVo();
+						routeInfo.setFromStation(flightRoute.getFromStation());
+						routeInfo.setToStation(flightRoute.getToStation());
+						routeInfo.setNoBaseStation(connection.getNoOfBaseStns());
+						routeInfo.setConnecionType(connection.getConnectionType());
+						routeInfo.setConnectionBaseStations(connection.getConnectionBaseStns());
+						routeInfo.setCircularBaseStations(connection.getCircuilarBaseStns());
+						routeVO.add(routeInfo);
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN POPULATEBASESTATIONCODE "+e.getMessage(),e);
+		}
+		return routeVO;
+	}
+This query is actually taking more than one hour to compile. How can we overcome this?
+
+
 <body onload="getStationCodeSetHidden();">
 	<div id="main_cot">
 		<jsp:include page="AdminHeader.jsp" />
