@@ -1,3 +1,13 @@
+SELECT DISTINCT
+       fri.ROUTE_ID,
+       fri.FROM_STATION,
+       fri.TO_STATION,
+       fci.*
+FROM FLIGHT_ROUTE_INFO fri
+LEFT OUTER JOIN FLIGHT_CONNECTION_INFO fci
+       ON fri.ROUTE_ID = fci.ROUTE_ID;
+
+
 @Entity
 @Table(name = "FLIGHT_ROUTE_INFO")
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
