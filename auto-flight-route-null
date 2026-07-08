@@ -1,3 +1,227 @@
+<body onload="getStationCodeSetHidden();">
+	<div id="main_cot">
+		<jsp:include page="AdminHeader.jsp" />
+		<div class="flight_schedule_inner">
+			<jsp:include page="AdminSideLink.jsp" />
+			<div class="flight_schedule_inner_right">
+				<c:if test="${not empty errorMsg}"><div id="classId" class="error">${errorMsg}</div></c:if>
+				<c:if test="${not empty successMsg}"><div id="successId" class="success">${successMsg}</div></c:if>
+				<div class="flight_schedule_inner_right_head">
+					<div class="flight_schedule_inner_right_image">
+						<img src="<%=request.getContextPath()%>/resources/images/book.jpg"
+							alt="Notification" />
+					</div>
+					<div class="flight_schedule_inner_right_text">Manage Stations</div>
+				</div>
+				<div class="flight_schedule_inner_right_inner">
+					<c:if test="${not empty  stationList}">
+						<div class="FlightScheduleTable fullWidth" style="height:500px;overflow-x: hidden;overflow-y:scroll;">
+							<div class="FlightScheduleTableHeading"
+								style="padding-left: 10px;"></div>
+							<table width="708" border="0" cellpadding="0" cellspacing="0"
+								class="table_bg">
+								<tr>
+									<td width="5%"><span class="text1">SL.No</span></td>
+									<td width="8%"><span class="text1">Station Name</span></td>
+									<td width="12%"><span class="text1">Country Name</span></td>
+									<td width="12%"><span class="text1">Status</span></td>
+									<td width="10%"><span class="text1">Delete</span></td>
+								</tr>
+								<c:forEach var="stationList" items="${stationList}"
+									varStatus="loopStatus">
+									<tr class="${loopStatus.index % 2 == 0 ? 'odd' : 'even'}">
+										<td width="5%">${stationList.serialNo}</td>
+										<td width="15%"><a
+											href="javascript: getStationDetails('${stationList.stationFullName}')">${stationList.stationFullName}</a></td>
+										<td width="15%">${stationList.countryName}</td>
+										<td class="${rowClass}" ALIGN="center"><c:choose>
+												<c:when test="${stationList.active == true}">
+													<img src="<%=request.getContextPath()%>/resources/images/active.gif" />
+												</c:when>
+												<c:otherwise>
+													<img src="<%=request.getContextPath()%>/resources/images/inactive.gif" />
+												</c:otherwise>
+											</c:choose></td>
+										<!-- <td width="15%">Status</td> -->
+										<td width="15%"><center>
+												<a
+													href="javascript: deleteStation('${stationList.stationCode}')">
+													<img src="<%=request.getContextPath()%>/resources/images/delete.jpg"
+													border="0" alt="Delete"></img>
+												</a>
+											</center></td>
+									</tr>
+								</c:forEach>
+							</table>
+						</div>
+						<div class="flight_schedule_inner_right_head">
+							<!-- 								<div class="flight_schedule_inner_right_image"> -->
+							<!-- 									<img src="images/ssim.jpg" alt="Edit Carrier" /> -->
+							<!-- 								</div> -->
+							<div class="flight_schedule_inner_right_text">Edit Station</div>
+						</div>
+						<form:form id="stationDetailsForm" name="stationDetailsForm" onsubmit="return submitDetails()"
+							method="post" action="manageStations/submitDetails" modelAttribute="stationDetails">
+							<form:hidden path="operationType" id="operationType"/>
+							<form:hidden path="stationId" id="stnId" />
+							<input type="hidden" id="stnCode" name="stnCode"/> 
+							<div class="flight_schedule_inner_right_inner"
+								id="stationDetailsDiv">
+								<table width="708" border="0" cellspacing="0" cellpadding="0"
+									class="table1_bg">
+
+									<tr>
+										<td class="odd1">Station Name:<span style="color:red">*</span></td>
+										<td class="odd1"><label> <form:input
+													name="stationName" type="text" class="text_box"
+													id="stationName" maxlength="50" path="stationName" />
+										</label></td>
+										<td class="odd1">Station Code:<span style="color:red">*</span></td>
+										<td class="odd1"><label> <form:input
+													name="stationCode" type="text" class="text_box"
+													id="stationCode" maxlength="3" path="stationCode" />
+										</label></td>
+									</tr>
+
+									<tr>
+										<td>Country:<span style="color:red">*</span></td>
+										<td><label> <form:select name="countrySelect"
+													id="countrySelect" class="drop_down" path="countryId">
+													<form:option value="0">SELECT</form:option>
+													<c:forEach var="country" items="${countryList}">
+														<form:option value="${country.countryId}">
+															${country.countryName}</form:option>
+													</c:forEach>
+												</form:select>
+										</label></td>
+										<td>Airport Name:<span style="color:red">*</span></td>
+										<td><label> <form:input name="airport"
+													id="airport" type="text" class="text_box_airport"
+													path="airportName"/>
+										</label></td>
+									</tr>
+								</table>
+
+								<table width="708" border="0" cellspacing="0" cellpadding="0"
+									class="table1_bg">
+									<tr>
+										<td class="odd1" style="width: 108px;">Latitude:<span style="color:red">*</span></td>
+										<td class="odd1" style="width: 30px;"><label> <form:input
+													name="latitude" type="text" class="text_box1" id="latitude" value="0"
+													path="latitude" />
+										</label></td>
+										<td class="odd1" style="width: 90px; text-align: center;">
+											Longitude:<span style="color:red">*</span></td>
+										<td class="odd1" style="width: 90px;"><label> <form:input
+													name="longitude" type="text" class="text_box1" value="0"
+													id="longitude" path="longitude" />
+										</label></td>
+										<td class="odd1" style="text-align: center;">Weather Code:<span style="color:red">*</span></td>
+										<td class="odd1"><label> <form:input
+													name="weatherCode" type="text" class="text_box1" value="0"
+													id="weatherCode" path="weatherCode" />
+										</label></td>
+									</tr>
+									<tr>
+										<td>Map position:<span style="color:red">*</span></td>
+										<td><label> <form:select name="mapSelect"
+													id="mapSelect" class="drop_down" path="mapPosition">
+													<form:option value="0">SELECT</form:option>
+													<c:forEach var="mapPosition" items="${mapPositionList}">
+														<form:option value="${mapPosition}">${mapPosition}</form:option>
+													</c:forEach>
+												</form:select>
+										</label></td>
+										<td style="text-align: center;">X-axis:</td>
+										<td style="padding-right: 5px;"><form:input name="x_axis" value="0"
+												id="x_axis" type="text" class="text_box1" path="xAxis" /></td>
+										<td style="text-align: center;">Y-axis:</td>
+										<td><form:input name="y_axis" id="y_axis" type="text" value="0"
+												class="text_box1" path="yAxis" /></td>
+									</tr>
+
+									<tr>
+										<td class="odd1" colspan="6"><label> <form:checkbox
+													name="operationalBaseInd" id="operationalBaseInd"
+													path="oprtnalBsIndicator" /> Operational Base
+										</label> &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; <label> <form:checkbox
+													name="flightOperationalInd" id="flightOperationalInd"
+													path="flightOprtnalIndicator" /> Flight Operational
+										</label> &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; <label> <form:checkbox
+													name="busOperationalInd" id="busOperationalInd"
+													path="busOprtnalIndicator" /> Bus Operational
+										</label> &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; <label> <form:checkbox
+													name="activeStatus" id="activeStatus" path="active" />
+												Active
+										</label>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; <label> <form:checkbox
+													name="baseStation" id="baseStation" path="baseStation" />
+												Base Station
+										</label></td>
+									</tr>
+								</table>
+								<table width="708" border="0" cellspacing="0" cellpadding="0"
+									class="table1_bg">
+									<tr>
+										<td style="width: 10%;" align="center"><input
+											type="submit" name="addButton" id="addButton" value="Add" onclick="setActionValue('add');"
+											title="Add new station"/></td>
+										<td style="width: 10%;" align="center"><input
+											type="submit" name="updateButton" id="updateButton" value="Update" 
+											title="Update station" onclick="setActionValue('update');" /></td>
+
+										<td style="width: 10%;" align="center"><input
+											type="button" value="Clear" title="Reset" onclick="clearData();"/></td>
+										<td style="width: 70%;" align="center">&nbsp;</td>
+									</tr>
+								</table>
+							</div>
+						</form:form>
+						<form:form action="manageStations/deleteStationDetails" method="POST" id="deleteStationForm" commandName="stationDetails">
+							<form:hidden path="dltStationCode" id="deleteStnCode"/>
+						</form:form>
+					</c:if>
+				</div>
+			</div>
+		</div>
+	</div>
+	<jsp:include page="AdminFooter.jsp" />
+</body>
+
+public class ManageStationVo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private String serialNo;
+	private int stationId;
+	private String stationName;
+	private String stationCode;
+	private String airportName;
+	private String stationFullName;
+	private String countryName;
+	private String countryId;
+	private String latitude;
+	private String longitude;
+	private String weatherCode;
+	private Boolean active;
+	private Boolean oprtnalBsIndicator;
+	private Boolean flightOprtnalIndicator;
+	private Boolean busOprtnalIndicator;
+	private Boolean baseStation;
+	private Boolean deleted;
+	private String mapPosition;
+	private String xAxis;
+	private String yAxis;
+	private String operationType;
+	private String dltStationCode;
+public String getDltStationCode() {
+		return dltStationCode;
+	}
+
+	public void setDltStationCode(String dltStationCode) {
+		this.dltStationCode = dltStationCode;
+	}
+}
+
+
 @RequestMapping(method = RequestMethod.GET)
 	public ModelAndView manageStationsRendering(HttpServletRequest request, HttpServletResponse response,Model model,@ModelAttribute("stationDetails") ManageStationVo manageStationVo){
 		try {
