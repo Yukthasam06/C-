@@ -1,3 +1,68 @@
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/controller/FlightSearchController.java:[287,218] unmappable character for encoding UTF-8
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/controller/FlightScheduleSearchController.java:[455,82] unmappable character for encoding UTF-8
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[16,55] cannot find symbol
+  symbol:   class SaltSource
+  location: package org.springframework.security.authentication.dao
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[17,60] package org.springframework.security.authentication.encoding does not exist
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[18,60] package org.springframework.security.authentication.encoding does not exist
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[50,17] cannot find symbol
+  symbol:   class PasswordEncoder
+  location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[52,17] cannot find symbol
+  symbol:   class SaltSource
+  location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[159,19] cannot find symbol
+  symbol:   class PasswordEncoder
+  location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[177,41] cannot find symbol
+  symbol:   class SaltSource
+  location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[181,19] cannot find symbol
+  symbol:   class SaltSource
+  location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[INFO] 10 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 4.725 s
+[INFO] Finished at: 2026-07-08T13:57:26+05:30
+[INFO] Final Memory: 26M/222M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project FlightScheduleWeb: Compilation failure: Compilation failure:
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/controller/FlightSearchController.java:[287,218] unmappable character for encoding UTF-8
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/controller/FlightScheduleSearchController.java:[455,82] unmappable character for encoding UTF-8
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[16,55] cannot find symbol
+[ERROR] symbol:   class SaltSource
+[ERROR] location: package org.springframework.security.authentication.dao
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[17,60] package org.springframework.security.authentication.encoding does not exist
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[18,60] package org.springframework.security.authentication.encoding does not exist
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[50,17] cannot find symbol
+[ERROR] symbol:   class PasswordEncoder
+[ERROR] location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[52,17] cannot find symbol
+[ERROR] symbol:   class SaltSource
+[ERROR] location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[159,19] cannot find symbol
+[ERROR] symbol:   class PasswordEncoder
+[ERROR] location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[177,41] cannot find symbol
+[ERROR] symbol:   class SaltSource
+[ERROR] location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/security/RestAuthenticationProvider.java:[181,19] cannot find symbol
+[ERROR] symbol:   class SaltSource
+[ERROR] location: class aero.omanair.flightschedule.security.RestAuthenticationProvider
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+
+
 <properties>
 		<spring.version>4.0.3.RELEASE</spring.version>
 		<jdk.version>1.8</jdk.version>
