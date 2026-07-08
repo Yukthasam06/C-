@@ -1,3 +1,153 @@
+package aero.omanair.flightschedule.security;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.annotation.Resource;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
+import org.springframework.security.authentication.dao.SaltSource;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+
+import aero.omanair.flightschedule.exception.FlightScheduleException;
+import aero.omanair.flightschedule.service.ISecurityService;
+
+@Component
+@Profile("client")
+public class RestAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
+	
+	private static final Logger LOGGER = LogManager.getLogger(RestAuthenticationProvider.class);
+
+	@Resource(name = "securityService")
+	private ISecurityService securityService;
+	private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
+
+	private SaltSource saltSource;
+
+	public RestAuthenticationProvider() {
+		super();
+	}
+	@Override
+	@SuppressWarnings("deprecation")
+	protected void additionalAuthenticationChecks(final UserDetails userDetails, final UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+		Object salt = null;
+
+		if (saltSource != null) {
+			salt = saltSource.getSalt(userDetails);
+		}
+
+		if (authentication.getCredentials() == null) {
+			LOGGER.debug("Authentication failed: no credentials provided");
+		
+			throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"), userDetails);
+		}
+
+		final String presentedPassword = authentication.getCredentials().toString();
+
+		if (!passwordEncoder.isPasswordValid(userDetails.getPassword(), presentedPassword, salt)) {
+			LOGGER.debug("Authentication failed: password does not match stored value");
+
+			throw new BadCredentialsException(messages.getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"), userDetails);
+		}
+	}
+
+	
+	@Override
+	protected final UserDetails retrieveUser(final String userName, final UsernamePasswordAuthenticationToken auth) {
+		final String password = auth.getCredentials().toString();
+		UserDetails loadedUser = null;
+		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+	    authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		try {
+			String results=securityService.doLogin(userName, password);
+			if (results.equals("F")) {
+				return new org.springframework.security.core.userdetails.User("worng", "wrong", new ArrayList());
+			} else if (results.equals("L")) {
+				return new org.springframework.security.core.userdetails.User(userName, password, true, true, true, false, authorities);
+			}
+			
+			loadedUser = new org.springframework.security.core.userdetails.User(userName, password, authorities);
+		} catch (Exception ex) {
+			LOGGER.error(ex.getMessage(), ex);
+			throw new AuthenticationServiceException(ex.getMessage(), ex);
+		} catch (FlightScheduleException e) {
+			LOGGER.error(e.getMessage(), e);
+			throw new AuthenticationServiceException(e.getMessage(), e);
+		}
+		return loadedUser;
+	}
+	public void setPasswordEncoder(final Object passwordEncoderToSet) {
+		Assert.notNull(passwordEncoderToSet, "passwordEncoder cannot be null");
+
+		if (passwordEncoderToSet instanceof PasswordEncoder) {
+			passwordEncoder = (PasswordEncoder) passwordEncoderToSet;
+			return;
+		}
+
+		if (passwordEncoderToSet instanceof org.springframework.security.crypto.password.PasswordEncoder) {
+			final org.springframework.security.crypto.password.PasswordEncoder delegate = (org.springframework.security.crypto.password.PasswordEncoder) passwordEncoderToSet;
+			passwordEncoder = new PasswordEncoder() {
+				@Override
+				public String encodePassword(final String rawPass, final Object salt) {
+					checkSalt(salt);
+					return delegate.encode(rawPass);
+				}
+
+				@Override
+				public boolean isPasswordValid(final String encPass, final String rawPass, final Object salt) {
+					checkSalt(salt);
+					return delegate.matches(rawPass, encPass);
+				}
+
+				private void checkSalt(final Object salt) {
+					Assert.isNull(salt, "Salt value must be null when used with crypto module PasswordEncoder");
+				}
+			};
+
+			return;
+		}
+
+		throw new IllegalArgumentException("passwordEncoder must be a PasswordEncoder instance");
+	}
+
+	protected PasswordEncoder getPasswordEncoder() {
+		return passwordEncoder;
+	}
+	public void setSaltSource(final SaltSource saltSourceToSet) {
+		saltSource = saltSourceToSet;
+	}
+
+	protected SaltSource getSaltSource() {
+		return saltSource;
+	}
+
+}
+The import org.springframework.security.authentication.dao.SaltSource cannot be resolved
+The import org.springframework.security.authentication.encoding cannot be resolved
+PasswordEncoder cannot be resolved to a type
+PlaintextPasswordEncoder cannot be resolved to a type
+SaltSource cannot be resolved to a type
+The constructor BadCredentialsException(String, UserDetails) is undefined
+The method encodePassword(String, Object) of type new PasswordEncoder(){} must override or implement a supertype method
+The method isPasswordValid(String, String, Object) of type new PasswordEncoder(){} must override or implement a supertype method
+
+
+
 [ERROR] COMPILATION ERROR : 
 [INFO] -------------------------------------------------------------
 [ERROR] /C:/Users/FlightsWeb/check-out-new/FlightScheduleWeb/src/main/java/aero/omanair/flightschedule/controller/FlightSearchController.java:[287,218] unmappable character for encoding UTF-8
