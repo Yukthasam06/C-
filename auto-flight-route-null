@@ -1,3 +1,27 @@
+@Entity
+@Table(name = "FLIGHT_ROUTE_INFO")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+public class FlightRouteInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name = "ROUTE_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int routeId;
+	
+	@Column(name = "FROM_STATION")
+	private String fromStation;
+	
+	@Column(name = "TO_STATION")
+	private String toStation;
+	
+	@Cache(usage=CacheConcurrencyStrategy.TRANSACTIONAL)	
+	@OneToMany(mappedBy = "flightRouteInfo", cascade = CascadeType.ALL,fetch=FetchType.EAGER)
+	private Set<FlightConnectionInfo> flightConnectionInfo;
+}
+
+
 public List<FlightRouteInfoVo> getFlightRouteInformation() {
 		List<FlightRouteInfoVo> populateFlightRouteInfo = null;
 		try {
