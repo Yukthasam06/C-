@@ -1,3 +1,19 @@
+@RequestMapping(method = RequestMethod.GET)
+	public ModelAndView manageStationsRendering(HttpServletRequest request, HttpServletResponse response,Model model,@ModelAttribute("stationDetails") ManageStationVo manageStationVo){
+		try {
+			model.addAttribute("stationList", flightStationService.getManageStationsList());
+			model.addAttribute("countryList",flightStationService.getCountries());
+			model.addAttribute("mapPositionList",flightStationService.getMapPositions());
+			model.addAttribute("stationDetails",manageStationVo);
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION :-"+e.getMessage(),e);
+		}
+		return new ModelAndView("manageStations");
+	}
+
+ManageStationVo [serialNo=null, stationId=0, stationName=null, stationCode=null, airportName=null, stationFullName=null, countryName=null, countryId=null, latitude=null, longitude=null, weatherCode=null, active=null, oprtnalBsIndicator=null, flightOprtnalIndicator=null, busOprtnalIndicator=null, baseStation=null, deleted=null, mapPosition=null, xAxis=null, yAxis=null, operationType=null]
+
+
 08 Jul 2026 17:11:11,637 INFO : aero.omanair.flightschedule.controller.FlightRouteSynchronizationController:56 [] - #########################ROUTE SYNCHRONIZATION ACTIVITY LOG INFO####################################
 08 Jul 2026 17:11:27,184 ERROR: org.springframework.web.servlet.tags.form.HiddenInputTag:86 [] - Neither BindingResult nor plain target object for bean name 'command' available as request attribute
 java.lang.IllegalStateException: Neither BindingResult nor plain target object for bean name 'command' available as request attribute
