@@ -1,3 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<security:global-method-security
+		secured-annotations="enabled"/>		
+		
+	<security:http pattern="/resources/**" security="none" />
+	
+	<security:http auto-config="true" entry-point-ref="ajaxAwareAuthenticationEntryPoint" use-expressions="true">
+		<!-- Restrict URLs based on role -->
+		<security:intercept-url pattern="/login"
+			access="permitAll" />
+		<security:intercept-url pattern="/flightScheduleSearch/**"
+			access="permitAll" />
+		<security:intercept-url pattern="/flightSearch/**"
+			access="permitAll" />
+		<security:intercept-url pattern="/resources/**"
+			access="permitAll" />
+		<security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
+
+		<!-- Override default login and logout pages -->
+		<security:form-login login-page="/login"
+			username-parameter="userName" password-parameter="password"
+			login-processing-url="/ssimConfig"
+			authentication-success-handler-ref="authenticationSuccessHandler" 
+			authentication-failure-handler-ref="authenticationFailureHandler" />
+		<security:logout delete-cookies="JSESSIONID" logout-url="/logout" logout-success-url="/login" />
+	</security:http>
+	
+	<bean id="ajaxAwareAuthenticationEntryPoint"
+		class="aero.omanair.flightschedule.security.AjaxAwareAuthenticationEntryPoint" >
+		<constructor-arg name="flightSearch" value="/flightSearch"/>
+	</bean>
+
+	<bean id="authenticationSuccessHandler"
+		class="aero.omanair.flightschedule.security.FlightSearchUrlAuthenticationSuccessHandler" />
+
+	<bean id="authenticationFailureHandler"
+		class="aero.omanair.flightschedule.security.FlightSearchUrlAuthenticationFailureHandler" />
+
+	<bean id="restAuthenticationProvider"
+		class="aero.omanair.flightschedule.security.RestAuthenticationProvider" />
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			ref="restAuthenticationProvider" />
+	</security:authentication-manager>
+
+
+</beans>
+
+
 08 Jul 2026 16:14:55,452 INFO : org.springframework.security.config.SecurityNamespaceHandler:86 [] - Spring Security 'config' module version is 5.8.14
 08 Jul 2026 16:14:55,666 ERROR: org.springframework.web.context.ContextLoader:299 [] - Context initialization failed
 org.springframework.beans.factory.parsing.BeanDefinitionParsingException: Configuration problem: You cannot use a spring-security-2.0.xsd or spring-security-3.0.xsd or spring-security-3.1.xsd schema or spring-security-3.2.xsd schema or spring-security-4.0.xsd schema with Spring Security 5.8. Please update your schema declarations to the 5.8 schema.
