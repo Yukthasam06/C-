@@ -6,6 +6,34 @@ SELECT DISTINCT
 FROM FLIGHT_ROUTE_INFO fri
 LEFT OUTER JOIN FLIGHT_CONNECTION_INFO fci
        ON fri.ROUTE_ID = fci.ROUTE_ID;
+This query returns the result in below order
+41	AUH	ADD	1		MCT	CONNECTION	1	41
+42	AUH	ADL	2		MCT,DOH	CONNECTION	2	42
+42	AUH	ADL	3		MCT,SLL,DOH	CONNECTION	3	42
+
+But the query used in application, returns the records in the below different order
+select distinct f from FlightRouteInfo f left join fetch f.flightConnectionInfo
+Sl No
+From-To
+Connection Type
+No Of Base Stns
+Connection station
+Stop Over
+1
+AUH-ADD
+CONNECTION
+1
+MCT
+2
+AUH-ADL
+CONNECTION
+3
+MCT,SLL,DOH
+3
+AUH-ADL
+CONNECTION
+2
+MCT,DOH
 
 
 @Entity
