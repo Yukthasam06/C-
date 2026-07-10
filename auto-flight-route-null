@@ -1,3 +1,79 @@
+@RequestMapping(value = "/submitDetails",method = RequestMethod.POST)
+	public ModelAndView updateStationsDetails(RedirectAttributes redirectAttributes,HttpServletRequest request, HttpServletResponse response,HttpSession session,
+			@ModelAttribute("stationDetails") ManageStationVo manageStationVo, Model model){
+		try{
+			if(manageStationVo.getOperationType().equals("add")){
+				if(!alreadyExist(manageStationVo)){
+					flightStationService.save(manageStationVo);
+					flightStationService.evictSingleEntityCache(new Stations()); // Refreshing second level Cache.
+//					session.setAttribute(FlightScheduleConstants.MANAGESTATIONVO, null);
+					redirectAttributes.addFlashAttribute("successMsg", "Station is added successfully.");
+				}else{
+					redirectAttributes.addFlashAttribute("stationDetails",manageStationVo);
+//					session.setAttribute(FlightScheduleConstants.MANAGESTATIONVO, manageStationVo);
+					redirectAttributes.addFlashAttribute("errorMsg", "Station already exists with same station code, please change station code.");
+					return new ModelAndView("redirect:/manageStations/rendering");
+				}
+			}else if(manageStationVo.getOperationType().equals("update")){
+				flightStationService.updateStationDetails(manageStationVo);
+				flightStationService.evictSingleEntityCache(new Stations()); // Refreshing second level Cache.
+				session.setAttribute(FlightScheduleConstants.MANAGESTATIONVO, null);
+				redirectAttributes.addFlashAttribute("successMsg", "Station updated successfully.");
+			}
+			session = request.getSession();
+			session.setAttribute(FlightScheduleConstants.STATION_SESSION, null);
+		} catch (Exception e) {
+			session.setAttribute(FlightScheduleConstants.MANAGESTATIONVO, null);
+			LOGGER.error("EXCEPTION :-"+e.getMessage(),e);
+			redirectAttributes.addFlashAttribute("errorMsg",e.getMessage());
+		}
+		return new ModelAndView("redirect:/manageStations");
+	}
+
+@Override
+	public void save(ManageStationVo manageStationVo) {
+		Stations stations = null;
+		Country country = null;
+		try{
+			if(null != manageStationVo){
+				stations = new Stations();
+				country = flightStationsDAO.findById(manageStationVo.getCountryId());
+				stations.setCountry(country);
+				stations.setStationCode(manageStationVo.getStationCode());
+				stations.setStationName(manageStationVo.getStationName());
+				stations.setAirportName(manageStationVo.getAirportName());
+				stations.setLatitude(manageStationVo.getLatitude());
+				stations.setLongitude(manageStationVo.getLongitude());
+				stations.setWeatherCode(manageStationVo.getWeatherCode());
+				stations.setMapPosition(manageStationVo.getMapPosition());
+				stations.setxAxis(manageStationVo.getxAxis());
+				stations.setyAxix(manageStationVo.getyAxis());
+				stations.setOprtnalBsIndicator(manageStationVo.getOprtnalBsIndicator());
+				stations.setFlightOprtnalIndicator(manageStationVo.getFlightOprtnalIndicator());
+				stations.setBusOprtnalIndicator(manageStationVo.getBusOprtnalIndicator());
+				stations.setActive(manageStationVo.getActive());
+				stations.setBaseStation(manageStationVo.getBaseStation());
+				flightStationsDAO.save(stations);
+			}
+		}catch(Exception e){
+			LOGGER.error("EXCEPTION IN SAVE STATIONS :-" + e.getMessage(), e);
+		}
+	}
+public void save(Stations station){
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			session.save(station);
+		} catch (Exception e) {
+			LOGGER.error("EXCEPTION IN ADDING NEW STATION",e);
+		}finally{
+			if (session != null) {
+				session.close();
+			}
+		}
+	}
+After the dependencies upgrade, when trying to add a station it is not saving. Why this happens and how to resolve this?
+
 SELECT DISTINCT
        fri.ROUTE_ID,
        fri.FROM_STATION,
