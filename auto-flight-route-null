@@ -1,3 +1,32 @@
+public void save(Stations station) {
+
+    Transaction tx = null;
+    Session session = null;
+
+    try {
+
+        session = sessionFactory.openSession();
+
+        tx = session.beginTransaction();
+
+        session.save(station);
+
+        tx.commit();
+
+    } catch (Exception e) {
+
+        if (tx != null)
+            tx.rollback();
+
+        LOGGER.error("EXCEPTION", e);
+
+    } finally {
+
+        if (session != null)
+            session.close();
+    }
+}
+
 @RequestMapping(value = "/submitDetails",method = RequestMethod.POST)
 	public ModelAndView updateStationsDetails(RedirectAttributes redirectAttributes,HttpServletRequest request, HttpServletResponse response,HttpSession session,
 			@ModelAttribute("stationDetails") ManageStationVo manageStationVo, Model model){
