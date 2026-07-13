@@ -1,0 +1,23 @@
+public void save(Stations station) {
+
+    Transaction tx = null;
+
+    try (Session session = sessionFactory.openSession()) {
+
+        tx = session.beginTransaction();
+
+        session.save(station);
+
+        tx.commit();
+
+    } catch (Exception e) {
+
+        if (tx != null && tx.getStatus().canRollback()) {
+            tx.rollback();
+        }
+
+        LOGGER.error("Error saving station", e);
+
+        throw e;
+    }
+}
