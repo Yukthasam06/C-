@@ -1,4 +1,40 @@
 public void save(Stations station) {
+    Session session = null;
+    Transaction tx = null;
+
+    try {
+        System.out.println("1. Entering save()");
+
+        session = sessionFactory.openSession();
+        System.out.println("2. Session opened");
+
+        tx = session.beginTransaction();
+        System.out.println("3. Transaction started");
+
+        session.save(station);
+        System.out.println("4. Entity saved");
+
+        tx.commit();
+        System.out.println("5. Transaction committed");
+
+    } catch (Exception e) {
+        System.out.println("Exception occurred");
+        e.printStackTrace();
+
+        if (tx != null) {
+            tx.rollback();
+        }
+
+        throw new RuntimeException(e);
+
+    } finally {
+        if (session != null) {
+            session.close();
+        }
+    }
+}
+
+public void save(Stations station) {
 
     Transaction tx = null;
     Session session = null;
