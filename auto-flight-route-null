@@ -1,3 +1,49 @@
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+public boolean deleteStationDetails(String stationCode) throws Exception {
+
+    Session session = null;
+    Transaction tx = null;
+    boolean isCheck = false;
+
+    try {
+
+        session = sessionFactory.openSession();
+        tx = session.beginTransaction();
+
+        Query query = session.createQuery(
+                "update Stations s set s.deleted = 1 where s.stationCode = :stationCode");
+
+        query.setParameter("stationCode", stationCode);
+
+        int rows = query.executeUpdate();
+
+        tx.commit();
+
+        isCheck = (rows > 0);
+
+    } catch (Exception e) {
+
+        if (tx != null && tx.getStatus().canRollback()) {
+            tx.rollback();
+        }
+
+        LOGGER.error("EXCEPTION IN DELETING STATION DETAILS FOR " + stationCode, e);
+
+        throw e;
+
+    } finally {
+
+        if (session != null) {
+            session.close();
+        }
+    }
+
+    return isCheck;
+}
+
 public boolean deleteStationDetails(String stationCode) throws Exception {
 		Session session = null;
 		boolean isCheck=false;
