@@ -1,3 +1,16 @@
+Query<SSIMRecordType3> query = session.createQuery(
+    "FROM SSIMRecordType3 s " +
+    "WHERE s.uniqId IN (" +
+    "   SELECT MIN(s2.uniqId) " +
+    "   FROM SSIMRecordType3 s2 " +
+    "   WHERE s2.flightNbr = :flightNbr " +
+    "   GROUP BY s2.departStation, s2.arrvlStation" +
+    ")",
+    SSIMRecordType3.class);
+
+query.setParameter("flightNbr", flightNbr);
+
+
 1765	0705	MCT	ZNZ
 1766	0705	ZNZ	DAR
 1767	0705	MCT	ZNZ
