@@ -1,196 +1,45 @@
-//old code
-public String delayDtlsNewFirstRow() {
-        setFlightId(getFlightId().split(",")[0]);
-        initPage();
-        try{
-        	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
-            ArrayList<DelayDetailNewTO> newDetailTOs = new ArrayList<DelayDetailNewTO>();
-            DelayDetailNewTO detailTO = new DelayDetailNewTO();
-            newDetailTOs.add(detailTO);
-            setDelayDetailsNew(newDetailTOs);
-            setFreezeStatus(getDelegate().getFreezeStatus(flightId));
-           // setCommonDlyDetails();            
-        } catch (OtpException e) {
-        }
-        return "success";
-    }
+14 Jul 2026 13:25:08,750 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper: 142 [] Cannot delete or update a parent row: a foreign key constraint fails (flight_schedule_db. FLIGHT CONNECTION INFO bkp`, CONSTRAINT `FKj39w4bof2x3mqvbswrr6kyetq FOREIGN KEY (ROUTE_ID_FK) REFERENCES FLIGHT_ROUTE_INFO` (`ROUTE_ID`))
 
-//new code
+14 Jul 2026 13:25:09,097 ERROR: aero.omanair.flightschedule.daoImpl.FlightRouteInfoDAOImp1:48 [] EXCEPTION OCCURED IN CLEAN UP DB OF FLIGHT_ROUTE_INFO:-org.hibernate.exception.Constraint ViolationException: could not execute statement
 
-function addDelay(tag){
+javax.persistence. PersistenceException: org.hibernate.exception.ConstraintViolationException: could not execute statement
 
-    var fltid = $(tag).attr("id").split("-")[1];
+at org.hibernate.internal.ExceptionConverterImpl.convert (ExceptionConverterImpl.java:154)
 
-    var rowCount = $("#newDelayTable-"+fltid+" tr").length - 1;
+at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:181)
 
-    $.ajax({
+at org.hibernate.query.internal.AbstractProducedQuery.executeUpdate(AbstractProducedQuery.java:1705)
 
-        url : "delayDtlsNewFirstRow.action",
+at aero.omanair.flightschedule.daoImpl. FlightRouteInfoDA)Impl.cleanupDB (FlightRouteInfoDAOImpl.java:40)
 
-        type : "GET",
+at aero.omanair.flightschedule.serviceImpl.FlightRouteInfoServiceImpl.uploadDataFromCSVFile (FlightRouteInfoServiceImpl.
 
-        data : {
-            flightId : fltid,
-            rowIndex : rowCount
-        },
+at aero.omanair.flightschedule.controller.FlightRouteSynchronizationController.uploadFileHandler(FlightRouteSynchronizationController.java:86)
 
-        success : function(response){
+at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 
-            $("#newDelayTable-"+fltid).append(response);
+at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
 
-        },
+at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
 
-        error : function(){
-            alert("Unable to add new delay row");
-        }
+at java.lang.reflect.Method.invoke(Method.java:498)
 
-    });
+at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
 
-}
+at org.springframework.web.method.support.InvocableHandlerMethod.invoke ForRequest (InvocableHandlerMethod.java:150)
 
-public String delayDtlsNewFirstRow() {
-        setFlightId(getFlightId().split(",")[0]);
-        initPage();
-        try{
-        	setProcesses((ArrayList<SelectionTO>)getDelegate().getProcesses());
-        	setReasons(new ArrayList<SelectionTO>());
-        	setStakeholders(new ArrayList<StakeholderTO>());
-            ArrayList<DelayDetailNewTO> newDetailTOs = new ArrayList<DelayDetailNewTO>();
-            DelayDetailNewTO detailTO = new DelayDetailNewTO();
-            detailTO.setProcessId("-1");
-            detailTO.setReasonId("-1");
-            detailTO.setStakeholderId("-1");
-            detailTO.setDelayCode("");
-            detailTO.setDelayMinutes("");
-            detailTO.setType("");
-            detailTO.setDelayRemarks("");
-            newDetailTOs.add(detailTO);
-            setDelayDetailsNew(newDetailTOs);
-            setFreezeStatus(getDelegate().getFreezeStatus(flightId));
-           // setCommonDlyDetails();            
-        } catch (OtpException e) {
-        }
-        return "success";
-    }
+at
 
-private int rowIndex;
+org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
 
-public int getRowIndex() {
-    return rowIndex;
-}
+org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod (RequestMappingHandlerAdapter.java:903) at
 
-public void setRowIndex(int rowIndex) {
-    this.rowIndex = rowIndex;
-}
+at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal (RequestMappingHandlerAdapter.java:809)
 
+org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
 
-<tr>
+at at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1072)
 
-<td>
+at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:965)
 
-<s:select
-name="delayDetailsNew[%{rowIndex}].processId"
-list="processes"
-listKey="id"
-listValue="value"
-headerKey="-1"
-headerValue="Select Process"
-cssClass="pax_inputSelect"
-id="process_%{rowIndex}"
-onchange="loadReasons(this.value,%{rowIndex})"
-/>
-
-</td>
-
-<td>
-
-<s:select
-name="delayDetailsNew[%{rowIndex}].reasonId"
-list="{}"
-headerKey="-1"
-headerValue="Select Reason"
-cssClass="pax_inputSelect"
-id="reason_%{rowIndex}"
-onchange="loadStakeholders(this.value,%{rowIndex})"
-/>
-
-</td>
-
-<td>
-
-<s:select
-name="delayDetailsNew[%{rowIndex}].stakeholderId"
-list="{}"
-headerKey="-1"
-headerValue="Select Stakeholder"
-cssClass="pax_inputSelect"
-id="stakeholder_%{rowIndex}"
-onchange="loadDelayCode(this.value,%{rowIndex})"
-/>
-
-</td>
-
-<td>
-
-<s:textfield
-name="delayDetailsNew[%{rowIndex}].delayCode"
-cssClass="pax_inputTextBox"
-id="delayCode_%{rowIndex}"
-readonly="true"
-/>
-
-</td>
-
-<td>
-
-<s:textfield
-name="delayDetailsNew[%{rowIndex}].delayMinutes"
-cssClass="pax_inputTextBox"
-/>
-
-</td>
-
-<td>
-
-<select
-name="delayDetailsNew[%{rowIndex}].type"
-class="pax_inputSelect"
-id="type_%{rowIndex}">
-
-<option value="">Select</option>
-<option value="Primary">Primary</option>
-<option value="Secondary">Secondary</option>
-
-</select>
-
-</td>
-
-<td>
-
-<s:textfield
-name="delayDetailsNew[%{rowIndex}].delayRemarks"
-cssClass="pax_inputTextBox"
-/>
-
-</td>
-
-<td></td>
-<td></td>
-
-<td>
-
-<img
-src="<%=request.getContextPath()%>/images/icons/ico_16x16_deleteDelay.png"
-width="16"
-height="16"
-style="cursor:pointer"
-onclick="deleteDelay(this)">
-
-</td>
-
-</tr>
-
-<action name="delayDtlsNewFirstRow" method="delayDtlsNewFirstRow" class="aero.omanair.pax.otp.web.actions.FlightDelayNewAction">
-                <result name="success">/jsp/departure-tab-delays-dtls-new.jsp</result>
-                <result name="error">/jsp/flightsCreateError.jsp</result>                
-    </action> 
+at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
