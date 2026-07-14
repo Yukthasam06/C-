@@ -1,45 +1,30 @@
-14 Jul 2026 13:25:08,750 ERROR: org.hibernate.engine.jdbc.spi.SqlExceptionHelper: 142 [] Cannot delete or update a parent row: a foreign key constraint fails (flight_schedule_db. FLIGHT CONNECTION INFO bkp`, CONSTRAINT `FKj39w4bof2x3mqvbswrr6kyetq FOREIGN KEY (ROUTE_ID_FK) REFERENCES FLIGHT_ROUTE_INFO` (`ROUTE_ID`))
+public void cleanupDB() {
 
-14 Jul 2026 13:25:09,097 ERROR: aero.omanair.flightschedule.daoImpl.FlightRouteInfoDAOImp1:48 [] EXCEPTION OCCURED IN CLEAN UP DB OF FLIGHT_ROUTE_INFO:-org.hibernate.exception.Constraint ViolationException: could not execute statement
+Session session = null;
 
-javax.persistence. PersistenceException: org.hibernate.exception.ConstraintViolationException: could not execute statement
+try {
 
-at org.hibernate.internal.ExceptionConverterImpl.convert (ExceptionConverterImpl.java:154)
+session sessionFactory.openSession();
 
-at org.hibernate.internal.ExceptionConverterImpl.convert(ExceptionConverterImpl.java:181)
+session.createSQLQuery("DELETE FROM FLIGHT_CONNECTION_INFO").executeUpdate();
 
-at org.hibernate.query.internal.AbstractProducedQuery.executeUpdate(AbstractProducedQuery.java:1705)
+session.createSQLQuery("ALTER TABLE FLIGHT_CONNECTION_INFO AUTO_INCREMENT = 1").executeUpdate();
 
-at aero.omanair.flightschedule.daoImpl. FlightRouteInfoDA)Impl.cleanupDB (FlightRouteInfoDAOImpl.java:40)
+session.createSQL Query("DELETE FROM FLIGHT_ROUTE_INFO").executeUpdate();
 
-at aero.omanair.flightschedule.serviceImpl.FlightRouteInfoServiceImpl.uploadDataFromCSVFile (FlightRouteInfoServiceImpl.
+session.createSQLQuery("ALTER TABLE FLIGHT_ROUTE_INFO AUTO_INCREMENT = 1").executeUpdate();
 
-at aero.omanair.flightschedule.controller.FlightRouteSynchronizationController.uploadFileHandler(FlightRouteSynchronizationController.java:86)
+LOGGER.info("======Clean up DB successfull==========");
 
-at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+} catch (Exception e) {
 
-at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+LOGGER.error("EXCEPTION OCCURED IN CLEAN UP DB OF FLIGHT_ROUTE_INFO:-" + e.getMessage(), e);
 
-at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+) finally {
 
-at java.lang.reflect.Method.invoke(Method.java:498)
+if (session != ull)
 
-at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+session.close();
 
-at org.springframework.web.method.support.InvocableHandlerMethod.invoke ForRequest (InvocableHandlerMethod.java:150)
-
-at
-
-org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
-
-org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod (RequestMappingHandlerAdapter.java:903) at
-
-at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal (RequestMappingHandlerAdapter.java:809)
-
-org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
-
-at at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1072)
-
-at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:965)
-
-at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+}
+Even after execution of this code while executing the below script auto increment is not showing as 1
