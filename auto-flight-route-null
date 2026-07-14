@@ -1,3 +1,13 @@
+SELECT s.FLIGHT_NBR
+FROM ST_SSIM_RECORD_TYPE_NEW3 s
+JOIN (
+    SELECT MIN(UNIQ_ID) AS UNIQ_ID
+    FROM ST_SSIM_RECORD_TYPE_NEW3
+    WHERE LEG_SQNC_NBR > 1
+    GROUP BY FROM_STATION, TO_STATION
+) t
+ON s.UNIQ_ID = t.UNIQ_ID;
+
 2026-07-13 14:09:29 ERROR SqlExceptionHelper:142 - Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'flight_schedule_db.ST_SSIM_RECORD_TYPE_NEW3.FLIGHT_NBR' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
 2026-07-13 14:09:29 ERROR SsimLoaderDAOImpl:182 - EXCEPTION OCCURED WHILE RETURNING CIRCULAR FLIGHT NUMBERS:- org.hibernate.exception.SQLGrammarException: could not extract ResultSet
 javax.persistence.PersistenceException: org.hibernate.exception.SQLGrammarException: could not extract ResultSet
