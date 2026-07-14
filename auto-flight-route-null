@@ -1,3 +1,13 @@
+1765	0705	MCT	ZNZ
+1766	0705	ZNZ	DAR
+1767	0705	MCT	ZNZ
+1768	0705	ZNZ	DAR
+FROM SSIMRecordType3 WHERE FLIGHT_NBR = :flightNbr GROUP BY departStation,arrvlStation
+This old query provides below result
+1765	0705	MCT	ZNZ
+1766	0705	ZNZ	DAR
+Now how should I modify the query for my upgrade since I'm getting the same error for this case.
+
 SELECT s.FLIGHT_NBR
 FROM ST_SSIM_RECORD_TYPE_NEW3 s
 JOIN (
