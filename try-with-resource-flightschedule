@@ -1,3 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+xmlns:context="http://www.springframework.org/schema/context"
+
+xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+xsi:schemaLocation="
+
+http://www.springframework.org/schema/beans
+
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+http://www.springframework.org/schema/context
+
+http://www.springframework.org/schema/context/spring-context-3.0.xsd
+
+http://www.springframework.org/schema/mvc
+
+http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+<context:component-scan base-package="aero.omanair" />
+
+<mvc:resources mapping="/resources/**" location="/resources/" />
+
+<mvc:annotation-driven />
+
+<bean id="localeResolver"
+
+class="org.springframework.web.servlet.il8n.SessionLocaleResolver">
+
+<property name="defaultLocale" value="en" />
+
+</bean>
+
+<bean
+
+class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<property name="prefix">
+
+<value>/WEB-INF/pages/</value>
+
+</property>
+
+<property name="suffix">
+
+<value>.jsp</value>
+
+</property>
+
+</bean>
+
+<bean id="velocityEngine" m
+
+class="org.springframewk.ui.velocity.VelocityEngine FactoryBean">
+
+<property name="resourceLoaderPath" value="WEB-INF/classes" />
+
+<property name="preferFileSystemAccess" value="false" />
+
+</bean>
+
+<bean
+
+class="org.jasypt.spring.properties. Encryptable PropertyPlaceholderConfigurer">
+
+<constructor-arg ref="configuration Encryptor" />
+
+<property name="location"
+
+value="classpath:application.properties" />
+
+CONTROLLERS
+
+-->
+
+</bean>
+
+<!--
+
+bean id="erpStagingSchedulerGenerator" class="aero.omanair.schedulers.sheduler.ErpStagingSchedulerGenerator" />
+
+< <bean id="payment StatusEmailNotification" class="aero.omanair.schedulers.sheduler.PaymentStatus Email Notification"/>
+
+<bean id="disableSystemUsers" class="aero.omanair.schedulers.sheduler. DisableSystemUser"/>
+
+</beans>
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+B
+
+19
+
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+< bean id="erpStagingReportScheduler" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+
+<property name="targetObject" ref="erpStagingSchedulerGenerator"/> <property
+
+name="targetMethod" value="init"/> </bean>
+
+<!-- Frequent Flyer Program Scheduler Run the job every day at 01:00 AM -->
+
+<bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"
+
+id="erpStagingTrigger">
+
+<property ref="erpStagingReportScheduler" name="jobDetail" />
+
+<property name="cronExpression" value="${erpStaging.scheduledTime)" />
+
+</bean>
+
+<!-- CCMS Email Notification -->
+
+< bean id="ccmsPaymetStatusScheduler" class="org.springframework.scheduling.quartz.MethodInvoking JobDetail FactoryBean">
+
+<property name="targetObject" ref="payment Status EmailNotification"/> <property
+
+name="targetMethod" value="init"/> </bean>
+
+<!-- CCMS Disable system users -->
+
+<bean id="systemUserDisableScheduler" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+
+<property name="targetObject" ref="disableSystemUsers" /> <property
+
+name="targetMethod" value="init"/> </bean>
+
+<!-- CCMS payment status email notification Schedular every day at 01:00 AM --> <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"
+
+id="payment StatusTrigger">
+
+<property ref="ccmsPaymetStatusScheduler" name="jobDetail" />
+
+<property name="cronExpression" value="${ccmsPaymentStatus.scheduledTime)" />
+</bean>
+
+<!-- CCMS DISABLE SYSTEM USERS -->
+
+<bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"
+
+id="systemUserDisableTrigger">
+
+<property ref="systemUserDisableScheduler" name="jobDetail" />
+
+<property name="cronExpression" value="${ccmsDisableSystemUsers.scheduledTime}" />
+
+</bean>
+
+<!-- Scheduler factory bean to glue together jobDetails and triggers to
+
+Configure Quartz Scheduler -->
+
+< bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+
+<property name="jobDetails">
+
+<list>
+
+<ref bean="erpStagingReport Scheduler" />
+
+<ref bean="ccmsPaymetStatusScheduler" />
+
+<ref bean="systemUserDisableScheduler"/>
+
+</list>
+
+</property>
+
+<property name="triggers">
+
+<list>
+
+<ref bean="erpStagingTrigger" />
+
+<ref bean="paymentStatusTrigger" />
+
+<ref bean="systemUserDisableTrigger"/>
+
+</list>
+
+</property>
+
+</bean>
+
+</beans>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+xmlns:context="http://www.springframework.org/schema/context"
+
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+
+xsi:schemaLocation="
+
+http://www.springframework.org/schema/beans
+
+http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+
+http://www.springframework.org/schema/context
+
+http://www.springframework.org/schema/context/spring-context-4.0.xsd
+
+http://www.springframework.org/schema/task
+
+http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+
+<task:annotation-driven />
+
+<bean
+
+class="org.jasypt.spring3.properties.Encryptable Property PlaceholderConfigurer">
+
+<constructor-arg ref="configurationEncryptor" />
+
+<property name="location"
+
+value="classpath:application.properties" />
+
+</bean>
+
+< bean id="configuration Encryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+
+<property name="config" ref="environmentVariablesConfiguration" />
+
+</bean>
+
+<bean id="environmentVariablesConfiguration"
+
+class="org.jasypt.encryption.pbe.config. EnvironmentStringPBEConfig">
+
+<property name="algorithm" value="PBEWithMD5AndDES" />
+
+<property name="passwordEnvName" value="APP_ENCRYPTION PASSWORD" />
+</bean>
+
+< bean id="pbeStringEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+
+<property name="config" ref="environmentVariablesConfiguration" />
+
+</bean>
+
+<!-- Data Source Configured for ERP STG & CCMS payment Status email Notification Scheduler -->
+
+<bean id="esDataSource" ="com.mysql.jdbc.jdbc2.optional. MysqlDataSource">
+
+<property name="url" value="${esDbUrl}" />
+
+<property name="user" value="${esDbUserId)"></property>
+
+<property name="password" value="${esDbUserPassword) "></property>
+
+<property name="useUnicode" value="true" />
+
+<property name="characterEncoding" value="UTF-8" />
+
+</bean>
+
+<!-- Hibernate session factory -->
+
+<bean id="esSessionFactory"
+
+class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+
+<property name="dataSource" ref="esDataSource" />
+
+<property name="packagesToScan" value="aero.omanair.schedulers.models" />
+
+<property name="hibernate Properties">
+
+<props>
+
+<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+
+<prop key="hibernate.current_session_context_class">thread</prop>
+
+<!-- <prop key="show_sql">true</prop> -->
+
+<prop key="hibernate.show_sql">true</prop>
+
+<prop key="hibernate.hbm2dll.auto">update</prop>
+
+<prop key="hibernate.connection.pool_size">10</prop>
+
+</props>
+
+</property>
+
+</bean>
+
+<!-- Hibernate session factory -->
+
+<bean id="ccmsSessionFactory"
+
+class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+
+<property name="dataSource" ref="esDataSource" />
+
+<property name="packagesToScan" value="aero.omanair.schedulers.models" />
+
+<property name="hibernateProperties">
+
+<props>
+
+<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto)</prop>
+
+<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+
+<prop key="hibernate.show_sql">${hibernate.show_sql)</prop>
+<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+
+<prop key="hibernate.current_session_context_class">thread</prop>
+
+<!-- <prop key="show_sql">true</prop> -->
+
+<prop key="hibernate.show_sql">true</prop>
+
+<prop key="hibernate.hbm2dll.auto">update</prop>
+
+<prop key="hibernate.connection.pool_size">10</prop>
+
+</props>
+
+</property>
+
+</bean>
+
+</beans>
+#Cron Expression
+
+ccms PaymentStatus.scheduledTime=0 0/2 ***?
+
+5ccmsDisableSystemUsers.scheduledTime=0 0/2 ***?
+
+7erpStaging.scheduledTime=0 0/2 ***?
+
+
+
+
 CREATE TABLE XXOA_AP_INV_CRMS_STG (
     INVOICE_NUMBER VARCHAR(50) NOT NULL,
     INVOICE_DATE DATE,
