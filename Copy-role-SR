@@ -1,557 +1,324 @@
-INSERT INTO wynetadm.temp_bpf_id
-            SELECT bpf_id
-              FROM bpf_pending_actions
-             WHERE next_actor = volduserid;
-During the execution of this line in the procedure, it will return about 9000 bpf_id and while inserting those getting the below error. How to check and overcome this issue. Provide a step by step explanation and solution for this.
-java.sql.SQLException: ORA-00001: unique constraint (WYNETADM.BPAD_UQ) violated
-ORA-06512: at "WYNETADM.BPF", line 711
-ORA-06512: at "WYNETADM.INS_TEMP_BPF_ID", line 2
-ORA-04088: error during execution of trigger 'WYNETADM.INS_TEMP_BPF_ID'
-ORA-06512: at "WYNETADM.BPF", line 190
-
-	at oracle.jdbc.driver.DatabaseError.throwSqlException(DatabaseError.java:111)
-	at oracle.jdbc.driver.T4CTTIoer.processError(T4CTTIoer.java:330)
-	at oracle.jdbc.driver.T4CTTIoer.processError(T4CTTIoer.java:287)
-	at oracle.jdbc.driver.T4C8Oall.receive(T4C8Oall.java:744)
-	at oracle.jdbc.driver.T4CCallableStatement.doOall8(T4CCallableStatement.java:214)
-
-create or replace TRIGGER "WYNETADM"."INS_TEMP_BPF_ID" 
-BEFORE INSERT
-ON WYNETADM.TEMP_BPF_ID 
-REFERENCING NEW AS NEW OLD AS OLD
-FOR EACH ROW
-
-
-BEGIN
-	 bpf.put_in_bpf_que(:new.PROCESS_INSTANCE_ID,1);
-END ;
-
-PROCEDURE put_in_bpf_que (bpfid IN NUMBER, trigflag IN NUMBER)
-   IS
-      is_conditional_flow   NUMBER          := 0;
-      appid                 NUMBER          := 0;
-      appflowid             NUMBER          := 0;
-      processid             NUMBER          := 0;
-      s                     VARCHAR2 (1000);
-      v_nonoutstation       NUMBER          := -1;
-      v_advapprove          NUMBER          := -1;
-      v_pending_actions_count NUMBER        := -1;
-      v_pending_actionsdtl_count NUMBER     := -1;
-      aprv_action           NUMBER          := 0;
-      cpo_aprved            NUMBER          := 0;
-      v_filter              VARCHAR2(1000);
-      v_sql                 VARCHAR2(1000);
-      v_sql_dtl             VARCHAR2(1000);
-      wy_payroll            NUMBER          := 0;
-      hr_type               NUMBER          := 0;
-
-   BEGIN
-
-      SELECT COUNT(*) INTO v_nonoutstation
-          FROM WYNETADM.BPF_NONOUTSTATION_PAYROLL 
-          WHERE PAYROLL_ID = (
-              SELECT PAYROLLID 
-              FROM WYNETADM.xxdt_employee_view 
-              WHERE STAFFID = (
-                  SELECT EMP_NO 
-                  FROM WYNETADM.DT_HDR 
-                  WHERE BPF_ID = bpfid
-              )
-          );      
-
-      SELECT COUNT(*) INTO v_advapprove 
-      FROM WYNETADM.BPF_PROCESS_INSTANCES 
-      WHERE PROCESS_INSTANCE_ID = bpfid AND STATE_ID = 8;
-
-      SELECT COUNT(*) INTO v_pending_actions_count 
-      FROM bpf_pending_actions WHERE bpf_id = bpfid;
-
-      SELECT COUNT(*) INTO v_pending_actionsdtl_count 
-      FROM bpf_pending_action_dtl WHERE bpf_id = bpfid;
-
-      IF v_nonoutstation = 0 AND v_advapprove = 1 AND v_pending_actions_count = 0 AND v_pending_actionsdtl_count = 0 
-      THEN
-          DBMS_OUTPUT.PUT_LINE('OUTSTATION STAFF, HENCE NOT REQUIRED TO ADD BACK PENDING ACTIONS');
-      ELSE
-
-      DELETE FROM bpf_temp_transitions;
-      INSERT INTO bpf_temp_transitions
-                  (trans_type, transition_id, activity_name, role_id,
-                   is_valid)
-         SELECT 1, transition_id, activity_to_name, role_id, 1
-           FROM bpf_pit_view
-          WHERE process_instance_id = bpfid;
-
-      INSERT INTO bpf_temp_transitions
-                  (trans_type, transition_id, is_valid)
-         SELECT 2, transition_id, 0
-           FROM bpf_transition_instances
-          WHERE process_instance_id = bpfid;
-
-      SELECT application_id, NVL (conditional_flow, 0)
-        INTO appid, is_conditional_flow
-        FROM bpf_applications
-       WHERE application_id =
-                     (SELECT application_id
-                        FROM bpf_processes
-                       WHERE process_id = (SELECT process_id
-                                             FROM bpf_process_instances
-                                            WHERE process_instance_id = bpfid));
-
-      SELECT app_flow_id, process_id
-        INTO appflowid, processid
-        FROM bpf_processes
-       WHERE process_id = (SELECT process_id
-                             FROM bpf_process_instances
-                            WHERE process_instance_id = bpfid);
-
-      IF is_conditional_flow = 1
-      THEN
-          -- Initially IS_VALID of BPF_TEMP_TRANSITIONS will be 0 i.e. INVALID. Now validation is shown below.
-         -- For includ any VALIDATION
-            --First setting as invalid for all transitions having includ any option
-         UPDATE bpf_temp_transitions a
-            SET is_valid = 0
-          WHERE trans_type = 1
-            AND 0 < (SELECT COUNT (*)
-                       FROM bpf_trans_rules
-                      WHERE val_type = 2 AND a.transition_id = parent_trans);
-
-         --Now updating valid transitions by checking any of the rul transitions in trans history.
-         UPDATE bpf_temp_transitions a
-            SET is_valid = 1
-          WHERE trans_type = 1
-            AND 0 <
-                   (SELECT COUNT (transition_id)
-                      FROM bpf_temp_transitions
-                     WHERE trans_type = 2
-                       AND transition_id IN (
-                              SELECT prev_trans
-                                FROM bpf_trans_rules
-                               WHERE val_type = 2
-                                 AND parent_trans = a.transition_id));
-
-         --For includ all VALIDATION [Rule trasitions minus history will allways return value if all rule trans does not exist in history and thus update as invalid.]
-         s :=
-            'update BPF_TEMP_TRANSITIONS A set is_valid=0 where 
-		  TRANS_TYPE=1 and (select PREV_TRANS from BPF_TRANS_RULES 
-		  where VAL_TYPE=3 and PARENT_TRANS=A.TRANSITION_ID ) in (select PREV_TRANS from BPF_TRANS_RULES 
-		  where VAL_TYPE=3 and PARENT_TRANS=A.TRANSITION_ID
-		  minus select TRANSITION_ID from BPF_TEMP_TRANSITIONS where  TRANS_TYPE=2)';
-
-         EXECUTE IMMEDIATE s;
-
-         --For must exclude VALIDATION [If history contains any of the Ruls transition it is invalid]
-         UPDATE bpf_temp_transitions a
-            SET is_valid = 0
-          WHERE trans_type = 1
-            AND 0 <
-                   (SELECT COUNT (transition_id)
-                      FROM bpf_temp_transitions
-                     WHERE trans_type = 2
-                       AND transition_id IN (
-                              SELECT prev_trans
-                                FROM bpf_trans_rules
-                               WHERE val_type = 1
-                                 AND parent_trans = a.transition_id));
-      END IF;
-
-      DELETE FROM bpf_pending_actions
-            WHERE bpf_id = bpfid;
-
-      DELETE FROM bpf_pending_action_dtl
-            WHERE bpf_id = bpfid;
-
-      INSERT INTO bpf_pending_actions
-                  (bpf_id, next_actor, user_role_id, application_id,
-                   app_flow_id)
-         SELECT bpfid, b.user_id, b.user_role_id, appid, appflowid
-           FROM bpf_temp_valid_roles_view a, bpf_user_roles b
-          WHERE a.role_id = b.role_id
-            AND (   a.role_id NOT IN (
-                        SELECT DISTINCT role_id
-                                   FROM bpf_transitions
-                                  WHERE process_id = processid
-                                    AND activity_from IS NULL)
-                 OR (    UPPER (b.user_id) =
-                                          (SELECT UPPER (user_id)
-                                             FROM bpf_process_instances
-                                            WHERE process_instance_id = bpfid)
-                     AND a.role_id IN (
-                            SELECT DISTINCT role_id
-                                       FROM bpf_transitions
-                                      WHERE process_id = processid
-                                        AND activity_from IS NULL)
-                    )
-                );
-
-/*  SELECT bpfId,B.USER_ID,B.USER_ROLE_ID,appId from  BPF_TEMP_VALID_ROLES_view A, BPF_USER_ROLES B
-    where  A.ROLE_ID not in (
-      SELECT DISTINCT ROLE_ID FROM BPF_TRANSITIONS
-      WHERE PROCESS_ID=(SELECT PROCESS_ID FROM BPF_PROCESS_INSTANCES
-      WHERE PROCESS_INSTANCE_ID=bpfId) AND ACTIVITY_FROM IS NULL )
-    and A.ROLE_ID=B.ROLE_ID;
-*/
-      INSERT INTO bpf_pending_action_dtl
-                  (bpf_id, transition_id, activity_name, next_actor,
-                   user_role_id, application_id, app_flow_id)
-         SELECT DISTINCT bpfid, a.transition_id, a.activity_name, b.user_id,
-                         b.user_role_id, appid, appflowid
-                    FROM bpf_temp_transitions a, bpf_user_roles b
-                   WHERE is_valid = 1
-                     AND a.role_id = b.role_id
-                     AND UPPER(a.activity_name) <> 'RECOVERED_ADV' --Omit RECOVERED_ADV
-                     AND (   a.role_id NOT IN (
-                                SELECT DISTINCT role_id
-                                           FROM bpf_transitions
-                                          WHERE process_id = processid
-                                            AND activity_from IS NULL)
-                          OR (    UPPER (b.user_id) =
-                                          (SELECT UPPER (user_id)
-                                             FROM bpf_process_instances
-                                            WHERE process_instance_id = bpfid)
-                              AND a.role_id IN (
-                                     SELECT DISTINCT role_id
-                                                FROM bpf_transitions
-                                               WHERE process_id = processid
-                                                 AND activity_from IS NULL)
-                             )
-                         );
-                         
-     --CPO
-     
-     SELECT count(*) INTO hr_type FROM DT_HDR WHERE BPF_ID = bpfid AND TRAVEL_TYPE in (11,30,31,32,33,34);
-     
-     IF hr_type > 0 THEN
-     
-     SELECT COUNT(*) INTO wy_payroll
-        FROM (
-          SELECT DISTINCT e.payrollid
-          FROM xxdt_employee_view e
-          WHERE e.staffid IN (SELECT EMP_NO FROM DT_HDR WHERE BPF_ID = bpfid
-          )
-          AND NOT EXISTS (
-            SELECT 1
-            FROM bpf_dts_payroll_treasury_map m
-            WHERE m.payroll_id = e.payrollid
-          )
-        ) t;
-      
-      IF wy_payroll > 0 THEN
-     
-     select count(*) into aprv_action from BPF_PENDING_ACTION_DTL where BPF_ID = bpfid and  ACTIVITY_NAME in ('APPROVE_ADV');
-     
-     SELECT COUNT(*) into cpo_aprved
-      FROM BPF_CPO_APPROVAL a
-      WHERE a.PROCESS_INSTANCE_ID = bpfid
-        AND a.CPO_APPROVED = 1
-        AND a.CPO_APPROVAL_ID = (
-              SELECT MAX(CPO_APPROVAL_ID)
-              FROM BPF_CPO_APPROVAL
-              WHERE PROCESS_INSTANCE_ID = bpfid
-            );
-     
-     
-     DBMS_OUTPUT.PUT_LINE('aprv_action: ' || aprv_action);
-     DBMS_OUTPUT.PUT_LINE('cpo_aprved: ' || cpo_aprved);
-     
-     IF aprv_action > 0  THEN  
-        IF cpo_aprved > 0 THEN 
-          NULL;
-        ELSE  
-            INSERT INTO BPF_CPO_APPROVAL
-                            (CPO_APPROVAL_ID, PROCESS_INSTANCE_ID, ITEM, PROCESS_ID,STATE_ID, LAST_TRANSITION,LAST_ACTIVITY,USER_ID,CPO_APPROVED)
-            select BPF_CPO_APPROVAL_SEQ.NEXTVAL,a.PROCESS_INSTANCE_ID, a.ITEM, a.PROCESS_ID,a.STATE_ID, a.LAST_TRANSITION,a.LAST_ACTIVITY,
-            a.USER_ID, 0 
-            from BPF_PROCESS_INSTANCES a where a.PROCESS_INSTANCE_ID = bpfid 
-                  AND NOT EXISTS (
-                     SELECT 1
-                       FROM BPF_CPO_APPROVAL ca
-                      WHERE ca.PROCESS_INSTANCE_ID = bpfid
-                        AND ca.CPO_APPROVED        = 0
-                   );
-     
-           DELETE FROM bpf_pending_actions
-                      WHERE bpf_id = bpfid;
-           DELETE FROM bpf_pending_action_dtl
-                      WHERE bpf_id = bpfid;
-                      
-           SELECT FILTER_SQL INTO v_filter FROM BPF_AUTHORITY WHERE AUTHORITY = 'CPO';
-           
-            v_sql :=
-                'INSERT INTO bpf_pending_actions (bpf_id, next_actor, user_role_id, application_id, app_flow_id)
-                 SELECT :1, a.user_id, a.user_role_id, :2, :3
-                 FROM bpf_user_roles a
-                 JOIN ipr_users d ON a.user_id = d.user_id
-                 JOIN xxdt_employee_view c ON c.staffid = d.staff_number
-                 WHERE a.role_id = 45 AND ' || v_filter;
-              
-              EXECUTE IMMEDIATE v_sql USING bpfid, appid, appflowid;
-              
-              v_sql_dtl :=
-                'INSERT INTO bpf_pending_action_dtl (bpf_id, transition_id, activity_name, next_actor, user_role_id, application_id, app_flow_id)
-                 SELECT DISTINCT :1, t.transition_id, act.name, ur.user_id, ur.user_role_id, :2, :3
-                 FROM bpf_transitions t
-                 JOIN bpf_user_roles ur ON t.role_id = ur.role_id
-                 JOIN bpf_activities act ON t.activity_to = act.activity_id
-                 JOIN ipr_users d ON ur.user_id = d.user_id
-                 JOIN xxdt_employee_view ev ON ev.staffid = d.staff_number
-                 WHERE t.process_id = :4 AND t.role_id = 45 AND ' || v_filter;
-              
-              EXECUTE IMMEDIATE v_sql_dtl USING bpfid, appid, appflowid, processid;
-
-      END IF;
-    END IF;   
-    END IF;
-    END IF;
-      --To delete pending with Treasury staff for ADV PAID or ADVANCE RECOVERED DTs
-      DELETE FROM bpf_pending_actions
-         WHERE bpf_id = bpfid
-         AND next_actor IN ( SELECT b.user_id
-                               FROM bpf_temp_transitions a
-                               JOIN bpf_user_roles b ON a.role_id = b.role_id
-                               WHERE UPPER(a.activity_name) = 'RECOVERED_ADV'
-                            );
-                            
-                            
-      IF trigflag = 0
-      THEN
-         COMMIT;
-      END IF;
-      END IF;
-   END;
-
-The error is occuring at this line: INSERT INTO bpf_pending_action_dtl
-
-How to troubleshoot this issue.
-
-bpf_pending_actions TABLE: 
-BPF_ID  NEXT_ACTOR  USER_ROLE_ID APPLICATION_ID APP_FLOW_ID
-176706	wy990416	701938	14	2
-176706	wy990416	714007	14	2
-176706	wy990416	714582	14	2
-176706	wy990416	714467	14	2
-176706	wy990416	714237	14	2
-176706	wy990416	714352	14	2
-176706	wy990416	714697	14	2
-176706	wy990416	714122	14	2
-176706	wy990416	713892	14	2
-
-For this table unique constaint is bpf_id and next_actor, but the error is not occuring while inserting this records and getting error only during bpf_pending_action_dtl table insert
-
-bpf_pending_action_dtl table:
-bpf_id transition_id activity_name next_actor user_role_id application_id app_flow_id
-176706	1080029	CANCEL_DT	wy990416	701938	14	2
-176706	1080040	CANCEL_DT	wy990416	713892	14	2
-176706	1080117	CANCEL_DT	wy990416	714697	14	2
-176706	1080051	CANCEL_DT	wy990416	714007	14	2
-176706	1080073	CANCEL_DT	wy990416	714237	14	2
-176706	1080106	CANCEL_DT	wy990416	714582	14	2
-176706	1080095	CANCEL_DT	wy990416	714467	14	2
-176706	1080062	CANCEL_DT	wy990416	714122	14	2
-176706	1080084	CANCEL_DT	wy990416	714352	14	2
-
-
-SELECT 
-    bt.process_id,
-    bt.name,
-    bt.activity_from,
-    bt.activity_to,
-    COUNT(*) AS duplicate_count
-FROM bpf_transitions bt
-WHERE bt.process_id IN (
-    SELECT DISTINCT bpi.process_id
-    FROM bpf_process_instances bpi
-    WHERE bpi.process_instance_id IN (
-        SELECT bpf_id
-        FROM bpf_pending_actions
-        WHERE next_actor = '60005'
-    )
-)
-AND EXISTS (
-    SELECT 1
-    FROM bpf_processes bp
-    WHERE bp.process_id = bt.process_id
-      AND bp.is_active = 1
-)
-GROUP BY 
-    bt.process_id,
-    bt.name,
-    bt.activity_from,
-    bt.activity_to
-HAVING COUNT(*) > 1;
-
---------------context.xml----------------
-
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-<!-- Note:  A "Server" is not itself a "Container", so you may not
-     define subcomponents such as "Valves" at this level.
-     Documentation at /docs/config/server.html
- -->
-<Server port="8105" shutdown="SHUTDOWN">
-  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
-  <!-- Security listener. Documentation at /docs/config/listeners.html
-  <Listener className="org.apache.catalina.security.SecurityListener" />
-  -->
-  <!-- APR library loader. Documentation at /docs/apr.html -->
-  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
-  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
-  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
-  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
-  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
-
-  <!-- Global JNDI resources
-       Documentation at /docs/jndi-resources-howto.html
-  -->
-  <GlobalNamingResources>
-    <!-- Editable user database that can also be used by
-         UserDatabaseRealm to authenticate users
-    -->
-    <Resource name="UserDatabase" auth="Container"
-              type="org.apache.catalina.UserDatabase"
-              description="User database that can be updated and saved"
-              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
-              pathname="conf/tomcat-users.xml" />
-  </GlobalNamingResources>
-
-  <!-- A "Service" is a collection of one or more "Connectors" that share
-       a single "Container" Note:  A "Service" is not itself a "Container",
-       so you may not define subcomponents such as "Valves" at this level.
-       Documentation at /docs/config/service.html
-   -->
-  <Service name="Catalina">
-
-    <!--The connectors can use a shared executor, you can define one or more named thread pools-->
-    <!--
-    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
-        maxThreads="150" minSpareThreads="4"/>
-    -->
-
-
-    <!-- A "Connector" represents an endpoint by which requests are received
-         and responses are returned. Documentation at :
-         Java HTTP Connector: /docs/config/http.html
-         Java AJP  Connector: /docs/config/ajp.html
-         APR (HTTP/AJP) Connector: /docs/apr.html
-         Define a non-SSL/TLS HTTP/1.1 Connector on port 8080
-    -->
-    <Connector port="8081" protocol="HTTP/1.1"
-               connectionTimeout="20000"
-               redirectPort="8443" />
-    <!-- A "Connector" using the shared thread pool-->
-    <!--
-    <Connector executor="tomcatThreadPool"
-               port="8081" protocol="HTTP/1.1"
-               connectionTimeout="20000"
-               redirectPort="8443" />
-    -->
-    <!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443
-         This connector uses the NIO implementation. The default
-         SSLImplementation will depend on the presence of the APR/native
-         library and the useOpenSSL attribute of the AprLifecycleListener.
-         Either JSSE or OpenSSL style configuration may be used regardless of
-         the SSLImplementation selected. JSSE style configuration is used below.
-    -->
-    <!--
-    <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
-               maxThreads="150" SSLEnabled="true">
-        <SSLHostConfig>
-            <Certificate certificateKeystoreFile="conf/localhost-rsa.jks"
-                         type="RSA" />
-        </SSLHostConfig>
-    </Connector>
-    -->
-    <!-- Define an SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
-         This connector uses the APR/native implementation which always uses
-         OpenSSL for TLS.
-         Either JSSE or OpenSSL style configuration may be used. OpenSSL style
-         configuration is used below.
-    -->
-    <!--
-    <Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol"
-               maxThreads="150" SSLEnabled="true" >
-        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
-        <SSLHostConfig>
-            <Certificate certificateKeyFile="conf/localhost-rsa-key.pem"
-                         certificateFile="conf/localhost-rsa-cert.pem"
-                         certificateChainFile="conf/localhost-rsa-chain.pem"
-                         type="RSA" />
-        </SSLHostConfig>
-    </Connector>
-    -->
-
-    <!-- Define an AJP 1.3 Connector on port 8009 -->
-    <!--
-    <Connector protocol="AJP/1.3"
-               address="::1"
-               port="8009"
-               redirectPort="8443" />
-    -->
-
-    <!-- An Engine represents the entry point (within Catalina) that processes
-         every request.  The Engine implementation for Tomcat stand alone
-         analyzes the HTTP headers included with the request, and passes them
-         on to the appropriate Host (virtual host).
-         Documentation at /docs/config/engine.html -->
-
-    <!-- You should set jvmRoute to support load-balancing via AJP ie :
-    <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
-    -->
-    <Engine name="Catalina" defaultHost="localhost">
-
-      <!--For clustering, please take a look at documentation at:
-          /docs/cluster-howto.html  (simple how to)
-          /docs/config/cluster.html (reference documentation) -->
-      <!--
-      <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
-      -->
-
-      <!-- Use the LockOutRealm to prevent attempts to guess user passwords
-           via a brute-force attack -->
-      <Realm className="org.apache.catalina.realm.LockOutRealm">
-        <!-- This Realm uses the UserDatabase configured in the global JNDI
-             resources under the key "UserDatabase".  Any edits
-             that are performed against this UserDatabase are immediately
-             available for use by the Realm.  -->
-        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-               resourceName="UserDatabase"/>
-      </Realm>
-
-      <Host name="localhost"  appBase="webapps"
-            unpackWARs="true" autoDeploy="true">
-
-        <!-- SingleSignOn valve, share authentication between web applications
-             Documentation at: /docs/config/valve.html -->
-        <!--
-        <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
-        -->
-
-        <!-- Access log processes all example.
-             Documentation at: /docs/config/valve.html
-             Note: The pattern used is equivalent to using pattern="common" -->
-        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-               prefix="localhost_access_log" suffix=".txt"
-               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
-
-      </Host>
-    </Engine>
-  </Service>
-</Server>
-
-
+org.eclipse.birt.report.engine.api.EngineException: An exception occurred during processing. Please see the following message for details:
+Cannot open the connection for the driver: org.eclipse.birt.report.data.oda.jdbc.
+org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.addException(ExecutionContext.java:1252)
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.addException(ExecutionContext.java:1231)
+   at org.eclipse.birt.report.engine.executor.QueryItemExecutor.executeQuery(QueryItemExecutor.java:96)
+   at org.eclipse.birt.report.engine.executor.DataItemExecutor.execute(DataItemExecutor.java:75)
+   at org.eclipse.birt.report.engine.internal.executor.wrap.WrappedReportItemExecutor.execute(WrappedReportItemExecutor.java:46)
+   at org.eclipse.birt.report.engine.internal.executor.emitter.ReportItemEmitterExecutor.execute(ReportItemEmitterExecutor.java:46)
+   at org.eclipse.birt.report.engine.internal.executor.dup.SuppressDuplicateItemExecutor.execute(SuppressDuplicateItemExecutor.java:43)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:65)
+   at org.eclipse.birt.report.engine.layout.html.HTMLStackingLM.layoutChildren(HTMLStackingLM.java:26)
+   at org.eclipse.birt.report.engine.layout.html.HTMLAbstractLM.layout(HTMLAbstractLM.java:140)
+   at org.eclipse.birt.report.engine.layout.html.HTMLInlineStackingLM.resumeLayout(HTMLInlineStackingLM.java:111)
+   at org.eclipse.birt.report.engine.layout.html.HTMLInlineStackingLM.layoutNodes(HTMLInlineStackingLM.java:160)
+   at org.eclipse.birt.report.engine.layout.html.HTMLStackingLM.layoutChildren(HTMLStackingLM.java:26)
+   at org.eclipse.birt.report.engine.layout.html.HTMLAbstractLM.layout(HTMLAbstractLM.java:140)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:71)
+   at org.eclipse.birt.report.engine.layout.html.HTMLStackingLM.layoutChildren(HTMLStackingLM.java:26)
+   at org.eclipse.birt.report.engine.layout.html.HTMLRepeatHeaderLM.layoutChildren(HTMLRepeatHeaderLM.java:46)
+   at org.eclipse.birt.report.engine.layout.html.HTMLAbstractLM.layout(HTMLAbstractLM.java:140)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:71)
+   at org.eclipse.birt.report.engine.layout.html.HTMLPageLM.layout(HTMLPageLM.java:92)
+   at org.eclipse.birt.report.engine.layout.html.HTMLReportLayoutEngine.layout(HTMLReportLayoutEngine.java:100)
+   at org.eclipse.birt.report.engine.presentation.ReportDocumentBuilder.build(ReportDocumentBuilder.java:258)
+   at org.eclipse.birt.report.engine.api.impl.RunTask.doRun(RunTask.java:273)
+   at org.eclipse.birt.report.engine.api.impl.RunTask.run(RunTask.java:89)
+   at org.eclipse.birt.report.service.ReportEngineService.runReport(ReportEngineService.java:1325)
+   at org.eclipse.birt.report.service.BirtViewerReportService.runReport(BirtViewerReportService.java:159)
+   at org.eclipse.birt.report.service.actionhandler.BirtRunReportActionHandler.__execute(BirtRunReportActionHandler.java:81)
+   at org.eclipse.birt.report.service.actionhandler.BirtGetPageActionHandler.__checkDocumentExists(BirtGetPageActionHandler.java:58)
+   at org.eclipse.birt.report.service.actionhandler.AbstractGetPageActionHandler.prepareParameters(AbstractGetPageActionHandler.java:118)
+   at org.eclipse.birt.report.service.actionhandler.AbstractGetPageActionHandler.__execute(AbstractGetPageActionHandler.java:103)
+   at org.eclipse.birt.report.service.actionhandler.AbstractBaseActionHandler.execute(AbstractBaseActionHandler.java:90)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseDocumentProcessor.__executeAction(AbstractBaseDocumentProcessor.java:47)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseComponentProcessor.executeAction(AbstractBaseComponentProcessor.java:143)
+   at org.eclipse.birt.report.soapengine.processor.BirtDocumentProcessor.handleGetPage(BirtDocumentProcessor.java:87)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseComponentProcessor.process(AbstractBaseComponentProcessor.java:112)
+   at org.eclipse.birt.report.soapengine.endpoint.BirtSoapBindingImpl.getUpdatedObjects(BirtSoapBindingImpl.java:66)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.apache.axis.providers.java.RPCProvider.invokeMethod(RPCProvider.java:397)
+   at org.apache.axis.providers.java.RPCProvider.processMessage(RPCProvider.java:186)
+   at org.apache.axis.providers.java.JavaProvider.invoke(JavaProvider.java:323)
+   at org.apache.axis.strategies.InvocationStrategy.visit(InvocationStrategy.java:32)
+   at org.apache.axis.SimpleChain.doVisiting(SimpleChain.java:118)
+   at org.apache.axis.SimpleChain.invoke(SimpleChain.java:83)
+   at org.apache.axis.handlers.soap.SOAPService.invoke(SOAPService.java:454)
+   at org.apache.axis.server.AxisServer.invoke(AxisServer.java:281)
+   at org.apache.axis.transport.http.AxisServlet.doPost(AxisServlet.java:699)
+   at org.eclipse.birt.report.servlet.BirtSoapMessageDispatcherServlet.doPost(BirtSoapMessageDispatcherServlet.java:265)
+   at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+   at org.apache.axis.transport.http.AxisServletBase.service(AxisServletBase.java:327)
+   at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+   at org.eclipse.birt.report.servlet.BirtSoapMessageDispatcherServlet.service(BirtSoapMessageDispatcherServlet.java:122)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:201)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.eclipse.birt.report.filter.ViewerFilter.doFilter(ViewerFilter.java:68)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:170)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:57)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:170)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+   at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88)
+   at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:539)
+   at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:129)
+   at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:86)
+   at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:764)
+   at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:71)
+   at org.apache.catalina.connector.CoyoteAdapter.service$PANW(CoyoteAdapter.java:350)
+   at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java)
+   at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:412)
+   at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:71)
+   at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1345)
+   at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:2255)
+   at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:74)
+   at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:974)
+   at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:492)
+   at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:80)
+   at java.lang.Thread.run(Thread.java:750)
+Caused by: org.eclipse.birt.report.data.adapter.api.AdapterException: An exception occurred during processing. Please see the following message for details:
+Cannot open the connection for the driver: org.eclipse.birt.report.data.oda.jdbc.
+org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.report.data.adapter.impl.DataRequestSessionImpl.execute(DataRequestSessionImpl.java:672)
+   at org.eclipse.birt.report.engine.data.dte.DteDataEngine.doExecuteQuery(DteDataEngine.java:158)
+   at org.eclipse.birt.report.engine.data.dte.DataGenerationEngine.doExecuteQuery(DataGenerationEngine.java:83)
+   at org.eclipse.birt.report.engine.data.dte.AbstractDataEngine.execute(AbstractDataEngine.java:286)
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.executeQuery(ExecutionContext.java:1954)
+   at org.eclipse.birt.report.engine.executor.QueryItemExecutor.executeQuery(QueryItemExecutor.java:80)
+... 81 more
+Caused by: org.eclipse.birt.data.engine.odaconsumer.OdaDataException: Cannot open the connection for the driver: org.eclipse.birt.report.data.oda.jdbc.
+org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.data.engine.odaconsumer.ExceptionHandler.newException(ExceptionHandler.java:54)
+   at org.eclipse.birt.data.engine.odaconsumer.ConnectionManager.openConnection(ConnectionManager.java:177)
+   at org.eclipse.birt.data.engine.executor.DataSource.newConnection(DataSource.java:224)
+   at org.eclipse.birt.data.engine.executor.DataSource.open(DataSource.java:212)
+   at org.eclipse.birt.data.engine.impl.DataSourceRuntime.openOdiDataSource(DataSourceRuntime.java:217)
+   at org.eclipse.birt.data.engine.impl.QueryExecutor.openDataSource(QueryExecutor.java:439)
+   at org.eclipse.birt.data.engine.impl.QueryExecutor.prepareExecution(QueryExecutor.java:327)
+   at org.eclipse.birt.data.engine.impl.PreparedQuery.doPrepare(PreparedQuery.java:464)
+   at org.eclipse.birt.data.engine.impl.PreparedDataSourceQuery.produceQueryResults(PreparedDataSourceQuery.java:190)
+   at org.eclipse.birt.data.engine.impl.PreparedDataSourceQuery.execute(PreparedDataSourceQuery.java:178)
+   at org.eclipse.birt.data.engine.impl.PreparedOdaDSQuery.execute(PreparedOdaDSQuery.java:179)
+   at org.eclipse.birt.report.data.adapter.impl.DataRequestSessionImpl.execute(DataRequestSessionImpl.java:652)
+... 86 more
+Caused by: org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.findDriver(JDBCDriverManager.java:881)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.loadAndRegisterDriver(JDBCDriverManager.java:986)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.loadAndRegisterDriver(JDBCDriverManager.java:963)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.doConnect(JDBCDriverManager.java:285)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.getConnection(JDBCDriverManager.java:236)
+   at org.eclipse.birt.report.data.oda.jdbc.Connection.connectByUrl(Connection.java:253)
+   at org.eclipse.birt.report.data.oda.jdbc.Connection.open(Connection.java:163)
+   at org.eclipse.datatools.connectivity.oda.consumer.helper.OdaConnection.open(OdaConnection.java:250)
+   at org.eclipse.birt.data.engine.odaconsumer.ConnectionManager.openConnection(ConnectionManager.java:165)
+... 96 more
+org.eclipse.birt.report.engine.api.EngineException: Invalid bound column name: DIV_NAME_ENG.
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.addException(ExecutionContext.java:1252)
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.addException(ExecutionContext.java:1231)
+   at org.eclipse.birt.report.engine.executor.DataItemExecutor.execute(DataItemExecutor.java:101)
+   at org.eclipse.birt.report.engine.internal.executor.wrap.WrappedReportItemExecutor.execute(WrappedReportItemExecutor.java:46)
+   at org.eclipse.birt.report.engine.internal.executor.emitter.ReportItemEmitterExecutor.execute(ReportItemEmitterExecutor.java:46)
+   at org.eclipse.birt.report.engine.internal.executor.dup.SuppressDuplicateItemExecutor.execute(SuppressDuplicateItemExecutor.java:43)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:65)
+   at org.eclipse.birt.report.engine.layout.html.HTMLStackingLM.layoutChildren(HTMLStackingLM.java:26)
+   at org.eclipse.birt.report.engine.layout.html.HTMLAbstractLM.layout(HTMLAbstractLM.java:140)
+   at org.eclipse.birt.report.engine.layout.html.HTMLInlineStackingLM.resumeLayout(HTMLInlineStackingLM.java:111)
+   at org.eclipse.birt.report.engine.layout.html.HTMLInlineStackingLM.layoutNodes(HTMLInlineStackingLM.java:160)
+   at org.eclipse.birt.report.engine.layout.html.HTMLStackingLM.layoutChildren(HTMLStackingLM.java:26)
+   at org.eclipse.birt.report.engine.layout.html.HTMLAbstractLM.layout(HTMLAbstractLM.java:140)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:71)
+   at org.eclipse.birt.report.engine.layout.html.HTMLStackingLM.layoutChildren(HTMLStackingLM.java:26)
+   at org.eclipse.birt.report.engine.layout.html.HTMLRepeatHeaderLM.layoutChildren(HTMLRepeatHeaderLM.java:46)
+   at org.eclipse.birt.report.engine.layout.html.HTMLAbstractLM.layout(HTMLAbstractLM.java:140)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:71)
+   at org.eclipse.birt.report.engine.layout.html.HTMLPageLM.layout(HTMLPageLM.java:92)
+   at org.eclipse.birt.report.engine.layout.html.HTMLReportLayoutEngine.layout(HTMLReportLayoutEngine.java:100)
+   at org.eclipse.birt.report.engine.presentation.ReportDocumentBuilder.build(ReportDocumentBuilder.java:258)
+   at org.eclipse.birt.report.engine.api.impl.RunTask.doRun(RunTask.java:273)
+   at org.eclipse.birt.report.engine.api.impl.RunTask.run(RunTask.java:89)
+   at org.eclipse.birt.report.service.ReportEngineService.runReport(ReportEngineService.java:1325)
+   at org.eclipse.birt.report.service.BirtViewerReportService.runReport(BirtViewerReportService.java:159)
+   at org.eclipse.birt.report.service.actionhandler.BirtRunReportActionHandler.__execute(BirtRunReportActionHandler.java:81)
+   at org.eclipse.birt.report.service.actionhandler.BirtGetPageActionHandler.__checkDocumentExists(BirtGetPageActionHandler.java:58)
+   at org.eclipse.birt.report.service.actionhandler.AbstractGetPageActionHandler.prepareParameters(AbstractGetPageActionHandler.java:118)
+   at org.eclipse.birt.report.service.actionhandler.AbstractGetPageActionHandler.__execute(AbstractGetPageActionHandler.java:103)
+   at org.eclipse.birt.report.service.actionhandler.AbstractBaseActionHandler.execute(AbstractBaseActionHandler.java:90)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseDocumentProcessor.__executeAction(AbstractBaseDocumentProcessor.java:47)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseComponentProcessor.executeAction(AbstractBaseComponentProcessor.java:143)
+   at org.eclipse.birt.report.soapengine.processor.BirtDocumentProcessor.handleGetPage(BirtDocumentProcessor.java:87)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseComponentProcessor.process(AbstractBaseComponentProcessor.java:112)
+   at org.eclipse.birt.report.soapengine.endpoint.BirtSoapBindingImpl.getUpdatedObjects(BirtSoapBindingImpl.java:66)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.apache.axis.providers.java.RPCProvider.invokeMethod(RPCProvider.java:397)
+   at org.apache.axis.providers.java.RPCProvider.processMessage(RPCProvider.java:186)
+   at org.apache.axis.providers.java.JavaProvider.invoke(JavaProvider.java:323)
+   at org.apache.axis.strategies.InvocationStrategy.visit(InvocationStrategy.java:32)
+   at org.apache.axis.SimpleChain.doVisiting(SimpleChain.java:118)
+   at org.apache.axis.SimpleChain.invoke(SimpleChain.java:83)
+   at org.apache.axis.handlers.soap.SOAPService.invoke(SOAPService.java:454)
+   at org.apache.axis.server.AxisServer.invoke(AxisServer.java:281)
+   at org.apache.axis.transport.http.AxisServlet.doPost(AxisServlet.java:699)
+   at org.eclipse.birt.report.servlet.BirtSoapMessageDispatcherServlet.doPost(BirtSoapMessageDispatcherServlet.java:265)
+   at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+   at org.apache.axis.transport.http.AxisServletBase.service(AxisServletBase.java:327)
+   at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+   at org.eclipse.birt.report.servlet.BirtSoapMessageDispatcherServlet.service(BirtSoapMessageDispatcherServlet.java:122)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:201)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.eclipse.birt.report.filter.ViewerFilter.doFilter(ViewerFilter.java:68)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:170)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:57)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:170)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+   at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88)
+   at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:539)
+   at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:129)
+   at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:86)
+   at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:764)
+   at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:71)
+   at org.apache.catalina.connector.CoyoteAdapter.service$PANW(CoyoteAdapter.java:350)
+   at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java)
+   at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:412)
+   at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:71)
+   at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1345)
+   at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:2255)
+   at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:74)
+   at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:974)
+   at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:492)
+   at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:80)
+   at java.lang.Thread.run(Thread.java:750)
+Caused by: org.eclipse.birt.data.engine.core.DataException: Invalid bound column name: DIV_NAME_ENG.
+   at org.eclipse.birt.data.engine.impl.PreparedDummyQuery$ResultIterator.getValue(PreparedDummyQuery.java:782)
+   at org.eclipse.birt.report.engine.data.dte.QueryResultSet.getValue(QueryResultSet.java:403)
+   at org.eclipse.birt.report.engine.executor.DataItemExecutor.execute(DataItemExecutor.java:97)
+... 80 more
+org.eclipse.birt.report.engine.api.EngineException: An exception occurred during processing. Please see the following message for details:
+Cannot open the connection for the driver: org.eclipse.birt.report.data.oda.jdbc.
+org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.addException(ExecutionContext.java:1252)
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.addException(ExecutionContext.java:1231)
+   at org.eclipse.birt.report.engine.executor.QueryItemExecutor.executeQuery(QueryItemExecutor.java:96)
+   at org.eclipse.birt.report.engine.executor.TableItemExecutor.execute(TableItemExecutor.java:62)
+   at org.eclipse.birt.report.engine.internal.executor.wrap.WrappedReportItemExecutor.execute(WrappedReportItemExecutor.java:46)
+   at org.eclipse.birt.report.engine.internal.executor.emitter.ReportItemEmitterExecutor.execute(ReportItemEmitterExecutor.java:46)
+   at org.eclipse.birt.report.engine.internal.executor.dup.SuppressDuplicateItemExecutor.execute(SuppressDuplicateItemExecutor.java:43)
+   at org.eclipse.birt.report.engine.layout.html.HTMLBlockStackingLM.layoutNodes(HTMLBlockStackingLM.java:65)
+   at org.eclipse.birt.report.engine.layout.html.HTMLPageLM.layout(HTMLPageLM.java:92)
+   at org.eclipse.birt.report.engine.layout.html.HTMLReportLayoutEngine.layout(HTMLReportLayoutEngine.java:100)
+   at org.eclipse.birt.report.engine.presentation.ReportDocumentBuilder.build(ReportDocumentBuilder.java:258)
+   at org.eclipse.birt.report.engine.api.impl.RunTask.doRun(RunTask.java:273)
+   at org.eclipse.birt.report.engine.api.impl.RunTask.run(RunTask.java:89)
+   at org.eclipse.birt.report.service.ReportEngineService.runReport(ReportEngineService.java:1325)
+   at org.eclipse.birt.report.service.BirtViewerReportService.runReport(BirtViewerReportService.java:159)
+   at org.eclipse.birt.report.service.actionhandler.BirtRunReportActionHandler.__execute(BirtRunReportActionHandler.java:81)
+   at org.eclipse.birt.report.service.actionhandler.BirtGetPageActionHandler.__checkDocumentExists(BirtGetPageActionHandler.java:58)
+   at org.eclipse.birt.report.service.actionhandler.AbstractGetPageActionHandler.prepareParameters(AbstractGetPageActionHandler.java:118)
+   at org.eclipse.birt.report.service.actionhandler.AbstractGetPageActionHandler.__execute(AbstractGetPageActionHandler.java:103)
+   at org.eclipse.birt.report.service.actionhandler.AbstractBaseActionHandler.execute(AbstractBaseActionHandler.java:90)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseDocumentProcessor.__executeAction(AbstractBaseDocumentProcessor.java:47)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseComponentProcessor.executeAction(AbstractBaseComponentProcessor.java:143)
+   at org.eclipse.birt.report.soapengine.processor.BirtDocumentProcessor.handleGetPage(BirtDocumentProcessor.java:87)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.eclipse.birt.report.soapengine.processor.AbstractBaseComponentProcessor.process(AbstractBaseComponentProcessor.java:112)
+   at org.eclipse.birt.report.soapengine.endpoint.BirtSoapBindingImpl.getUpdatedObjects(BirtSoapBindingImpl.java:66)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.apache.axis.providers.java.RPCProvider.invokeMethod(RPCProvider.java:397)
+   at org.apache.axis.providers.java.RPCProvider.processMessage(RPCProvider.java:186)
+   at org.apache.axis.providers.java.JavaProvider.invoke(JavaProvider.java:323)
+   at org.apache.axis.strategies.InvocationStrategy.visit(InvocationStrategy.java:32)
+   at org.apache.axis.SimpleChain.doVisiting(SimpleChain.java:118)
+   at org.apache.axis.SimpleChain.invoke(SimpleChain.java:83)
+   at org.apache.axis.handlers.soap.SOAPService.invoke(SOAPService.java:454)
+   at org.apache.axis.server.AxisServer.invoke(AxisServer.java:281)
+   at org.apache.axis.transport.http.AxisServlet.doPost(AxisServlet.java:699)
+   at org.eclipse.birt.report.servlet.BirtSoapMessageDispatcherServlet.doPost(BirtSoapMessageDispatcherServlet.java:265)
+   at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+   at org.apache.axis.transport.http.AxisServletBase.service(AxisServletBase.java:327)
+   at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+   at org.eclipse.birt.report.servlet.BirtSoapMessageDispatcherServlet.service(BirtSoapMessageDispatcherServlet.java:122)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:201)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.eclipse.birt.report.filter.ViewerFilter.doFilter(ViewerFilter.java:68)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:170)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:57)
+   at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:170)
+   at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:146)
+   at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+   at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88)
+   at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:539)
+   at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:129)
+   at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:86)
+   at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:764)
+   at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:71)
+   at org.apache.catalina.connector.CoyoteAdapter.service$PANW(CoyoteAdapter.java:350)
+   at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java)
+   at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:412)
+   at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:71)
+   at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1345)
+   at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:2255)
+   at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:74)
+   at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:974)
+   at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:492)
+   at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:80)
+   at java.lang.Thread.run(Thread.java:750)
+Caused by: org.eclipse.birt.report.data.adapter.api.AdapterException: An exception occurred during processing. Please see the following message for details:
+Cannot open the connection for the driver: org.eclipse.birt.report.data.oda.jdbc.
+org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.report.data.adapter.impl.DataRequestSessionImpl.execute(DataRequestSessionImpl.java:672)
+   at org.eclipse.birt.report.engine.data.dte.DteDataEngine.doExecuteQuery(DteDataEngine.java:152)
+   at org.eclipse.birt.report.engine.data.dte.DataGenerationEngine.doExecuteQuery(DataGenerationEngine.java:83)
+   at org.eclipse.birt.report.engine.data.dte.AbstractDataEngine.execute(AbstractDataEngine.java:286)
+   at org.eclipse.birt.report.engine.executor.ExecutionContext.executeQuery(ExecutionContext.java:1954)
+   at org.eclipse.birt.report.engine.executor.QueryItemExecutor.executeQuery(QueryItemExecutor.java:80)
+... 70 more
+Caused by: org.eclipse.birt.data.engine.odaconsumer.OdaDataException: Cannot open the connection for the driver: org.eclipse.birt.report.data.oda.jdbc.
+org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.data.engine.odaconsumer.ExceptionHandler.newException(ExceptionHandler.java:54)
+   at org.eclipse.birt.data.engine.odaconsumer.ConnectionManager.openConnection(ConnectionManager.java:177)
+   at org.eclipse.birt.data.engine.executor.DataSource.newConnection(DataSource.java:224)
+   at org.eclipse.birt.data.engine.executor.DataSource.open(DataSource.java:212)
+   at org.eclipse.birt.data.engine.impl.DataSourceRuntime.openOdiDataSource(DataSourceRuntime.java:217)
+   at org.eclipse.birt.data.engine.impl.QueryExecutor.openDataSource(QueryExecutor.java:439)
+   at org.eclipse.birt.data.engine.impl.QueryExecutor.prepareExecution(QueryExecutor.java:327)
+   at org.eclipse.birt.data.engine.impl.PreparedQuery.doPrepare(PreparedQuery.java:464)
+   at org.eclipse.birt.data.engine.impl.PreparedDataSourceQuery.produceQueryResults(PreparedDataSourceQuery.java:190)
+   at org.eclipse.birt.data.engine.impl.PreparedDataSourceQuery.execute(PreparedDataSourceQuery.java:178)
+   at org.eclipse.birt.data.engine.impl.PreparedOdaDSQuery.execute(PreparedOdaDSQuery.java:179)
+   at org.eclipse.birt.report.data.adapter.impl.DataRequestSessionImpl.execute(DataRequestSessionImpl.java:652)
+... 75 more
+Caused by: org.eclipse.birt.report.data.oda.jdbc.JDBCException: Cannot load JDBC Driver class: oracle.jdbc.driver.OracleDriver.
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.findDriver(JDBCDriverManager.java:881)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.loadAndRegisterDriver(JDBCDriverManager.java:986)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.loadAndRegisterDriver(JDBCDriverManager.java:963)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.doConnect(JDBCDriverManager.java:285)
+   at org.eclipse.birt.report.data.oda.jdbc.JDBCDriverManager.getConnection(JDBCDriverManager.java:236)
+   at org.eclipse.birt.report.data.oda.jdbc.Connection.connectByUrl(Connection.java:253)
+   at org.eclipse.birt.report.data.oda.jdbc.Connection.open(Connection.java:163)
+   at org.eclipse.datatools.connectivity.oda.consumer.helper.OdaConnection.open(OdaConnection.java:250)
+   at org.eclipse.birt.data.engine.odaconsumer.ConnectionManager.openConnection(ConnectionManager.java:165)
+... 85 more
