@@ -1,35 +1,2216 @@
-PFB the details.
+package om.com.oas.dutytravel.web.struts;
 
-Regarding the email retrieval logic, the system reads the email address from the Address field.
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
-The checks are performed in the following order:
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-Reservation Level Check
-First, the system checks whether an email address is available in the booking reservation.
-<st119:EmailAddresses>
-    <st119:EmailAddress id="10">
-        <st119:Address>AZHABRI@GMAIL.COM</st119:Address>
-        <st119:Comment>@E</st119:Comment>
-    </st119:EmailAddress>
-</st119:EmailAddresses>
-Passenger Level Check
-If the email address is not available at the reservation level, then the system checks under the passenger details.
-<st119:Passenger>
-    <st119:EmailAddress id="11">
-        <st119:Address>AZHABRI@GMAIL.COM</st119:Address>
-        <st119:Comment>@E</st119:Comment>
-    </st119:EmailAddress>
-</st119:Passenger>
+import om.com.oas.dutytravel.to.OverDueSearchTO;
+import om.com.oas.dutytravel.utils.Util;
 
-Other than this, the system only checks for the Frequent Flyer Number and stores it if present.
-If the email address is not found in both of the above checks, the email value will remain null and the check-in email notification will not be triggered.
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 
-Regarding the below passenger, the passenger will not receive the check-in email.
+public class BirtReportsAction extends AbstractAction {
 
-When we checked the PNR RQIMBS in UAT, the flight itself was not fetched from the Flight List API call, and currently there are no validations for codeshare flights in the online check-in logic.
+    private static final String BIRT_VIEWER_URL = "/frameset?__report=WEB-INF/ReportEngine/";
 
-From the logs, we could identify that the codeshare flight details are available only in the getPassengerData API response under the passenger itinerary list (which contains the complete travel plan of the passenger). However, the codeshare flights are not received in the initial Flight List API call itself.
+    private static final String BIRT_REPORT_EXTN = ".rptdesign";
 
-Additionally, PFA the API request and response details for your reference.
+    public ActionForward myExecute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse resp)
+            throws IOException, ServletException {
+        System.out.println("Reached action class ...");
 
-As discussed, TZX station flights are not available in the DB station list, and therefore flights for those routes will not be processed.
+        System.out.println("Report------------------>>>:::"
+                + (String) request.getParameter("reportName"));
+
+        if (request.getParameter("reportName") != null
+                && "Provision".equals((String) request
+                        .getParameter("reportName"))) {
+
+            System.out.println("Provision REPORT .......");
+            OverDueSearchTO odsTo = (OverDueSearchTO) request.getSession()
+                    .getAttribute("SEARCH_TO");
+
+            /** Constructing the filter string */
+
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Prov_report").append(BIRT_REPORT_EXTN);
+
+            System.out.println("<<>>" + odsTo.getDueDays() + "<<>>"
+                    + odsTo.getTravelFromDate() + "<<>>"
+                    + odsTo.getTravelToDate() + "<<>>" + odsTo.getDepName()
+                    + "<<>>" + odsTo.getTravelTypeName() + "<<>>");
+
+            urlStr.append("&dueDays=" + odsTo.getDueDays());
+            if (!Util.isEmpty(odsTo.getTravelFromDate())) {
+                urlStr.append("&travelStartDate=" + odsTo.getTravelFromDate());
+            }
+            if (!Util.isEmpty(odsTo.getTravelToDate())) {
+                urlStr.append("&travelEndDate=" + odsTo.getTravelToDate());
+            }
+            if ((!Util.isEmpty(odsTo.getDepName()))
+                    && (!"-1".equals(odsTo.getDepName()))) {
+                urlStr.append("&depCode=" + odsTo.getDepName());
+            }
+            if ((!Util.isEmpty(odsTo.getTravelTypeName()))
+                    && (!"-1".equals(odsTo.getTravelTypeName()))) {
+                urlStr.append("&travelType=" + odsTo.getTravelTypeName());
+            }
+
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+        } else if (request.getParameter("reportName") != null
+                && "Expense"
+                        .equals((String) request.getParameter("reportName"))) {
+            System.out.println("EXPENSE REPORT .......");
+
+            /** Constructing the filter string */
+
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_report")
+                    .append(BIRT_REPORT_EXTN);
+
+            /*
+             * System.out.println("<<>>" + odsTo.getDueDays() + "<<>>" +
+             * odsTo.getTravelFromDate() + "<<>>" + odsTo.getTravelToDate() +
+             * "<<>>" + odsTo.getDepName() + "<<>>" + odsTo.getTravelTypeName()
+             * + "<<>>");
+             */
+
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            urlStr.append("&travelType=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+
+        } else if (request.getParameter("reportName") != null
+                && "DT_Detailed_Allowance_Report"
+                .equals((String) request.getParameter("reportName"))) {
+			    System.out.println("EXPENSE1 REPORT .......");
+			
+			    /** Constructing the filter string */
+			
+			    StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+			
+			    urlStr.append("DT_Detailed_Allowance_Report")
+			            .append(BIRT_REPORT_EXTN);
+			
+			    /*
+			     * System.out.println("<<>>" + odsTo.getDueDays() + "<<>>" +
+			     * odsTo.getTravelFromDate() + "<<>>" + odsTo.getTravelToDate() +
+			     * "<<>>" + odsTo.getDepName() + "<<>>" + odsTo.getTravelTypeName()
+			     * + "<<>>");
+			     */
+			
+			    DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+			    Date date = new Date();
+			    Calendar cal = Calendar.getInstance();
+			    cal.setTime(date);
+			    cal.add(Calendar.MONTH, -1);
+			    // first day of month
+			    cal.set(Calendar.DAY_OF_MONTH, cal
+			            .getActualMinimum(Calendar.DAY_OF_MONTH));
+			    Date first = cal.getTime();
+			    System.out.println(df.format(cal.getTime()));
+			    urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+			
+			    // last day of month
+			    cal.set(Calendar.DAY_OF_MONTH, cal
+			            .getActualMaximum(Calendar.DAY_OF_MONTH));
+			    Date last = cal.getTime();
+			    System.out.println(df.format(cal.getTime()));
+			    urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+			
+			    urlStr.append("&travelType=" + "0");
+			    System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+			
+			
+			    
+			
+			    ActionForward af = new ActionForward(urlStr.toString(), true);
+			    // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+			    return af;
+			
+        } else if (request.getParameter("reportName") != null
+                && "DelayedSettlement".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("DelayedSettlement REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Delayed_Settlement_report").append(
+                    BIRT_REPORT_EXTN);
+
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        } else if (request.getParameter("reportName") != null
+                && "SettlementVSEntitlement".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("DelayedSettlement REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_SettlementVSEntitlement_report").append(
+                    BIRT_REPORT_EXTN);
+
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        } else if (request.getParameter("reportName") != null
+                && "recovered".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("recovered REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_recovered_report").append(
+                    BIRT_REPORT_EXTN);
+
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            return af;
+            // SettlementVSEntitlement
+
+        } else if (request.getParameter("reportName") != null
+                && "ExpenseSummary".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("ExpenseSummary REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_Summary_report")
+                    .append(BIRT_REPORT_EXTN);
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            
+            urlStr.append("&travelType=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            return af;
+            // SettlementVSEntitlement
+
+        }else if (request.getParameter("reportName") != null //MIS REPORTS NEW 25 OCT 2010 KALPAK 1
+                && "ExpenseDTT".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("ExpenseDTT REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_Summary_DTT_report")
+                    .append(BIRT_REPORT_EXTN);
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            
+            //urlStr.append("&travelType=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        }else if (request.getParameter("reportName") != null //MIS REPORTS NEW 25 OCT 2010 KALPAK 2
+                && "ExpenseDIV".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("ExpenseDIV REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_Summary_Dep_report")
+                    .append(BIRT_REPORT_EXTN);
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            
+            //urlStr.append("&div=" + "0");
+            //urlStr.append("&dep=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        }else if (request.getParameter("reportName") != null //MIS REPORTS NEW 25 OCT 2010 KALPAK 3
+                && "ExpenseDET".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("ExpenseDET REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_report")
+                    .append(BIRT_REPORT_EXTN);
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            
+            urlStr.append("&travelType=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        }
+        else if (request.getParameter("reportName") != null //MIS REPORTS NEW 21 MAR 2011 KALPAK 3
+                && "ExpenseDDIV".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("Expense Summary DIV Wise REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_Summary_DIV_report")
+                    .append(BIRT_REPORT_EXTN);
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            
+            urlStr.append("&travelType=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        }else if (request.getParameter("reportName") != null //MIS REPORTS NEW 21 MAR 2011 KALPAK 3
+                && "ExpenseDDIVDEPT".equals((String) request
+                        .getParameter("reportName"))) {
+            System.out.println("ExpenseD DIV DEPT Wise REPORT .......");
+            StringBuffer urlStr = new StringBuffer(BIRT_VIEWER_URL);
+
+            urlStr.append("DTS_OverDue_Expense_Summary_DIV_Dep_report")
+                    .append(BIRT_REPORT_EXTN);
+            DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.MONTH, -1);
+            // first day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date first = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelStartDate=" + df.format(cal.getTime()));
+
+            // last day of month
+            cal.set(Calendar.DAY_OF_MONTH, cal
+                    .getActualMaximum(Calendar.DAY_OF_MONTH));
+            Date last = cal.getTime();
+            System.out.println(df.format(cal.getTime()));
+            urlStr.append("&travelEndDate=" + df.format(cal.getTime()));
+
+            
+            urlStr.append("&travelType=" + "0");
+            System.out.println("URL is>>>>>>::::: " + urlStr.toString());
+
+            ActionForward af = new ActionForward(urlStr.toString(), true);
+            // http://localhost/birt-viewer/frameset?__report=test.rptdesign&sample=my+parameter
+            return af;
+            // SettlementVSEntitlement
+
+        }
+        return null;
+    }
+
+}
+package om.com.oas.dutytravel.web.struts;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import om.com.oas.dutytravel.delegate.DutyTravelDelegate;
+import om.com.oas.dutytravel.interfaces.Constants;
+import om.com.oas.dutytravel.to.DutyTravelSummary;
+import om.com.oas.dutytravel.to.OverDueSearchTO;
+import om.com.oas.dutytravel.to.ReportMailTO;
+import om.com.oas.dutytravel.utils.Util;
+import om.com.oas.obase.framework.to.UserTO;
+import om.com.oas.sts.utils.StsUtil;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.eclipse.birt.core.exception.BirtException;
+import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.report.engine.api.EngineConfig;
+import org.eclipse.birt.report.engine.api.IReportEngine;
+import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+
+
+public class OverDueTransferAction extends AbstractAction {
+	
+	static Properties prop = new Properties();
+	
+    protected ActionForward myExecute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        DutyTravelDelegate dutyTravelDelegate=new DutyTravelDelegate();
+        OverdueTranferForm odsForm= (OverdueTranferForm) form;
+        OverDueSearchTO odsTo = new OverDueSearchTO();
+
+        String operation = odsForm.getOperation();
+        System.out.println( " ****OverDueTransferAction.getActionString() : "+operation);
+        
+        String BIRT_HOME_STR = (String) request.getSession().getAttribute("BIRT_HOME_STR");
+        
+        System.out.println(BIRT_HOME_STR);
+        odsTo.setBirtHomeString(BIRT_HOME_STR);
+
+        List<String> failedIds = new ArrayList<>();
+        String message = "NA";
+        
+        if (operation.equals("SEND_MAIL")){
+            Collection overDueTransfers4Percom=(Collection) request.getAttribute("overDueTransfers4Percom");
+            System.out.println("SEND overDues.size()>>>>>>>>>>>>>>>>: "+overDueTransfers4Percom.size());
+            System.out.println("SEND overDues List>>>>>>>>>>>>>>>>: "+overDueTransfers4Percom.toString());
+
+            System.out.println("Mailing ........................ >");
+            System.out.println("STAFF YN>>>>>>>>>>>>>>>>>>>>: "+odsForm.getCcAllAuthYn());
+            System.out.println("HOD YN>>>>>>>>>>>>>>>>>>>>: "+odsForm.getCcApproverYn());
+            System.out.println("CC Mail ID>>>>>>>>>>>>>>>>>>>>: "+odsForm.getCcMailId());
+            System.out.println("FROM search page **************");
+            System.out.println("odsForm.getDepName---------->"+odsForm.getDepName());
+            System.out.println("odsForm.getDueDays---------->"+odsForm.getDueDays());
+            System.out.println("odsForm.getTravelFromDate---------->"+odsForm.getTravelFromDate());
+            System.out.println("odsForm.getTravelToDate---------->"+odsForm.getTravelToDate());
+            populateODSearchTO(odsForm,odsTo);
+            IReportEngine reportEngine = (IReportEngine) request.getSession().getAttribute("BIRTEngine");
+            
+            /*SR 39706 Email Automation and enhancement in Overdue*/
+            Collection mailsToList = (Collection)dutyTravelDelegate.getMailDetails(overDueTransfers4Percom,odsTo);
+            odsTo.setReportMailTOListEmp(mailsToList);
+            odsTo.setMailToHod("0");
+            //Send to individual staff    
+            dutyTravelDelegate.sendReportMail(reportEngine,odsTo);
+            odsForm.setActionString("SEND");
+
+        }else{
+            if (operation.equals("TRANSFER")){
+                System.out.println("in overdue Transfer.");
+        		UserTO user = (UserTO)request.getSession().getAttribute("USER_INFO");
+                String userId = user.getUserId();
+                Collection overDueTransfers4Percom=(Collection) request.getAttribute("overDueTransfers4Percom");
+                System.out.println("TRANSFER overDues1.size()>>>>>>>>>>>>>>>>: "+overDueTransfers4Percom.size());
+                System.out.println("Calling PROCEDURE..................:::::::>>>>");
+                failedIds = dutyTravelDelegate.callOverDueProcedure(overDueTransfers4Percom, userId);
+                if (failedIds == null) {
+                	message = "Failure";
+                } else if (failedIds.isEmpty()) {
+                    message = "Success";
+                } else {
+                	message = "InActiveStaff";
+                }
+
+            }else {
+                if (operation.equals("TRAINING")){
+                    odsTo.setTrainingOverdues(true);   
+                    odsTo.setTrainingHeadMailId(dutyTravelDelegate.getTrainingHeadMail());
+                    IReportEngine reportEngine = (IReportEngine) request.getSession().getAttribute("BIRTEngine");
+                    dutyTravelDelegate.sendReportMail(reportEngine,odsTo);
+                    odsForm.setActionString("SEND");          
+                }
+            }
+        }
+           
+        populateODSearchTO(odsForm,odsTo);
+        odsForm.setOperation("result");
+        String nonWYPayroll = null;
+        if(odsForm.isNonWYPayroll()) {
+        InputStream input = null;
+		String envNonWYPayroll = null;
+		try {
+		input = getClass().getClassLoader().getResourceAsStream("dts.properties");
+        prop.load(input);
+        nonWYPayroll = prop.getProperty("nonWY.payroll").trim();
+        envNonWYPayroll = System.getenv("NONWY_PAYROLLID");
+        if (nonWYPayroll.contains("${NONWY_PAYROLLID}")) {
+        	nonWYPayroll = nonWYPayroll.replace("${NONWY_PAYROLLID}", envNonWYPayroll);
+        }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+        }
+        Collection dutyTravels = dutyTravelDelegate.getOverDueRequests(odsTo,odsForm,nonWYPayroll);
+        
+        List<DutyTravelSummary> overdueList = new ArrayList<>(dutyTravels);
+        
+        int pageSize = 15;
+		
+		if(overdueList.size() > pageSize) {
+			
+			int currentPage = 1;
+		    String currentPageParam = request.getParameter("currentPage");
+		    if (currentPageParam != null && !currentPageParam.isEmpty()) {
+		        currentPage = Integer.parseInt(currentPageParam);
+		    }
+		    int startIndex = (currentPage - 1) * pageSize;
+		    int endIndex = Math.min(startIndex + pageSize, overdueList.size());
+
+			List<DutyTravelSummary> currentPageDutyTravels = overdueList.subList(startIndex, endIndex);			
+			request.setAttribute("DutyTravelSummaries", currentPageDutyTravels);
+			request.setAttribute("currentPage", currentPage);
+			request.setAttribute("pageSize", pageSize);
+			request.setAttribute("startIndex", startIndex+1);
+			request.setAttribute("totalRecords", overdueList.size()); // Total number of records in the entire list
+			request.setAttribute("requiredPaging", true);
+			
+		}else {
+			request.setAttribute("DutyTravelSummaries", dutyTravels);
+			request.setAttribute("requiredPaging", false);
+		}
+        
+		odsForm.setisNonWYPayroll(false);
+		odsForm.setisActiveStaff(false);
+		request.setAttribute("TransferMessage", message);
+		request.setAttribute("InActiveStaffID", failedIds);
+		
+        return mapping.findForward("SUCCESS");
+
+    }
+
+    private void populateODSearchTO(OverdueTranferForm odsForm, OverDueSearchTO odsTo)throws Exception {
+        odsTo.setDueDays(odsForm.getDueDays());
+        odsTo.setDepName(odsForm.getDepName());
+        odsTo.setTravelTypeName(odsForm.getTravelTypeName());
+
+        odsTo.setTravelFromDate(StsUtil.CalendatDateToAdvancedDate(odsForm.getTravelFromDate()));
+        odsTo.setTravelToDate(StsUtil.CalendatDateToAdvancedDate(odsForm.getTravelToDate()));
+
+        odsTo.setMailToStaff(String.valueOf(odsForm.getCcAllAuthYn()));
+        odsTo.setMailToHod(String.valueOf(odsForm.getCcApproverYn()));
+        odsTo.setMailToHodCC(odsForm.getCcMailId());
+
+    }
+}
+package om.com.oas.dutytravel.web.struts;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import om.com.oas.dutytravel.delegate.DutyTravelDelegate;
+import om.com.oas.dutytravel.interfaces.Constants;
+import om.com.oas.dutytravel.to.DutyTravelSummary;
+import om.com.oas.dutytravel.to.OverDueSearchTO;
+import om.com.oas.dutytravel.utils.Util;
+import om.com.oas.obase.framework.to.UserTO;
+import om.com.oas.sts.utils.StsUtil;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.eclipse.birt.core.exception.BirtException;
+import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.report.engine.api.EngineConfig;
+import org.eclipse.birt.report.engine.api.IReportEngine;
+import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+
+public class ListOverdueRequestsAction extends AbstractAction{
+	
+	static Properties prop = new Properties();
+    private Map userPermission = null;
+
+
+    protected ActionForward myExecute(ActionMapping mapping,
+            ActionForm form, HttpServletRequest request, HttpServletResponse response)
+    throws Exception {
+        
+        OverdueTranferForm odsForm = (OverdueTranferForm)form;
+        OverDueSearchTO odsTo = new OverDueSearchTO();
+
+        userPermission=(Map)request.getSession().getAttribute(Constants.USER_PERMISSIONS);
+        
+        
+        
+        Set permission = (Set)userPermission.get(Constants.PRT_DTS);
+        
+        boolean overDuePermission =  permission.contains(Constants.PRA_OVERDUE);
+        boolean trainingPermission = permission.contains(Constants.PRA_TRAINING);
+        
+        System.out.println(overDuePermission +"<><><><><><><><>><><><>>"+trainingPermission);
+        
+
+        
+
+        System.out.println(" ****in overdue retriving userperm from session ,user perm map:"+userPermission);
+        String operation = odsForm.getOperation();
+        System.out.println( " ****odForm.getActionString() : "+operation);
+
+        DutyTravelDelegate dutyTravelDelegate=new DutyTravelDelegate();
+
+        UserTO user = (UserTO)request.getSession().getAttribute("USER_INFO");
+        String loggedInStaff = user.getUserId();		
+
+        System.out.println("Staff Id "+loggedInStaff);	
+
+        if(Util.isEmpty(operation)||"result".equals(operation)||"load".equals(operation)) {
+            System.out.println("calling search page load only**************");
+            //odsTo.setDepName("-1");
+            odsTo = dutyTravelDelegate.loadSearchParams();
+            odsTo.setOperation("load");
+            //odsForm.setApproverList(odsTo.getApproverList());
+            odsForm.setTravelTypeList(odsTo.getTravelTypeList());
+            odsForm.setDeptList(odsTo.getDeptList());
+            odsForm.setOperation(odsTo.getOperation());
+            odsForm.setDueDays("14");
+            odsForm.setTravelFromDate("");
+            odsForm.setTravelToDate("");
+            odsForm.setCcMailId("");
+            odsForm.setDepName("-1");
+            request.setAttribute("requiredPaging", false);
+            //populateODSearchForm(odsForm,odsTo);
+
+        } else if("search".equals(operation)){
+
+            System.out.println("calling search page **************");
+            System.out.println("odsForm.getDepName---------->"+odsForm.getDepName());
+            System.out.println("odsForm.getDueDays---------->"+odsForm.getDueDays());
+            System.out.println("odsForm.getTravelFromDate---------->"+odsForm.getTravelFromDate());
+            System.out.println("odsForm.getTravelToDate---------->"+odsForm.getTravelToDate());
+            populateODSearchTO(odsForm,odsTo);
+            
+            request.getSession().setAttribute("SEARCH_TO",odsTo);
+            
+            odsForm.setOperation("result");
+
+
+            //odsTo = dutyTravelDelegate.searchOverDues(odsTO);
+            // old
+
+            if(request.getSession().getAttribute("BIRTEngine")==null){
+                System.out.println("Session put BIRTEngine...............");
+                request.getSession().setAttribute("BIRTEngine",getReportEngine(request));
+            }
+
+            //if(hasPermission("OVERDUE",Constants.PRT_DTS)){
+            String nonWYPayroll = null;
+            if(odsForm.isNonWYPayroll()) {
+            InputStream input = null;
+    		String envNonWYPayroll = null;
+    		try {
+    		input = getClass().getClassLoader().getResourceAsStream("dts.properties");
+            prop.load(input);
+            nonWYPayroll = prop.getProperty("nonWY.payroll").trim();
+            envNonWYPayroll = System.getenv("NONWY_PAYROLLID");
+            if (nonWYPayroll.contains("${NONWY_PAYROLLID}")) {
+            	nonWYPayroll = nonWYPayroll.replace("${NONWY_PAYROLLID}", envNonWYPayroll);
+            }
+    		} catch(Exception e) {
+    			e.printStackTrace();
+    		}
+            }
+
+                Collection dutyTravels = dutyTravelDelegate.getOverDueRequests(odsTo,odsForm, nonWYPayroll);
+                
+                List<DutyTravelSummary> overdueList = new ArrayList<>(dutyTravels);
+                
+                int pageSize = 15;
+        		
+        		if(overdueList.size() > pageSize) {
+        			
+        			int currentPage = 1;
+        		    String currentPageParam = request.getParameter("currentPage");
+        		    if (currentPageParam != null && !currentPageParam.isEmpty()) {
+        		        currentPage = Integer.parseInt(currentPageParam);
+        		    }
+        		    int startIndex = (currentPage - 1) * pageSize;
+        		    int endIndex = Math.min(startIndex + pageSize, overdueList.size());
+
+        			List<DutyTravelSummary> currentPageDutyTravels = overdueList.subList(startIndex, endIndex);
+        			
+        			request.setAttribute("DutyTravelSummaries", currentPageDutyTravels);
+        			request.setAttribute("currentPage", currentPage);
+        			request.setAttribute("pageSize", pageSize);
+        			request.setAttribute("startIndex", startIndex+1);
+        			request.setAttribute("totalRecords", overdueList.size()); 
+        			request.setAttribute("requiredPaging", true);
+        			
+        		}else {
+        			
+        			request.setAttribute("DutyTravelSummaries", dutyTravels);
+        			request.setAttribute("requiredPaging", false);
+        			
+        		}
+        }
+        odsForm.setisActiveStaff(false);
+        odsForm.setisNonWYPayroll(false);
+        
+        return mapping.findForward("SUCCESS"); 
+    }
+    private void populateODSearchForm(OverdueTranferForm odsForm, OverDueSearchTO odsTo){
+        odsForm.setApproverList(odsTo.getApproverList());
+        odsForm.setDeptList(odsTo.getDeptList());
+        odsForm.setResultList(odsTo.getResultList());
+        odsForm.setOperation(odsTo.getOperation());
+        odsForm.setDueDays("30");
+    }
+
+    private void populateODSearchTO(OverdueTranferForm odsForm, OverDueSearchTO odsTo)throws Exception {
+        odsTo.setDueDays(odsForm.getDueDays());
+        odsTo.setDepName(odsForm.getDepName());
+        //odsTo.setAproverName(odsForm.getAproverName());
+        odsTo.setTravelTypeName(odsForm.getTravelTypeName());
+        
+        odsTo.setTravelFromDate(StsUtil.CalendatDateToAdvancedDate(odsForm.getTravelFromDate()));
+        odsTo.setTravelToDate(StsUtil.CalendatDateToAdvancedDate(odsForm.getTravelToDate()));
+    }
+
+    private boolean hasPermission(String action,String targetName){
+        if (userPermission == null) return false;
+        Set permission = (Set)userPermission.get(targetName);
+        if (permission == null) return false;		
+        return permission.contains(action);
+
+    }
+    private IReportEngine getReportEngine(HttpServletRequest request){
+        EngineConfig engineConfig = null;
+        IReportEngine reportEngine = null;
+
+        try {
+            engineConfig = new EngineConfig();
+            String BIRT_HOME_STR = request.getSession().getServletContext().getRealPath( "/WEB-INF/ReportEngine" );
+            System.out.println("BIRT_HOME_STR = " +BIRT_HOME_STR );
+            
+            engineConfig.setBIRTHome(BIRT_HOME_STR);
+            request.getSession().setAttribute("BIRT_HOME_STR",BIRT_HOME_STR);
+
+            Platform.startup(engineConfig);
+            IReportEngineFactory factory = (IReportEngineFactory)Platform.createFactoryObject(
+                    IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
+
+
+            reportEngine = factory.createReportEngine(engineConfig);
+
+        }catch (BirtException e) {         
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return reportEngine;
+    }
+}
+
+C:\Users\check-out-dts\DTS\src\main\webapp\WEB-INF>tree /F
+Folder PATH listing
+Volume serial number is 181A-AC61
+C:.
+│   application.properties
+│   log4j.properties
+│   security.properties
+│   server-config.wsdd
+│   struts-bean.tld
+│   struts-config.xml
+│   struts-html.tld
+│   struts-logic.tld
+│   struts-nested.tld
+│   struts-template.tld
+│   struts-tiles.tld
+│   taglib.tld
+│   viewer.properties
+│   vssver.scc
+│   web-template.xml
+│   web.xml
+│   wynet.tld
+│
+├───lib
+│       activation.jar
+│       axis-ant.jar
+│       axis.jar
+│       bpfConPool.jar
+│       cactus.jar
+│       chartengineapi.jar
+│       classes12.jar
+│       com.ibm.icu_3.8.1.v20080530.jar
+│       commons-beanutils.jar
+│       commons-cli-1.0.jar
+│       commons-collections.jar
+│       commons-dbcp.jar
+│       commons-digester.jar
+│       commons-discovery.jar
+│       commons-fileupload.jar
+│       commons-lang.jar
+│       commons-logging.jar
+│       commons-net.jar
+│       commons-pool.jar
+│       commons-resources.jar
+│       commons-services.jar
+│       commons-validator.jar
+│       coreapi.jar
+│       cos.jar
+│       crosstabcoreapi.jar
+│       dataadapterapi.jar
+│       dataaggregationapi.jar
+│       dataextraction.jar
+│       dom4j.jar
+│       dteapi.jar
+│       engineapi.jar
+│       fileupload.jar
+│       flute.jar
+│       iText-5.0.4.jar
+│       jakarta-oro.jar
+│       javax.wsdl_1.5.1.v200806030408.jar
+│       jaxm-api.jar
+│       jaxrpc.jar
+│       jcert.jar
+│       jdbc2_0-stdext.jar
+│       jnet.jar
+│       js.jar
+│       jsch-0.1.44.jar
+│       jsse.jar
+│       junit.jar
+│       mail.jar
+│       modelapi.jar
+│       modelodaapi.jar
+│       obaseV2.jar
+│       odadesignapi.jar
+│       ojdbc14.jar
+│       org.apache.commons.codec_1.3.0.v20080530-1600.jar
+│       org.eclipse.emf.common_2.4.0.v200808251517.jar
+│       org.eclipse.emf.ecore.xmi_2.4.1.v200808251517.jar
+│       org.eclipse.emf.ecore_2.4.1.v200808251517.jar
+│       org.w3c.css.sac_1.3.0.v200805290154.jar
+│       pagertag.jar
+│       reports_tld.jar
+│       saaj-api.jar
+│       saaj-impl-1.3.jar
+│       saaj-impl.jar
+│       saaj-ri.jar
+│       saaj.jar
+│       scriptapi.jar
+│       servlet-api.jar
+│       servlet.jar
+│       struts-legacy.jar
+│       struts.jar
+│       uploadbean.jar
+│       viewservlets.jar
+│       vssver.scc
+│       wsdl4j.jar
+│       xalan.jar
+│       xerces.jar
+│       xml-apis.jar
+│
+├───platform
+│   ├───configuration
+│   │   │   config.ini
+│   │   │   vssver.scc
+│   │   │
+│   │   ├───org.eclipse.core.runtime
+│   │   │   │   .contributions.370
+│   │   │   │   .contributors.370
+│   │   │   │   .extraData.370
+│   │   │   │   .mainData.370
+│   │   │   │   .namespaces.370
+│   │   │   │   .orphans.370
+│   │   │   │   .table.370
+│   │   │   │
+│   │   │   └───.manager
+│   │   │           .fileTable.376
+│   │   │           .fileTable.377
+│   │   │           .fileTableLock
+│   │   │
+│   │   ├───org.eclipse.equinox.app
+│   │   │   └───.manager
+│   │   │           .fileTableLock
+│   │   │
+│   │   ├───org.eclipse.osgi
+│   │   │   │   .bundledata.1
+│   │   │   │   .lazy.1
+│   │   │   │   .state.1
+│   │   │   │
+│   │   │   ├───.manager
+│   │   │   │       .fileTable.4
+│   │   │   │       .fileTable.5
+│   │   │   │       .fileTableLock
+│   │   │   │
+│   │   │   └───bundles
+│   │   │       └───53
+│   │   │           └───1
+│   │   │               └───.cp
+│   │   │                   └───lib
+│   │   │                           commons-cli-1.0.jar
+│   │   │                           Tidy.jar
+│   │   │
+│   │   └───org.eclipse.update
+│   │       │   last.config.stamp
+│   │       │   platform.xml
+│   │       │   vssver.scc
+│   │       │
+│   │       └───history
+│   │               1240389708000.xml
+│   │               1240389748000.xml
+│   │               1240392624000.xml
+│   │               1240392800000.xml
+│   │               1240393132000.xml
+│   │               1240393166000.xml
+│   │               1240393434000.xml
+│   │               1240394172000.xml
+│   │               1240394360000.xml
+│   │               1240394790000.xml
+│   │               1240395026000.xml
+│   │               1240395116000.xml
+│   │               1240395228000.xml
+│   │               1240395364000.xml
+│   │               1240395948000.xml
+│   │               1240396206000.xml
+│   │               1240396530000.xml
+│   │               1240396730000.xml
+│   │               1240397008000.xml
+│   │               1240397134000.xml
+│   │               1240397326000.xml
+│   │               1240398792000.xml
+│   │               1240399078000.xml
+│   │               1240400106000.xml
+│   │               1240400470000.xml
+│   │               1240400564000.xml
+│   │               1240401012000.xml
+│   │               1240401188000.xml
+│   │               1240401612000.xml
+│   │               1240465622000.xml
+│   │               1240743568000.xml
+│   │               1240807272000.xml
+│   │               1240815786000.xml
+│   │               1240894600000.xml
+│   │               1240901638000.xml
+│   │               1240902852000.xml
+│   │               1240903706000.xml
+│   │               1240981342000.xml
+│   │               1241078524000.xml
+│   │               1241433436000.xml
+│   │               1241501592000.xml
+│   │               1241511758000.xml
+│   │               1241584012000.xml
+│   │               1241600684000.xml
+│   │               1241603848000.xml
+│   │               1241604350000.xml
+│   │               1241604796000.xml
+│   │               1241606252000.xml
+│   │               1243248862000.xml
+│   │               1243420888000.xml
+│   │               1243835674000.xml
+│   │               1243922756000.xml
+│   │               1243923680000.xml
+│   │               1243925752000.xml
+│   │               1243926034000.xml
+│   │               1245059216000.xml
+│   │               1245145094000.xml
+│   │               1245146104000.xml
+│   │               1245310360000.xml
+│   │               1245313288000.xml
+│   │               1245313856000.xml
+│   │               1245317980000.xml
+│   │               1245319132000.xml
+│   │               1245319646000.xml
+│   │               1245320418000.xml
+│   │               1245322328000.xml
+│   │               1245558324000.xml
+│   │               1245558448000.xml
+│   │               1245558542000.xml
+│   │               1245570840000.xml
+│   │               1245665030000.xml
+│   │               1245667416000.xml
+│   │               1245733934000.xml
+│   │               1245737070000.xml
+│   │               1245737908000.xml
+│   │               1245754872000.xml
+│   │               1245756504000.xml
+│   │               1246531668000.xml
+│   │               1246768420000.xml
+│   │               1246770650000.xml
+│   │               1246770852000.xml
+│   │               1246771668000.xml
+│   │               1246772864000.xml
+│   │               1246773648000.xml
+│   │               1246775082000.xml
+│   │               1246781284000.xml
+│   │               1246781326000.xml
+│   │               1246782332000.xml
+│   │               1246785276000.xml
+│   │               1246786034000.xml
+│   │               1246787698000.xml
+│   │               1246788736000.xml
+│   │               1246788816000.xml
+│   │               1246789140000.xml
+│   │               1246789370000.xml
+│   │               1246789874000.xml
+│   │               1246790196000.xml
+│   │               1246790422000.xml
+│   │               1246790612000.xml
+│   │               1246790736000.xml
+│   │               1246791066000.xml
+│   │               1246791286000.xml
+│   │               1246791660000.xml
+│   │               1246792156000.xml
+│   │               1246792458000.xml
+│   │               1246793048000.xml
+│   │               1246793640000.xml
+│   │               1246794680000.xml
+│   │               1246794804000.xml
+│   │               1246795572000.xml
+│   │               1246854944000.xml
+│   │               1246855376000.xml
+│   │               1246855552000.xml
+│   │               1246855614000.xml
+│   │               1246855772000.xml
+│   │               1246856250000.xml
+│   │               1246856552000.xml
+│   │               1246856702000.xml
+│   │               1246856862000.xml
+│   │               1246857200000.xml
+│   │               1246858210000.xml
+│   │               1246858420000.xml
+│   │               1246858762000.xml
+│   │               1246859346000.xml
+│   │               1246859516000.xml
+│   │               1246859998000.xml
+│   │               1246860284000.xml
+│   │               1246860554000.xml
+│   │               1246950562000.xml
+│   │               1246951152000.xml
+│   │               1246951438000.xml
+│   │               1246951674000.xml
+│   │               1246962292000.xml
+│   │               1246964376000.xml
+│   │               1246967068000.xml
+│   │               1246968254000.xml
+│   │               1247026824000.xml
+│   │               1247027168000.xml
+│   │               1248153504000.xml
+│   │               1249463492000.xml
+│   │               1249541080000.xml
+│   │               1249815134000.xml
+│   │               1249816764000.xml
+│   │               1249817514000.xml
+│   │               1249818132000.xml
+│   │               1249820996000.xml
+│   │               1249885526000.xml
+│   │               1249963318000.xml
+│   │               1249972112000.xml
+│   │               1249984244000.xml
+│   │               1250402334000.xml
+│   │               1252214364000.xml
+│   │               1252309044000.xml
+│   │               1253166582000.xml
+│   │               1253166688000.xml
+│   │               1253167188000.xml
+│   │               1253167232000.xml
+│   │               1253167610000.xml
+│   │               1253168720000.xml
+│   │               1254914584000.xml
+│   │               1255411762000.xml
+│   │               1255413510000.xml
+│   │               1255413766000.xml
+│   │               1255414158000.xml
+│   │               1255415820000.xml
+│   │               1256472098000.xml
+│   │               1258869108000.xml
+│   │               1258873498000.xml
+│   │               1258874682000.xml
+│   │               1258875140000.xml
+│   │               1258878812000.xml
+│   │               1258880262000.xml
+│   │               1262672400000.xml
+│   │               1262689654000.xml
+│   │               1262692414000.xml
+│   │               1262759746000.xml
+│   │               1262760930000.xml
+│   │               1262761104000.xml
+│   │               1262762770000.xml
+│   │               1262848610000.xml
+│   │               1262850436000.xml
+│   │               1262853196000.xml
+│   │               1262863034000.xml
+│   │               1263109756000.xml
+│   │               1263368694000.xml
+│   │               1263377768000.xml
+│   │               1263378162000.xml
+│   │               1263378412000.xml
+│   │               1263380572000.xml
+│   │               1263380796000.xml
+│   │               1263381076000.xml
+│   │               1263454876000.xml
+│   │               1263455690000.xml
+│   │               1263456476000.xml
+│   │               1263457398000.xml
+│   │               1263462536000.xml
+│   │               1263465410000.xml
+│   │               1263712098000.xml
+│   │               1263716018000.xml
+│   │               1263725044000.xml
+│   │               1263725386000.xml
+│   │               1263725872000.xml
+│   │               1263728028000.xml
+│   │               1263729926000.xml
+│   │               1263797170000.xml
+│   │               1263798872000.xml
+│   │               1263799926000.xml
+│   │               1263801986000.xml
+│   │               1263803772000.xml
+│   │               1263803994000.xml
+│   │               1263814296000.xml
+│   │               1263816242000.xml
+│   │               1263816760000.xml
+│   │               1263877502000.xml
+│   │               1263879580000.xml
+│   │               1263881384000.xml
+│   │               1263881792000.xml
+│   │               1263883064000.xml
+│   │               1263884830000.xml
+│   │               1263885272000.xml
+│   │               1263885560000.xml
+│   │               1263887748000.xml
+│   │               1263888382000.xml
+│   │               1263888546000.xml
+│   │               1263888906000.xml
+│   │               1263889038000.xml
+│   │               1263889294000.xml
+│   │               1263889410000.xml
+│   │               1263896098000.xml
+│   │               1263898734000.xml
+│   │               1263899808000.xml
+│   │               1263900126000.xml
+│   │               1263901380000.xml
+│   │               1263902130000.xml
+│   │               1263905318000.xml
+│   │               1263905584000.xml
+│   │               1263905680000.xml
+│   │               1263906898000.xml
+│   │               1263907838000.xml
+│   │               1263963472000.xml
+│   │               1263966816000.xml
+│   │               1263974338000.xml
+│   │               1263974606000.xml
+│   │               1263977156000.xml
+│   │               1263977342000.xml
+│   │               1263977630000.xml
+│   │               1263978380000.xml
+│   │               1263978594000.xml
+│   │               1263981092000.xml
+│   │               1263981646000.xml
+│   │               1263983112000.xml
+│   │               1263985350000.xml
+│   │               1263985550000.xml
+│   │               1263987860000.xml
+│   │               1263988478000.xml
+│   │               1264049976000.xml
+│   │               1264053608000.xml
+│   │               1264056634000.xml
+│   │               1264316240000.xml
+│   │               1264397863531.xml
+│   │               1264398492741.xml
+│   │               1264398692318.xml
+│   │               1264400741301.xml
+│   │               1264402754583.xml
+│   │               1264403429494.xml
+│   │               1264405337877.xml
+│   │               1264485972501.xml
+│   │               1264492465908.xml
+│   │               1264492807038.xml
+│   │               1264499891473.xml
+│   │               1264570499721.xml
+│   │               1264585395184.xml
+│   │               1264586005183.xml
+│   │               1264586351576.xml
+│   │               1264654238266.xml
+│   │               1264654478138.xml
+│   │               1264655343502.xml
+│   │               1264673367441.xml
+│   │               1264673663906.xml
+│   │               1264673816482.xml
+│   │               1264912806745.xml
+│   │               1264931204839.xml
+│   │               1264938095482.xml
+│   │               1265017212776.xml
+│   │               1265018583853.xml
+│   │               1265019065987.xml
+│   │               1265019249610.xml
+│   │               1265019391623.xml
+│   │               1265019556512.xml
+│   │               1265024949359.xml
+│   │               1265084557794.xml
+│   │               1265172609398.xml
+│   │               1265618308128.xml
+│   │               1265704341788.xml
+│   │               1265783209114.xml
+│   │               1265783630781.xml
+│   │               1265785661396.xml
+│   │               1265792240827.xml
+│   │               1265793168612.xml
+│   │               1265797551821.xml
+│   │               1265863649818.xml
+│   │               1265881585122.xml
+│   │               1265883600444.xml
+│   │               1266315529148.xml
+│   │               1267334671026.xml
+│   │               1267345203224.xml
+│   │               1267345754908.xml
+│   │               1267349236245.xml
+│   │               1267349536931.xml
+│   │               1267349707399.xml
+│   │               1267351219686.xml
+│   │               1267351536621.xml
+│   │               1267351875025.xml
+│   │               1267353608787.xml
+│   │               1267354072549.xml
+│   │               1267355342307.xml
+│   │               1267355757242.xml
+│   │               1267417636315.xml
+│   │               1267521633919.xml
+│   │               1267522836740.xml
+│   │               1267591615168.xml
+│   │               1267592373163.xml
+│   │               1267593605749.xml
+│   │               1267593774935.xml
+│   │               1267594586117.xml
+│   │               1267594702367.xml
+│   │               1267602399067.xml
+│   │               1267602557848.xml
+│   │               1267605899201.xml
+│   │               1267606203137.xml
+│   │               1267607571253.xml
+│   │               1267610857513.xml
+│   │               1267611197902.xml
+│   │               1267612282379.xml
+│   │               1267613144499.xml
+│   │               1267613406934.xml
+│   │               1267613807557.xml
+│   │               1267613917415.xml
+│   │               1267685906575.xml
+│   │               1267686158527.xml
+│   │               1267686707836.xml
+│   │               1267687589533.xml
+│   │               1267688154483.xml
+│   │               1267697492360.xml
+│   │               1267935837700.xml
+│   │               1267956619425.xml
+│   │               1268200502981.xml
+│   │               1268205798367.xml
+│   │               1268207300492.xml
+│   │               1268208110039.xml
+│   │               1268208240914.xml
+│   │               1268208963336.xml
+│   │               1268209391836.xml
+│   │               1268210508477.xml
+│   │               1268282395139.xml
+│   │               1268895221944.xml
+│   │               1268897396368.xml
+│   │               1268897744912.xml
+│   │               1269230414600.xml
+│   │               1269407210218.xml
+│   │               1269420292822.xml
+│   │               1273470220003.xml
+│   │               1273491309234.xml
+│   │               1273491577793.xml
+│   │               1287919766382.xml
+│   │               1287919979847.xml
+│   │               1287982371711.xml
+│   │               1287984420609.xml
+│   │               1287984881554.xml
+│   │               1287984999536.xml
+│   │               1287985550416.xml
+│   │               1287986348822.xml
+│   │               1287986879140.xml
+│   │               1287987292445.xml
+│   │               1288847171181.xml
+│   │               1289200639768.xml
+│   │               1289289941599.xml
+│   │               1289291520500.xml
+│   │               1289367775519.xml
+│   │               1300703244339.xml
+│   │               1314090739355.xml
+│   │               1335766121111.xml
+│   │               1335766933642.xml
+│   │               1364964878941.xml
+│   │               1372139390399.xml
+│   │               1372145875701.xml
+│   │               1372147206489.xml
+│   │               1372148699527.xml
+│   │               1372148949244.xml
+│   │               1372154858409.xml
+│   │               1372155527858.xml
+│   │               1372156150683.xml
+│   │               1372156382397.xml
+│   │               1372157347960.xml
+│   │               1372157939972.xml
+│   │               1435564662163.xml
+│   │               1435566671438.xml
+│   │               1435568622076.xml
+│   │               1435571660333.xml
+│   │               1435572195866.xml
+│   │               1435572953088.xml
+│   │               1435573121829.xml
+│   │               vssver.scc
+│   │
+│   └───plugins
+│       │   com.ibm.icu_3.8.1.v20080530.jar
+│       │   javax.wsdl_1.4.0.v200806030407.jar
+│       │   javax.xml_1.3.4.v200806030440.jar
+│       │   org.apache.batik.bridge_1.6.0.v200805290154.jar
+│       │   org.apache.batik.css_1.6.0.v200805290154.jar
+│       │   org.apache.batik.dom.svg_1.6.0.v200805290154.jar
+│       │   org.apache.batik.dom_1.6.0.v200805290154.jar
+│       │   org.apache.batik.ext.awt_1.6.0.v200805290154.jar
+│       │   org.apache.batik.extension_1.6.0.v200805290154.jar
+│       │   org.apache.batik.parser_1.6.0.v200805290154.jar
+│       │   org.apache.batik.pdf_1.6.0.v200806031500.jar
+│       │   org.apache.batik.svggen_1.6.0.v200805290154.jar
+│       │   org.apache.batik.swing_1.6.0.v200805290154.jar
+│       │   org.apache.batik.transcoder_1.6.0.v200805290154.jar
+│       │   org.apache.batik.util.gui_1.6.0.v200805290154.jar
+│       │   org.apache.batik.util_1.6.0.v200805290154.jar
+│       │   org.apache.batik.xml_1.6.0.v200805290154.jar
+│       │   org.apache.commons.codec_1.3.0.v20080530-1600.jar
+│       │   org.apache.xerces_2.9.0.v200805270400.jar
+│       │   org.apache.xml.resolver_1.2.0.v200806030312.jar
+│       │   org.apache.xml.serializer_2.7.1.v200806030322.jar
+│       │   org.eclipse.birt.api_1.0.0.jar
+│       │   org.eclipse.birt.chart.device.extension_2.3.2.r232_20090115.jar
+│       │   org.eclipse.birt.chart.device.svg_2.3.2.r232_20090115.jar
+│       │   org.eclipse.birt.chart.engine.extension_2.3.2.r232_20090115.jar
+│       │   org.eclipse.birt.chart.engine_2.3.2.r232_20090211.jar
+│       │   org.eclipse.birt.chart.reportitem_2.3.2.r232_20090115.jar
+│       │   org.eclipse.birt.core.script.function_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.core_2.3.2.r232_20090304.jar
+│       │   org.eclipse.birt.data.aggregation_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.data_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.report.data.adapter_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.report.data.oda.jdbc.dbprofile.sampledb_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.report.data.oda.jdbc.dbprofile_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.report.data.oda.xml_2.3.2.r232_v20090211.jar
+│       │   org.eclipse.birt.report.engine.dataextraction.csv_2.3.2.r232_20090122.jar
+│       │   org.eclipse.birt.report.engine.dataextraction_2.3.2.r232_20090122.jar
+│       │   org.eclipse.birt.report.engine.emitter.html_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.engine.emitter.pdf_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.engine.emitter.postscript_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.engine.emitter.ppt_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.engine.emitter.prototype.excel_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.engine.emitter.wpml_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.engine_2.3.2.r232_20090217.jar
+│       │   org.eclipse.birt.report.item.crosstab.core_2.3.2.r232_20090202.jar
+│       │   org.eclipse.birt.report.model.adapter.oda_2.3.2.r232_20090108.jar
+│       │   org.eclipse.birt.report.model_2.3.2.r232_20090115.jar
+│       │   org.eclipse.core.contenttype_3.3.0.v20080604-1400.jar
+│       │   org.eclipse.core.expressions_3.4.1.r342_v20081203-0800.jar
+│       │   org.eclipse.core.filesystem_1.2.0.v20080604-1400.jar
+│       │   org.eclipse.core.jobs_3.4.1.R34x_v20081128.jar
+│       │   org.eclipse.core.resources_3.4.2.R34x_v20090126.jar
+│       │   org.eclipse.core.runtime.compatibility.auth_3.2.100.v20070502.jar
+│       │   org.eclipse.core.runtime.compatibility_3.2.0.v20071008.jar
+│       │   org.eclipse.core.runtime_3.4.0.v20080512.jar
+│       │   org.eclipse.datatools.connectivity.apache.derby.dbdefinition_1.0.2.v200901090940.jar
+│       │   org.eclipse.datatools.connectivity.apache.derby_1.0.3.v200902070611.jar
+│       │   org.eclipse.datatools.connectivity.console.profile_1.0.0.v200805231345.jar
+│       │   org.eclipse.datatools.connectivity.db.generic_1.0.1.v200810140922.jar
+│       │   org.eclipse.datatools.connectivity.dbdefinition.genericJDBC_1.0.1.v200810300511.jar
+│       │   org.eclipse.datatools.connectivity.oda.consumer_3.1.3.v200808270255.jar
+│       │   org.eclipse.datatools.connectivity.oda.design_3.0.7.v200807231215.jar
+│       │   org.eclipse.datatools.connectivity.oda.flatfile_3.0.8.v200812171046.jar
+│       │   org.eclipse.datatools.connectivity.oda.profile_3.0.7.v200812050755.jar
+│       │   org.eclipse.datatools.connectivity.oda_3.1.3.v200808270255.jar
+│       │   org.eclipse.datatools.connectivity.sqm.core_1.0.7.v200902180551.jar
+│       │   org.eclipse.datatools.connectivity_1.1.2.v200901090028.jar
+│       │   org.eclipse.datatools.enablement.hsqldb.dbdefinition_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.hsqldb_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.ibm.db2.iseries.dbdefinition_1.0.2.v200901090853.jar
+│       │   org.eclipse.datatools.enablement.ibm.db2.iseries_1.0.1.v200811210224.jar
+│       │   org.eclipse.datatools.enablement.ibm.db2.luw.dbdefinition_1.0.3.v200901090853.jar
+│       │   org.eclipse.datatools.enablement.ibm.db2.luw_1.0.1.v200811210224.jar
+│       │   org.eclipse.datatools.enablement.ibm.db2.zseries.dbdefinition_1.0.3.v200901060938.jar
+│       │   org.eclipse.datatools.enablement.ibm.db2.zseries_1.0.1.v200811210224.jar
+│       │   org.eclipse.datatools.enablement.ibm.informix.dbdefinition_1.0.3.v200811040352.jar
+│       │   org.eclipse.datatools.enablement.ibm.informix_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.msft.sqlserver.dbdefinition_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.msft.sqlserver_1.0.1.v200807181158.jar
+│       │   org.eclipse.datatools.enablement.mysql.dbdefinition_1.0.4.v200901090853.jar
+│       │   org.eclipse.datatools.enablement.mysql_1.0.2.v200810160130.jar
+│       │   org.eclipse.datatools.enablement.oda.ws_1.1.2.v200812171046.jar
+│       │   org.eclipse.datatools.enablement.oda.xml_1.1.2.v200902111040.jar
+│       │   org.eclipse.datatools.enablement.oracle.dbdefinition_1.0.2.v200902030725.jar
+│       │   org.eclipse.datatools.enablement.oracle_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.postgresql.dbdefinition_1.0.1.v200901090853.jar
+│       │   org.eclipse.datatools.enablement.postgresql_1.0.1.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.sap.maxdb.dbdefinition_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.enablement.sap.maxdb_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.modelbase.dbdefinition_1.0.1.v200901090853.jar
+│       │   org.eclipse.datatools.modelbase.derby_1.0.0.v200805152355.jar
+│       │   org.eclipse.datatools.modelbase.sql_1.0.1.v200812031125.jar
+│       │   org.eclipse.emf.common_2.4.0.v200902171115.jar
+│       │   org.eclipse.emf.ecore.change_2.4.0.v200902171115.jar
+│       │   org.eclipse.emf.ecore.xmi_2.4.1.v200902171115.jar
+│       │   org.eclipse.emf.ecore_2.4.2.v200902171115.jar
+│       │   org.eclipse.emf_2.4.0.v200902171115.jar
+│       │   org.eclipse.equinox.app_1.1.0.v20080421-2006.jar
+│       │   org.eclipse.equinox.common_3.4.0.v20080421-2006.jar
+│       │   org.eclipse.equinox.preferences_3.2.201.R34x_v20080709.jar
+│       │   org.eclipse.equinox.registry_3.4.0.v20080516-0950.jar
+│       │   org.eclipse.osgi.compatibility.state-1.2.500.jar
+│       │   org.eclipse.osgi.services_3.1.200.v20071203.jar
+│       │   org.eclipse.osgi_3.4.3.R34x_v20081215-1030.jar
+│       │   org.eclipse.update.configurator_3.2.201.R34x_v20080819.jar
+│       │   org.w3c.css.sac_1.3.0.v200805290154.jar
+│       │   org.w3c.dom.smil_1.0.0.v200806040011.jar
+│       │   org.w3c.dom.svg_1.1.0.v200806040011.jar
+│       │   vssver.scc
+│       │
+│       ├───com.lowagie.itext_1.5.4.v20080228
+│       │   │   about.html
+│       │   │   about.ini
+│       │   │   about.mappings
+│       │   │   about.properties
+│       │   │   eclipse32.png
+│       │   │   vssver.scc
+│       │   │
+│       │   ├───about_files
+│       │   │       bouncycastle_license.txt
+│       │   │       JAI-notice.txt
+│       │   │       LICENSE-asl-20.txt
+│       │   │       MPL-1.1.txt
+│       │   │       NOTICE-commons-lang.txt
+│       │   │       NOTICE-xerces.txt
+│       │   │       UNICODE-notice.txt
+│       │   │       vssver.scc
+│       │   │
+│       │   ├───lib
+│       │   │       itextasian-1.5.2.jar
+│       │   │       itext_1.5.4.jar
+│       │   │       vssver.scc
+│       │   │
+│       │   └───META-INF
+│       │           MANIFEST.MF
+│       │           vssver.scc
+│       │
+│       ├───org.apache.derby.core_10.3.1.4
+│       │   │   about.html
+│       │   │   asl-v20.txt
+│       │   │   derby.jar
+│       │   │   plugin.xml
+│       │   │   vssver.scc
+│       │   │
+│       │   ├───about_files
+│       │   │       LICENSE-2.0.txt
+│       │   │       NOTICE
+│       │   │       vssver.scc
+│       │   │
+│       │   └───META-INF
+│       │           MANIFEST.MF
+│       │           vssver.scc
+│       │
+│       ├───org.eclipse.birt.report.data.oda.jdbc_2.3.2.r232_v20090212
+│       │   │   .options
+│       │   │   about.html
+│       │   │   oda-jdbc.jar
+│       │   │   plugin.properties
+│       │   │   plugin.xml
+│       │   │   vssver.scc
+│       │   │
+│       │   ├───drivers
+│       │   │       classes12.jar
+│       │   │       readme.txt
+│       │   │       vssver.scc
+│       │   │
+│       │   ├───META-INF
+│       │   │       MANIFEST.MF
+│       │   │       vssver.scc
+│       │   │
+│       │   └───schema
+│       │           driverinfo.exsd
+│       │           vssver.scc
+│       │
+│       ├───org.eclipse.birt.report.data.oda.sampledb_2.3.2.r232_v20090211
+│       │   │   .options
+│       │   │   about.html
+│       │   │   plugin.properties
+│       │   │   plugin.xml
+│       │   │   sampledb.jar
+│       │   │   vssver.scc
+│       │   │
+│       │   ├───db
+│       │   │       BirtSample.jar
+│       │   │       vssver.scc
+│       │   │
+│       │   └───META-INF
+│       │           eclipse.inf
+│       │           MANIFEST.MF
+│       │           vssver.scc
+│       │
+│       ├───org.eclipse.birt.report.engine.fonts_2.3.2.r232_20090202
+│       │   │   about.html
+│       │   │   fontsConfig.xml
+│       │   │   fontsConfig_linux.xml
+│       │   │   fontsConfig_pdf.xml
+│       │   │   fontsConfig_win32.xml
+│       │   │   vssver.scc
+│       │   │
+│       │   └───META-INF
+│       │           MANIFEST.MF
+│       │           vssver.scc
+│       │
+│       ├───org.eclipse.core.runtime.compatibility.registry_3.2.200.v20080610
+│       │   │   about.html
+│       │   │   fragment.properties
+│       │   │   runtime_registry_compatibility.jar
+│       │   │   vssver.scc
+│       │   │
+│       │   └───META-INF
+│       │           eclipse.inf
+│       │           ECLIPSE.RSA
+│       │           ECLIPSE.SF
+│       │           MANIFEST.MF
+│       │           vssver.scc
+│       │
+│       ├───org.mozilla.rhino_1.6.7.v20080214
+│       │   │   about.html
+│       │   │   about.ini
+│       │   │   about.mappings
+│       │   │   about.properties
+│       │   │   eclipse32.png
+│       │   │   vssver.scc
+│       │   │
+│       │   ├───about_files
+│       │   │       MPL-1.1.txt
+│       │   │       NPL-1.1.html
+│       │   │       vssver.scc
+│       │   │
+│       │   ├───lib
+│       │   │       js.jar
+│       │   │       vssver.scc
+│       │   │
+│       │   └───META-INF
+│       │           MANIFEST.MF
+│       │           vssver.scc
+│       │
+│       └───org.w3c.sac_1.3.0.v20070710
+│           │   about.html
+│           │   about.ini
+│           │   about.mappings
+│           │   about.properties
+│           │   eclipse32.png
+│           │   vssver.scc
+│           │
+│           ├───about_files
+│           │   │   copyright-software-20021231.htm
+│           │   │   vssver.scc
+│           │   │
+│           │   └───copyright-software-20021231_files
+│           │           base.css
+│           │           vssver.scc
+│           │
+│           ├───lib
+│           │       flute.jar
+│           │       vssver.scc
+│           │
+│           └───META-INF
+│                   MANIFEST.MF
+│                   vssver.scc
+│
+├───ReportEngine
+│   │   DTS_OverDue_Delayed_Settlement_report.rptdesign
+│   │   DTS_OverDue_dept_report.rptdesign
+│   │   DTS_OverDue_Expense_report.rptdesign
+│   │   DTS_OverDue_Expense_Summary_Dep_report.rptdesign
+│   │   DTS_OverDue_Expense_Summary_DIV_Dep_report.rptdesign
+│   │   DTS_OverDue_Expense_Summary_DIV_report.rptdesign
+│   │   DTS_OverDue_Expense_Summary_DTT_report.rptdesign
+│   │   DTS_OverDue_Expense_Summary_report.rptdesign
+│   │   DTS_OverDue_Prov_report.rptdesign
+│   │   DTS_OverDue_recovered_report.rptdesign
+│   │   DTS_OverDue_SettlementVSEntitlement_report.rptdesign
+│   │   DTS_OverDue_staff_report.rptdesign
+│   │   DT_Detailed_Allowance_Report.rptdesign
+│   │   genReport.bat
+│   │   genReport.sh
+│   │   vssver.scc
+│   │
+│   ├───lib
+│   │       chartengineapi.jar
+│   │       com.ibm.icu_3.8.1.v20080530.jar
+│   │       commons-cli-1.0.jar
+│   │       coreapi.jar
+│   │       crosstabcoreapi.jar
+│   │       dataadapterapi.jar
+│   │       dataaggregationapi.jar
+│   │       dataextraction.jar
+│   │       dteapi.jar
+│   │       engineapi.jar
+│   │       flute.jar
+│   │       js.jar
+│   │       modelapi.jar
+│   │       modelodaapi.jar
+│   │       odadesignapi.jar
+│   │       org.apache.commons.codec_1.3.0.v20080530-1600.jar
+│   │       org.eclipse.emf.common_2.4.0.v200808251517.jar
+│   │       org.eclipse.emf.ecore.xmi_2.4.1.v200808251517.jar
+│   │       org.eclipse.emf.ecore_2.4.1.v200808251517.jar
+│   │       org.w3c.css.sac_1.3.0.v200805290154.jar
+│   │       scriptapi.jar
+│   │       vssver.scc
+│   │
+│   └───report
+│       │   bkd_fctd_region.rptdesign
+│       │   bkd_fctd_sector.rptdesign
+│       │   dailyUplift.rptdesign
+│       │   logo_new.gif
+│       │   logo_new_top.gif
+│       │   OmanAir_Logo_new.png
+│       │   otp.rptdesign
+│       │   paxplus.css
+│       │   paxplus.rptlibrary
+│       │   paxPLUS_Reports3.gif
+│       │   Thumbs.db
+│       │   vssver.scc
+│       │
+│       ├───images
+│       │       logo_new.gif
+│       │       Thumbs.db
+│       │       vssver.scc
+│       │
+│       └───styles
+│               mystyle.css
+│               vssver.scc
+│
+└───tlds
+        birt.tld
+        vssver.scc
+
+C:\Users\Downloads\birt-runtime-4.8.0-20180626>tree /F
+Folder PATH listing
+Volume serial number is 181A-AC61
+C:.
+│   about.html
+│   birt-folder-structure.txt
+│   birt.war
+│   epl-v10.html
+│   notice.html
+│   runtime_readme.txt
+│
+├───about_files
+│       LICENSE.txt
+│
+├───ReportEngine
+│   │   genReport.bat
+│   │   genReport.sh
+│   │
+│   ├───addons
+│   │       org.eclipse.datatools.enablement.hsqldb.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.hsqldb_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2.iseries.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2.iseries_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2.luw.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2.luw_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2.zseries.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2.zseries_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.db2_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.informix.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm.informix_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.ibm_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.msft.sqlserver.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.msft.sqlserver_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.mysql.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.mysql_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.oda.ws_1.4.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.oda.xml_1.4.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.oracle.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.oracle_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.postgresql.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.postgresql_1.3.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.sap.maxdb.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.enablement.sap.maxdb_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.modelbase.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.modelbase.derby_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.modelbase.sql.query_1.3.1.201712071719.jar
+│   │       org.eclipse.datatools.modelbase.sql_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.sqltools.data.core_1.4.1.201712071719.jar
+│   │       org.eclipse.datatools.sqltools.parsers.sql.lexer_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.sqltools.parsers.sql.query_1.4.1.201712071719.jar
+│   │       org.eclipse.datatools.sqltools.parsers.sql_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.sqltools.result_1.3.1.201712071719.jar
+│   │
+│   ├───lib
+│   │       com.ibm.icu_58.2.0.v20170418-1837.jar
+│   │       com.lowagie.text_2.1.7.v201004222200.jar
+│   │       flute.jar
+│   │       javax.wsdl_1.5.1.v201012040544.jar
+│   │       javax.xml.stream_1.0.1.v201004272200.jar
+│   │       javax.xml_1.3.4.v201005080400.jar
+│   │       net.sourceforge.lpg.lpgjavaruntime_1.1.0.v201004271650.jar
+│   │       org.apache.batik.bridge_1.7.0.v201011041433.jar
+│   │       org.apache.batik.css_1.7.0.v201011041433.jar
+│   │       org.apache.batik.dom.svg_1.7.0.v201011041433.jar
+│   │       org.apache.batik.dom_1.7.1.v201505191845.jar
+│   │       org.apache.batik.ext.awt.extension_1.7.0.v201806261756.jar
+│   │       org.apache.batik.ext.awt_1.7.0.v201011041433.jar
+│   │       org.apache.batik.parser_1.7.0.v201011041433.jar
+│   │       org.apache.batik.svggen_1.7.0.v201011041433.jar
+│   │       org.apache.batik.transcoder_1.7.0.v201011041433.jar
+│   │       org.apache.batik.util.gui_1.7.0.v200903091627.jar
+│   │       org.apache.batik.util_1.7.0.v201011041433.jar
+│   │       org.apache.batik.xml_1.7.0.v201011041433.jar
+│   │       org.apache.commons.codec_1.9.0.v20170208-1614.jar
+│   │       org.apache.commons.logging_1.1.1.v201101211721.jar
+│   │       org.apache.derby_10.11.1.1_v201605202053.jar
+│   │       org.apache.felix.scr_2.0.14.v20180117-1452.jar
+│   │       org.apache.lucene.analyzers-common_6.1.0.v20161115-1612.jar
+│   │       org.apache.lucene.core_6.1.0.v20170814-1820.jar
+│   │       org.apache.lucene.queryparser_6.1.0.v20161115-1612.jar
+│   │       org.apache.poi_3.9.0.v201405241750.jar
+│   │       org.apache.xerces_2.9.0.v201101211617.jar
+│   │       org.apache.xml.resolver_1.2.0.v201005080400.jar
+│   │       org.apache.xml.serializer_2.7.1.v201005080400.jar
+│   │       org.eclipse.birt.runtime_4.8.0-20180626.jar
+│   │       org.eclipse.core.contenttype_3.7.0.v20180426-1644.jar
+│   │       org.eclipse.core.expressions_3.6.100.v20180426-1644.jar
+│   │       org.eclipse.core.filesystem_1.7.100.v20180304-1102.jar
+│   │       org.eclipse.core.jobs_3.10.0.v20180427-1454.jar
+│   │       org.eclipse.core.resources_3.13.0.v20180512-1138.jar
+│   │       org.eclipse.core.runtime_3.14.0.v20180417-0825.jar
+│   │       org.eclipse.datatools.connectivity.apache.derby.dbdefinition_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.apache.derby_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.console.profile_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.db.generic_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.dbdefinition.genericJDBC_1.2.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.oda.consumer_3.4.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.oda.design_3.5.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.oda.flatfile_3.3.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.oda.profile_3.4.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.oda_3.6.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity.sqm.core_1.4.1.201712071719.jar
+│   │       org.eclipse.datatools.connectivity_1.14.1.201712071719.jar
+│   │       org.eclipse.emf.common_2.14.0.v20180527-1134.jar
+│   │       org.eclipse.emf.ecore.change_2.12.0.v20180125-1130.jar
+│   │       org.eclipse.emf.ecore.xmi_2.14.0.v20180129-1548.jar
+│   │       org.eclipse.emf.ecore_2.14.0.v20180529-1144.jar
+│   │       org.eclipse.equinox.app_1.3.500.v20171221-2204.jar
+│   │       org.eclipse.equinox.common_3.10.0.v20180412-1130.jar
+│   │       org.eclipse.equinox.ds_1.5.100.v20171221-2204.jar
+│   │       org.eclipse.equinox.event_1.4.200.v20180426-0845.jar
+│   │       org.eclipse.equinox.frameworkadmin.equinox_1.1.0.v20180512-1128.jar
+│   │       org.eclipse.equinox.frameworkadmin_2.1.0.v20180131-0638.jar
+│   │       org.eclipse.equinox.preferences_3.7.100.v20180510-1129.jar
+│   │       org.eclipse.equinox.registry_3.8.0.v20180426-1327.jar
+│   │       org.eclipse.equinox.security_1.2.400.v20171221-2204.jar
+│   │       org.eclipse.equinox.simpleconfigurator.manipulator_2.1.0.v20180103-0918.jar
+│   │       org.eclipse.equinox.simpleconfigurator_1.3.0.v20180502-1828.jar
+│   │       org.eclipse.help_3.8.100.v20180512-1136.jar
+│   │       org.eclipse.orbit.mongodb_3.2.2.v20170222-2110.jar
+│   │       org.eclipse.osgi.services_3.7.0.v20180223-1712.jar
+│   │       org.eclipse.osgi.util_3.5.0.v20180219-1511.jar
+│   │       org.eclipse.osgi_3.13.0.v20180409-1500.jar
+│   │       org.eclipse.update.configurator_3.4.0.v20180512-1141.jar
+│   │       org.mozilla.javascript_1.7.5.v201504281450.jar
+│   │       org.sat4j.core_2.3.5.v201308161310.jar
+│   │       org.sat4j.pb_2.3.5.v201404071733.jar
+│   │       org.tukaani.xz_1.8.0.v20180207-1613.jar
+│   │       org.w3c.css.sac_1.3.1.v200903091627.jar
+│   │       org.w3c.dom.events_3.0.0.draft20060413_v201105210656.jar
+│   │       org.w3c.dom.smil_1.0.1.v200903091627.jar
+│   │       org.w3c.dom.svg.extension_1.1.0.v201806261756.jar
+│   │       org.w3c.dom.svg_1.1.0.v201011041433.jar
+│   │
+│   └───samples
+│           hello_world.rptdesign
+│
+└───WebViewerExample
+    │   CancelTask.jsp
+    │   index.jsp
+    │   test.rptdesign
+    │   test1.rptdesign
+    │
+    ├───logs
+    │       readme.txt
+    │
+    ├───report
+    │   └───images
+    │           readme.txt
+    │
+    ├───scriptlib
+    │       readme.txt
+    │
+    ├───WEB-INF
+    │   │   jrun.web.xml
+    │   │   server-config.wsdd
+    │   │   viewer.properties
+    │   │   web-template.xml
+    │   │   web-viewer.xml
+    │   │   web-war.xml
+    │   │   web.xml
+    │   │   weblogic.xml
+    │   │   web_deploy.xml
+    │   │
+    │   ├───lib
+    │   │       axis-ant.jar
+    │   │       axis.jar
+    │   │       chartengineapi.jar
+    │   │       chartexamplescoreapi.jar
+    │   │       chartitemapi.jar
+    │   │       com.ibm.icu_58.2.0.v20170418-1837.jar
+    │   │       com.lowagie.text_2.1.7.v201004222200.jar
+    │   │       commons-cli-1.0.jar
+    │   │       commons-discovery-0.2.jar
+    │   │       coreapi.jar
+    │   │       crosstabcoreapi.jar
+    │   │       dataadapterapi.jar
+    │   │       dataaggregationapi.jar
+    │   │       dataextraction.jar
+    │   │       dteapi.jar
+    │   │       emitterconfig.jar
+    │   │       engineapi.jar
+    │   │       flute.jar
+    │   │       javax.wsdl_1.5.1.v201012040544.jar
+    │   │       javax.xml.stream_1.0.1.v201004272200.jar
+    │   │       javax.xml_1.3.4.v201005080400.jar
+    │   │       jaxrpc.jar
+    │   │       js.jar
+    │   │       jsp.jar
+    │   │       modelapi.jar
+    │   │       modelodaapi.jar
+    │   │       net.sourceforge.lpg.lpgjavaruntime_1.1.0.v201004271650.jar
+    │   │       odaconnectivity.jar
+    │   │       odadesignapi.jar
+    │   │       org.apache.batik.bridge_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.css_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.dom.svg_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.dom_1.7.1.v201505191845.jar
+    │   │       org.apache.batik.ext.awt.extension_1.7.0.v201806261756.jar
+    │   │       org.apache.batik.ext.awt_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.parser_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.svggen_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.transcoder_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.util.gui_1.7.0.v200903091627.jar
+    │   │       org.apache.batik.util_1.7.0.v201011041433.jar
+    │   │       org.apache.batik.xml_1.7.0.v201011041433.jar
+    │   │       org.apache.commons.codec_1.9.0.v20170208-1614.jar
+    │   │       org.apache.commons.logging_1.1.1.v201101211721.jar
+    │   │       org.apache.derby_10.11.1.1_v201605202053.jar
+    │   │       org.apache.felix.scr_2.0.14.v20180117-1452.jar
+    │   │       org.apache.lucene.analyzers-common_6.1.0.v20161115-1612.jar
+    │   │       org.apache.lucene.core_6.1.0.v20170814-1820.jar
+    │   │       org.apache.lucene.queryparser_6.1.0.v20161115-1612.jar
+    │   │       org.apache.poi_3.9.0.v201405241750.jar
+    │   │       org.apache.xerces_2.9.0.v201101211617.jar
+    │   │       org.apache.xml.resolver_1.2.0.v201005080400.jar
+    │   │       org.apache.xml.serializer_2.7.1.v201005080400.jar
+    │   │       org.eclipse.birt.axis.overlay_4.8.0.v201806261756.jar
+    │   │       org.eclipse.birt.runtime_4.8.0-20180626.jar
+    │   │       org.eclipse.core.contenttype_3.7.0.v20180426-1644.jar
+    │   │       org.eclipse.core.expressions_3.6.100.v20180426-1644.jar
+    │   │       org.eclipse.core.filesystem_1.7.100.v20180304-1102.jar
+    │   │       org.eclipse.core.jobs_3.10.0.v20180427-1454.jar
+    │   │       org.eclipse.core.resources_3.13.0.v20180512-1138.jar
+    │   │       org.eclipse.core.runtime_3.14.0.v20180417-0825.jar
+    │   │       org.eclipse.datatools.connectivity.apache.derby.dbdefinition_1.2.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.apache.derby_1.2.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.console.profile_1.2.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.db.generic_1.2.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.dbdefinition.genericJDBC_1.2.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.oda.consumer_3.4.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.oda.design_3.5.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.oda.flatfile_3.3.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.oda.profile_3.4.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.oda_3.6.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity.sqm.core_1.4.1.201712071719.jar
+    │   │       org.eclipse.datatools.connectivity_1.14.1.201712071719.jar
+    │   │       org.eclipse.emf.common_2.14.0.v20180527-1134.jar
+    │   │       org.eclipse.emf.ecore.change_2.12.0.v20180125-1130.jar
+    │   │       org.eclipse.emf.ecore.xmi_2.14.0.v20180129-1548.jar
+    │   │       org.eclipse.emf.ecore_2.14.0.v20180529-1144.jar
+    │   │       org.eclipse.equinox.app_1.3.500.v20171221-2204.jar
+    │   │       org.eclipse.equinox.common_3.10.0.v20180412-1130.jar
+    │   │       org.eclipse.equinox.ds_1.5.100.v20171221-2204.jar
+    │   │       org.eclipse.equinox.event_1.4.200.v20180426-0845.jar
+    │   │       org.eclipse.equinox.frameworkadmin.equinox_1.1.0.v20180512-1128.jar
+    │   │       org.eclipse.equinox.frameworkadmin_2.1.0.v20180131-0638.jar
+    │   │       org.eclipse.equinox.preferences_3.7.100.v20180510-1129.jar
+    │   │       org.eclipse.equinox.registry_3.8.0.v20180426-1327.jar
+    │   │       org.eclipse.equinox.security_1.2.400.v20171221-2204.jar
+    │   │       org.eclipse.equinox.simpleconfigurator.manipulator_2.1.0.v20180103-0918.jar
+    │   │       org.eclipse.equinox.simpleconfigurator_1.3.0.v20180502-1828.jar
+    │   │       org.eclipse.help_3.8.100.v20180512-1136.jar
+    │   │       org.eclipse.orbit.mongodb_3.2.2.v20170222-2110.jar
+    │   │       org.eclipse.osgi.services_3.7.0.v20180223-1712.jar
+    │   │       org.eclipse.osgi.util_3.5.0.v20180219-1511.jar
+    │   │       org.eclipse.osgi_3.13.0.v20180409-1500.jar
+    │   │       org.eclipse.update.configurator_3.4.0.v20180512-1141.jar
+    │   │       org.mozilla.javascript_1.7.5.v201504281450.jar
+    │   │       org.sat4j.core_2.3.5.v201308161310.jar
+    │   │       org.sat4j.pb_2.3.5.v201404071733.jar
+    │   │       org.tukaani.xz_1.8.0.v20180207-1613.jar
+    │   │       org.w3c.css.sac_1.3.1.v200903091627.jar
+    │   │       org.w3c.dom.events_3.0.0.draft20060413_v201105210656.jar
+    │   │       org.w3c.dom.smil_1.0.1.v200903091627.jar
+    │   │       org.w3c.dom.svg.extension_1.1.0.v201806261756.jar
+    │   │       org.w3c.dom.svg_1.1.0.v201011041433.jar
+    │   │       saaj.jar
+    │   │       scriptapi.jar
+    │   │       viewservlets.jar
+    │   │
+    │   └───tlds
+    │           birt.tld
+    │
+    └───webcontent
+        └───birt
+            ├───ajax
+            │   ├───core
+            │   │       BirtCommunicationManager.js
+            │   │       BirtDndManager.js
+            │   │       BirtEvent.js
+            │   │       BirtEventDispatcher.js
+            │   │       BirtSoapRequest.js
+            │   │       BirtSoapResponse.js
+            │   │       Mask.js
+            │   │
+            │   ├───lib
+            │   │       head.js
+            │   │       prototype.js
+            │   │
+            │   ├───mh
+            │   │       BirtBaseResponseHandler.js
+            │   │       BirtGetUpdatedObjectsResponseHandler.js
+            │   │
+            │   ├───taglib
+            │   │       CascadingParameter.js
+            │   │       ParameterDefinition.js
+            │   │       ParameterGroup.js
+            │   │       ProgressBar.js
+            │   │       SoapResponseHelper.js
+            │   │
+            │   ├───ui
+            │   │   ├───app
+            │   │   │       AbstractBaseToc.js
+            │   │   │       AbstractBaseToolbar.js
+            │   │   │       AbstractUIComponent.js
+            │   │   │       BirtNavigationBar.js
+            │   │   │       BirtProgressBar.js
+            │   │   │       BirtToc.js
+            │   │   │       BirtToolbar.js
+            │   │   │
+            │   │   ├───dialog
+            │   │   │       AbstractBaseDialog.js
+            │   │   │       AbstractExceptionDialog.js
+            │   │   │       AbstractParameterDialog.js
+            │   │   │       BirtConfirmationDialog.js
+            │   │   │       BirtExceptionDialog.js
+            │   │   │       BirtExportReportDialog.js
+            │   │   │       BirtParameterDialog.js
+            │   │   │       BirtPrintReportDialog.js
+            │   │   │       BirtPrintReportServerDialog.js
+            │   │   │       BirtSimpleExportDataDialog.js
+            │   │   │       BirtTabedDialogBase.js
+            │   │   │
+            │   │   └───report
+            │   │           AbstractBaseReportDocument.js
+            │   │           AbstractReportComponent.js
+            │   │           BirtReportDocument.js
+            │   │           ReportComponentIdRegistry.js
+            │   │
+            │   └───utility
+            │           BirtPosition.js
+            │           BirtUtility.js
+            │           BrowserUtility.js
+            │           Constants.js
+            │           Debug.js
+            │           Printer.js
+            │
+            ├───images
+            │   │   Add.gif
+            │   │   AddAll.gif
+            │   │   AddAll_disabled.gif
+            │   │   AddAll_disabled_rtl.gif
+            │   │   AddAll_rtl.gif
+            │   │   AddFilter.gif
+            │   │   Add_disabled.gif
+            │   │   Add_disabled_rtl.gif
+            │   │   Add_rtl.gif
+            │   │   childicon.gif
+            │   │   Close.gif
+            │   │   Collapse.gif
+            │   │   DeleteFilter.gif
+            │   │   Down.gif
+            │   │   Down_disabled.gif
+            │   │   EclipseBannerPic.jpg
+            │   │   Error.gif
+            │   │   Expand.gif
+            │   │   Export.gif
+            │   │   ExportReport.gif
+            │   │   FirstPage.gif
+            │   │   FirstPage_disabled.gif
+            │   │   Go.gif
+            │   │   Go_rtl.gif
+            │   │   gradient.jpg
+            │   │   Idea.jpg
+            │   │   Interactive_viewer.gif
+            │   │   LastPage.gif
+            │   │   LastPage_disabled.gif
+            │   │   Leaf.gif
+            │   │   Loading.gif
+            │   │   Loading_rtl.gif
+            │   │   NextPage.gif
+            │   │   NextPage_disabled.gif
+            │   │   parameter.gif
+            │   │   parameter_group.gif
+            │   │   PreviousPage.gif
+            │   │   PreviousPage_disabled.gif
+            │   │   Print.gif
+            │   │   PrintServer.gif
+            │   │   Remove.gif
+            │   │   RemoveAll.gif
+            │   │   RemoveAll_disabled.gif
+            │   │   RemoveAll_disabled_rtl.gif
+            │   │   RemoveAll_rtl.gif
+            │   │   Remove_disabled.gif
+            │   │   Remove_disabled_rtl.gif
+            │   │   Remove_rtl.gif
+            │   │   Report_parameters.gif
+            │   │   Report_Parameters_disabled.gif
+            │   │   Toc.gif
+            │   │   Up.gif
+            │   │   Up_disabled.gif
+            │   │
+            │   └───dialog
+            │       └───common
+            │               close.gif
+            │               ok-cancel-button-center.gif
+            │               ok-cancel-button-center_disabled.gif
+            │               ok-cancel-button-left.gif
+            │               ok-cancel-button-left_disabled.gif
+            │               ok-cancel-button-right.gif
+            │               ok-cancel-button-right_disabled.gif
+            │
+            ├───pages
+            │   ├───common
+            │   │       Attributes.jsp
+            │   │       blank.html
+            │   │       Error.jsp
+            │   │       Locale.jsp
+            │   │       processing.jsp
+            │   │
+            │   ├───control
+            │   │       NavigationbarFragment.jsp
+            │   │       ProgressBarFragment.jsp
+            │   │       TocFragment.jsp
+            │   │       ToolbarFragment.jsp
+            │   │
+            │   ├───dialog
+            │   │       ConfirmationDialogFragment.jsp
+            │   │       DialogContainerFragment.jsp
+            │   │       ExceptionDialogFragment.jsp
+            │   │       ExportDataDialogFragment.jsp
+            │   │       ExportReportDialogFragment.jsp
+            │   │       ParameterDialogFragment.jsp
+            │   │       PrintReportDialogFragment.jsp
+            │   │       PrintReportServerDialogFragment.jsp
+            │   │       SimpleExportDataDialogFragment.jsp
+            │   │
+            │   ├───layout
+            │   │       DocumentFragment.jsp
+            │   │       FramesetFragment.jsp
+            │   │       ParameterFragment.jsp
+            │   │       ReportContentFragment.jsp
+            │   │       ReportDialogFragment.jsp
+            │   │       ReportFragment.jsp
+            │   │       RequesterFragment.jsp
+            │   │       RunFragment.jsp
+            │   │       SidebarFragment.jsp
+            │   │
+            │   └───parameter
+            │           CheckboxParameterFragment.jsp
+            │           ComboBoxParameterFragment.jsp
+            │           HiddenParameterFragment.jsp
+            │           ParameterGroupFragment.jsp
+            │           RadioButtonParameterFragment.jsp
+            │           TextBoxParameterFragment.jsp
+            │
+            └───styles
+                    dialogbase.css
+                    dialogbase_rtl.css
+                    index.css
+                    style.css
