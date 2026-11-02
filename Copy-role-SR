@@ -1,3 +1,453 @@
+New web.xml
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         id="WebApp_ID">
+
+    <display-name>Oman Air Intranet</display-name>
+
+    <description>
+        This is the 1.0 version of the Oman Air Intranet application
+    </description>
+
+
+    <!-- ====================================================== -->
+    <!-- BIRT 4.8.0 CONTEXT PARAMETERS                          -->
+    <!-- ====================================================== -->
+
+    <!-- Default locale -->
+    <context-param>
+        <param-name>BIRT_VIEWER_LOCALE</param-name>
+        <param-value>en-US</param-value>
+    </context-param>
+
+    <!-- Default timezone -->
+    <context-param>
+        <param-name>BIRT_VIEWER_TIMEZONE</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- BIRT report working folder -->
+    <context-param>
+        <param-name>BIRT_VIEWER_WORKING_FOLDER</param-name>
+        <param-value>WEB-INF/ReportEngine</param-value>
+    </context-param>
+
+    <!-- Generated report documents -->
+    <context-param>
+        <param-name>BIRT_VIEWER_DOCUMENT_FOLDER</param-name>
+        <param-value>${birt.viewer.working.path}/documents</param-value>
+    </context-param>
+
+    <!-- Restrict report access to working folder -->
+    <context-param>
+        <param-name>WORKING_FOLDER_ACCESS_ONLY</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- URL report path policy -->
+    <context-param>
+        <param-name>URL_REPORT_PATH_POLICY</param-name>
+        <param-value>domain</param-value>
+    </context-param>
+
+    <!-- Generated chart/image directory -->
+    <context-param>
+        <param-name>BIRT_VIEWER_IMAGE_DIR</param-name>
+        <param-value>${birt.viewer.working.path}/report/images</param-value>
+    </context-param>
+
+    <!-- BIRT log directory -->
+    <context-param>
+        <param-name>BIRT_VIEWER_LOG_DIR</param-name>
+        <param-value>${birt.viewer.working.path}/logs</param-value>
+    </context-param>
+
+    <!-- BIRT log level -->
+    <context-param>
+        <param-name>BIRT_VIEWER_LOG_LEVEL</param-name>
+        <param-value>WARNING</param-value>
+    </context-param>
+
+    <!-- BIRT script library directory -->
+    <context-param>
+        <param-name>BIRT_VIEWER_SCRIPTLIB_DIR</param-name>
+        <param-value>${birt.viewer.working.path}/scriptlib</param-value>
+    </context-param>
+
+    <!-- BIRT resource directory -->
+    <context-param>
+        <param-name>BIRT_RESOURCE_PATH</param-name>
+        <param-value>${birt.viewer.working.path}</param-value>
+    </context-param>
+
+    <!-- Maximum report rows -->
+    <context-param>
+        <param-name>BIRT_VIEWER_MAX_ROWS</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- Maximum cube row levels -->
+    <context-param>
+        <param-name>BIRT_VIEWER_MAX_CUBE_ROWLEVELS</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- Maximum cube column levels -->
+    <context-param>
+        <param-name>BIRT_VIEWER_MAX_CUBE_COLUMNLEVELS</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- Cube memory size -->
+    <context-param>
+        <param-name>BIRT_VIEWER_CUBE_MEMORY_SIZE</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- BIRT viewer properties -->
+    <context-param>
+        <param-name>BIRT_VIEWER_CONFIG_FILE</param-name>
+        <param-value>WEB-INF/viewer.properties</param-value>
+    </context-param>
+
+    <!-- Server-side printing -->
+    <context-param>
+        <param-name>BIRT_VIEWER_PRINT_SERVERSIDE</param-name>
+        <param-value>ON</param-value>
+    </context-param>
+
+    <!-- Optimized HTML output -->
+    <context-param>
+        <param-name>HTML_ENABLE_AGENTSTYLE_ENGINE</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- Overwrite generated documents -->
+    <context-param>
+        <param-name>BIRT_OVERWRITE_DOCUMENT</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- Export filename generator -->
+    <context-param>
+        <param-name>BIRT_FILENAME_GENERATOR_CLASS</param-name>
+        <param-value>
+            org.eclipse.birt.report.utility.filename.DefaultFilenameGenerator
+        </param-value>
+    </context-param>
+
+
+    <!-- ====================================================== -->
+    <!-- APPLICATION FILTERS                                   -->
+    <!-- ====================================================== -->
+
+    <!-- GZIP Filter -->
+    <filter>
+        <filter-name>gzipfilter</filter-name>
+        <filter-class>om.com.oas.filters.GZIPFilter</filter-class>
+    </filter>
+
+    <!-- Session Validator Filter -->
+    <filter>
+        <filter-name>sessionvalidator</filter-name>
+        <filter-class>
+            om.com.oas.wynet.security.logon.web.interfaces.SessionValidatorFilter
+        </filter-class>
+    </filter>
+
+    <!-- BIRT Viewer Filter -->
+    <filter>
+        <filter-name>ViewerFilter</filter-name>
+        <filter-class>
+            org.eclipse.birt.report.filter.ViewerFilter
+        </filter-class>
+    </filter>
+
+
+    <!-- ====================================================== -->
+    <!-- FILTER MAPPINGS                                       -->
+    <!-- ====================================================== -->
+
+    <filter-mapping>
+        <filter-name>sessionvalidator</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>gzipfilter</filter-name>
+        <url-pattern>*.do</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>ViewerFilter</filter-name>
+        <servlet-name>ViewerServlet</servlet-name>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>ViewerFilter</filter-name>
+        <servlet-name>EngineServlet</servlet-name>
+    </filter-mapping>
+
+
+    <!-- ====================================================== -->
+    <!-- LISTENERS                                             -->
+    <!-- ====================================================== -->
+
+    <!-- BIRT Viewer Context Listener -->
+    <listener>
+        <listener-class>
+            org.eclipse.birt.report.listener.ViewerServletContextListener
+        </listener-class>
+    </listener>
+
+    <!-- BIRT Viewer HTTP Session Listener -->
+    <listener>
+        <listener-class>
+            org.eclipse.birt.report.listener.ViewerHttpSessionListener
+        </listener-class>
+    </listener>
+
+
+    <!-- ====================================================== -->
+    <!-- SERVLET DEFINITIONS                                   -->
+    <!-- ====================================================== -->
+
+    <!-- Existing Struts Action Servlet -->
+    <servlet>
+        <servlet-name>WYNetController</servlet-name>
+        <servlet-class>
+            org.apache.struts.action.ActionServlet
+        </servlet-class>
+
+        <init-param>
+            <param-name>config</param-name>
+            <param-value>/WEB-INF/struts-config.xml</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>application</param-name>
+            <param-value>ApplicationResources</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>2</param-value>
+        </init-param>
+
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+
+    <!-- BIRT Viewer Servlet -->
+    <servlet>
+        <servlet-name>ViewerServlet</servlet-name>
+        <servlet-class>
+            org.eclipse.birt.report.servlet.ViewerServlet
+        </servlet-class>
+    </servlet>
+
+    <!-- BIRT Engine Servlet -->
+    <servlet>
+        <servlet-name>EngineServlet</servlet-name>
+        <servlet-class>
+            org.eclipse.birt.report.servlet.BirtEngineServlet
+        </servlet-class>
+    </servlet>
+
+
+    <!-- ====================================================== -->
+    <!-- SERVLET MAPPINGS                                      -->
+    <!-- ====================================================== -->
+
+    <!-- Existing Struts mapping -->
+    <servlet-mapping>
+        <servlet-name>WYNetController</servlet-name>
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
+
+    <!-- BIRT Viewer mappings -->
+    <servlet-mapping>
+        <servlet-name>ViewerServlet</servlet-name>
+        <url-pattern>/frameset</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ViewerServlet</servlet-name>
+        <url-pattern>/run</url-pattern>
+    </servlet-mapping>
+
+    <!-- BIRT Engine mappings -->
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/preview</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/download</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/parameter</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/document</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/output</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>EngineServlet</servlet-name>
+        <url-pattern>/extract</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ====================================================== -->
+    <!-- SESSION CONFIGURATION                                 -->
+    <!-- ====================================================== -->
+
+    <session-config>
+        <session-timeout>25</session-timeout>
+    </session-config>
+
+
+    <!-- ====================================================== -->
+    <!-- WELCOME FILE                                          -->
+    <!-- ====================================================== -->
+
+    <welcome-file-list>
+        <welcome-file>/index.jsp</welcome-file>
+    </welcome-file-list>
+
+
+    <!-- ====================================================== -->
+    <!-- ERROR PAGES                                           -->
+    <!-- ====================================================== -->
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error_404.jsp</location>
+    </error-page>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error_500.jsp</location>
+    </error-page>
+
+
+    <!-- ====================================================== -->
+    <!-- JSP TAG LIBRARIES                                     -->
+    <!-- ====================================================== -->
+
+    <jsp-config>
+
+        <taglib>
+            <taglib-uri>/WEB-INF/struts-bean.tld</taglib-uri>
+            <taglib-location>/WEB-INF/struts-bean.tld</taglib-location>
+        </taglib>
+
+        <taglib>
+            <taglib-uri>/WEB-INF/struts-html.tld</taglib-uri>
+            <taglib-location>/WEB-INF/struts-html.tld</taglib-location>
+        </taglib>
+
+        <taglib>
+            <taglib-uri>/WEB-INF/struts-logic.tld</taglib-uri>
+            <taglib-location>/WEB-INF/struts-logic.tld</taglib-location>
+        </taglib>
+
+        <!-- BIRT Tag Library -->
+        <taglib>
+            <taglib-uri>/birt.tld</taglib-uri>
+            <taglib-location>/WEB-INF/tlds/birt.tld</taglib-location>
+        </taglib>
+
+    </jsp-config>
+
+
+    <!-- ====================================================== -->
+    <!-- ENVIRONMENT ENTRIES                                   -->
+    <!-- ====================================================== -->
+
+    <env-entry>
+        <env-entry-name>DAO_DATA_SOURCE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>jdbc/oasdb</env-entry-value>
+    </env-entry>
+
+    <!--
+    <env-entry>
+        <env-entry-name>FFP_DATA_SOURCE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>jdbc/ffpdb</env-entry-value>
+    </env-entry>
+    -->
+
+    <env-entry>
+        <env-entry-name>service/DutyTravelController</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>
+            om.com.oas.dutytravel.controller.DutyTravelController
+        </env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>AdminSqlDAOFactory</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>
+            om.com.oas.wynet.admin.factory.sql.AdminSqlDAOFactory
+        </env-entry-value>
+    </env-entry>
+
+    <env-entry>
+        <env-entry-name>SecuritySqlDAOFactory</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>
+            om.com.oas.wynet.security.factory.sql.SecuritySqlDAOFactory
+        </env-entry-value>
+    </env-entry>
+
+
+    <!-- ====================================================== -->
+    <!-- RESOURCE REFERENCES                                   -->
+    <!-- ====================================================== -->
+
+    <resource-ref>
+        <description>
+            Resource reference to a factory for java.sql.Connection
+            instances that may be used for talking to an ENLM database.
+        </description>
+        <res-ref-name>jdbc/oasdb</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
+    <resource-ref>
+        <description>
+            Resource reference to a factory for java.sql.Connection
+            instances that may be used for talking to an FFP database.
+        </description>
+        <res-ref-name>jdbc/ffpdb</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
+</web-app>
+
+
 web.xml of birt 4.8:
 <?xml version="1.0" encoding="utf-8"?>
 
