@@ -1,3 +1,5 @@
+org.eclipse.birt.report.engine.api.EngineException: A BIRT exception occurred. See next exception for more information. Can not convert the value of (32) to BigDecimal type
+
 New web.xml
 
 
