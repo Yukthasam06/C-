@@ -80,6 +80,25 @@ commonStyleFiles.xhtml
 	<!-- CSS references -->
 	<h:outputStylesheet name="http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700" />
 	<h:outputStylesheet library="default" name="css/font-awesome.css" />
+
+console.log("Toolbar:", $(".jqte_toolbar").length);
+console.log("Toolbar CSS:", $(".jqte_toolbar").css([
+    "display",
+    "height",
+    "width",
+    "overflow",
+    "position",
+    "float"
+]));
+
+console.log("Tool CSS:", $(".jqte_tool").first().css([
+    "display",
+    "width",
+    "height",
+    "float",
+    "line-height",
+    "background"
+]));
 	<h:outputStylesheet library="default" name="css/core.css" />
 	<h:outputStylesheet library="default" name="css/font.css" />
 </ui:composition>
