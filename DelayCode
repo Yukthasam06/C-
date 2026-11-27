@@ -1,52 +1,598 @@
-2026-11-18 18:28:00 INFO  SessionValidatorFilter:82 - /StsSearchAction.do
-2026-11-18 18:28:00 INFO  SessionValidatorFilter:94 - -------->true
-2026-11-18 18:28:00 INFO  StsSearchAction:237 - in getSelectPrivilegesOfUser, userPermission:{HdAccess=[DEPARTMENT, ORGANISATION, SECTION, SELF, STANDIN], STAFF_ACCESS_LEVEL=[DEPARTMENT, ORGANISATION, READ, SECTION, SELF, STANDIN], DTS=[ADD, CANCEL, DELETE, EDIT, OVERDUE, PAY, READ], DT_REPORTS=[READ]} target:STAFF_ACCESS_LEVEL
-2026-11-18 18:28:00 INFO  StsSearchAction:91 - ===== STS SEARCH DEBUG START =====
-2026-11-18 18:28:00 INFO  StsSearchAction:92 - Request Parameter op       : reqlst
-2026-11-18 18:28:00 INFO  StsSearchAction:93 - Form Operation            : search
-2026-11-18 18:28:00 INFO  StsSearchAction:94 - Travel From Date          : null
-2026-11-18 18:28:00 INFO  StsSearchAction:95 - Travel To Date            : null
-2026-11-18 18:28:00 INFO  StsSearchAction:96 - DTS Ref                   : null
-2026-11-18 18:28:00 INFO  StsSearchAction:97 - STS Ref                   : null
-2026-11-18 18:28:00 INFO  StsSearchAction:98 - Employee Number           : null
-2026-11-18 18:28:00 INFO  StsSearchAction:99 - Department                : null
-2026-11-18 18:28:00 INFO  StsSearchAction:101 - ^^^^^^^^^^^^^^^^^^^^^^^^parameter : reqlst
-2026-11-18 18:28:00 INFO  StsSearchAction:174 - Is operation empty? : false
-2026-11-18 18:28:00 INFO  StsSearchAction:183 - Executing SEARCH path
-2026-11-18 18:28:00 INFO  StsSearchAction:184 - Search Criteria:
-2026-11-18 18:28:00 INFO  StsSearchAction:185 - Access Level      : 3
-2026-11-18 18:28:00 INFO  StsSearchAction:186 - Travel From Date  : 
-2026-11-18 18:28:00 INFO  StsSearchAction:187 - Travel To Date    : 
-2026-11-18 18:28:00 INFO  StsSearchAction:188 - DTS Ref           : null
-2026-11-18 18:28:00 INFO  StsSearchAction:189 - STS Ref           : null
-2026-11-18 18:28:00 INFO  StsSearchAction:190 - Emp No            : null
-2026-11-18 18:28:00 INFO  StsSearchAction:191 - Dept Name         : null
-2026-11-18 18:28:00 INFO  StsSearchAction:192 - Status            : 1
-2026-11-18 18:28:00 INFO  StsSearchAction:193 - Action            : 
-2026-11-18 18:28:00 INFO  AbstractSqlDao:106 - datasource org.apache.tomcat.dbcp.dbcp2.BasicDataSource@7b6a8bc8
-2026-11-18 18:28:00 INFO  AbstractSqlDao:106 - datasource org.apache.tomcat.dbcp.dbcp2.BasicDataSource@7b6a8bc8
-2026-11-18 18:28:00 INFO  StsSqlBuilder:119 - USER ID: kalpak
-2026-11-18 18:28:00 INFO  StsSqlBuilder:227 - SQL : SELECT A.REQUEST_ID REQUEST_ID, A.TICKET_ID TICKET_ID, A.REQUEST_TYPE REQUEST_TYPE, B.RQST_TYPE_DESC RQST_TYPE_DESC, A.CREATED_ON CREATED_ON, E.DTS_REF_ID DTS_REF_ID, A.REQUEST_ACCPTD_BY REQUEST_ACCPTD_BY,A.REQUEST_ACCPTD_ON REQUEST_ACCPTD_ON, A.REQUEST_PROCESSED_BY REQUEST_PROCESSED_BY,A.REQUEST_PROCESSED_ON REQUEST_PROCESSED_ON,A.STATUS STATUS, D.STATUS_DESC STATUS_DESC, E.EMP_NUM EMP_NUM, C.PAX_NAME PAX_NAME, E.TRVL_START_DATE TRVL_START_DATE, E.TRVL_END_DATE TRVL_END_DATE, G.DEPT_NAME_ENG DEPT_NAME, G.DEPT_CODE DEPT_CODE FROM ST_REQUEST A,ST_RQST_TYPE_MST B, ST_PAX_INFO C, ST_STATUS_MST D, ST_TICKET E, PR_DEPT_MST G,PR_EMP_MST H WHERE B.ST_RQST_TYPE_ID = A.REQUEST_TYPE AND D.ST_STATUS_ID = A.STATUS AND E.TICKET_ID = A.TICKET_ID  AND A.CATEGORY_ID = 1 AND  C.TICKET_ID = E.TICKET_ID AND E.EMP_NUM = H.EMP_NUM AND G.DEPT_CODE = H.DEPT_CODE  AND A.STATUS = 1 AND A.STATUS <> 15  AND E.TRVL_END_DATE > ADD_MONTHS(SYSDATE, -12)  ORDER BY TRVL_START_DATE, DTS_REF_ID 
-2026-11-18 18:28:00 INFO  StsSearchAction:196 - Search Result Count : 589
-2026-11-18 18:28:00 INFO  SessionValidatorFilter:82 - /Calander/agenda.js
-2026-11-18 18:28:01 INFO  SessionValidatorFilter:82 - /Calander/agenda.js
-2026-11-18 18:28:19 INFO  SessionValidatorFilter:82 - /StsSearchAction.do
-2026-11-18 18:28:19 INFO  SessionValidatorFilter:94 - -------->true
-2026-11-18 18:28:19 INFO  StsSearchAction:237 - in getSelectPrivilegesOfUser, userPermission:{HdAccess=[DEPARTMENT, ORGANISATION, SECTION, SELF, STANDIN], STAFF_ACCESS_LEVEL=[DEPARTMENT, ORGANISATION, READ, SECTION, SELF, STANDIN], DTS=[ADD, CANCEL, DELETE, EDIT, OVERDUE, PAY, READ], DT_REPORTS=[READ]} target:STAFF_ACCESS_LEVEL
-2026-11-18 18:28:19 INFO  StsSearchAction:91 - ===== STS SEARCH DEBUG START =====
-2026-11-18 18:28:19 INFO  StsSearchAction:92 - Request Parameter op       : reqlst
-2026-11-18 18:28:19 INFO  StsSearchAction:93 - Form Operation            : null
-2026-11-18 18:28:19 INFO  StsSearchAction:94 - Travel From Date          : 
-2026-11-18 18:28:19 INFO  StsSearchAction:95 - Travel To Date            : 
-2026-11-18 18:28:19 INFO  StsSearchAction:96 - DTS Ref                   : 
-2026-11-18 18:28:19 INFO  StsSearchAction:97 - STS Ref                   : 55222
-2026-11-18 18:28:19 INFO  StsSearchAction:98 - Employee Number           : 
-2026-11-18 18:28:19 INFO  StsSearchAction:99 - Department                : -1
-2026-11-18 18:28:19 INFO  StsSearchAction:101 - ^^^^^^^^^^^^^^^^^^^^^^^^parameter : reqlst
-2026-11-18 18:28:19 INFO  StsSearchAction:174 - Is operation empty? : true
-2026-11-18 18:28:19 INFO  StsSearchAction:177 - Executing LOAD path
-2026-11-18 18:28:19 INFO  AbstractSqlDao:106 - datasource org.apache.tomcat.dbcp.dbcp2.BasicDataSource@7b6a8bc8
-2026-11-18 18:28:19 INFO  StsSearchAction:212 - Default dates are being assigned
-2026-11-18 18:28:19 INFO  StsSearchAction:213 - Operation value at this point : null
-2026-11-18 18:28:19 INFO  SessionValidatorFilter:82 - /Calander/agenda.js
-2026-11-18 18:28:19 INFO  SessionValidatorFilter:82 - /Calander/agenda.js
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+   
+	xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+	 <!-- xmlns:f=”http://java.sun.com/jsf/core&#8221; -->
+<h:head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+</h:head>
+<h:body>
+	<ui:composition template="/templates/template_admin.xhtml">
+		<ui:define name="title">#{msg['ccms.app.page.title.internalfeedbacks']}</ui:define>
+
+		<ui:define name="content">
+
+			<link rel="stylesheet"
+				href="#{request.contextPath}/pages/jquery/jquery-ui.css" />
+			<link rel="stylesheet"
+				href="#{request.contextPath}/pages/jquery/jquery_override.css" />
+			<script
+				src="#{request.contextPath}/pages/jquery/jquery-1.11.1.min.js"></script>
+			<script src="#{request.contextPath}/pages/jquery/jquery-ui.js"></script>
+			<script
+				src="#{request.contextPath}/resources/default/js/ccmsUtils.js"></script>
+			<script
+				src="#{request.contextPath}/resources/default/js/ccmsValidations.js"></script>
+			<link rel="stylesheet"
+				href="#{request.contextPath}/pages/jquery/jquery-te-1.4.0.css" />
+			<script
+				src="#{request.contextPath}/pages/jquery/jquery-te-1.4.0.min.js"></script>
+
+			<script type="text/javascript">
+				$(function() {
+					loadAllJquery();
+				});
+
+				function loadAllJquery() {
+					setDatepicker();
+					$(".editor").jqte();
+					$(".jqte").css("border", "none");
+					$(".jqte").css("box-shadow", "0px 0px 1px #999");
+					showMandatoryFields(true);
+				}
+			</script>
+			
+			<script>
+				function checkSpecialCharactor(evt) {
+					evt = (evt) ? evt : window.event;
+			        var element  = document.getElementById(evt.target.id);
+			        
+			        var initialValue  = element.value;
+			        if(evt.type == "paste"){
+			        	  setTimeout(function() {
+			            	var value  = element.value;
+			          	var pastedText = value.replace(initialValue,"");
+			          	
+			          	const regex = /^[A-Za-z0-9 ]+$/;
+			          	
+			              if(regex.test(pastedText)){
+			              	element.value = value;
+			              	return true;
+			              }else{
+			              	element.value = initialValue;
+			              	return false;
+			              }
+			            }, 2);         
+			        }
+			      }
+			</script>
+				
+			<div class="row clearfix">
+				<div class="row clearfix">
+					<div class="panel">
+						<div class="panelHeader">
+							<h1>Internal Feedback</h1>
+						</div>
+
+						<div class="panelContent" style="padding-top: 10px;">
+
+							<h:form id="form">
+								<h:messages infoClass="alert alertSuccess"
+									errorClass="alert alertError" globalOnly="true"
+									style="padding-left:0px" />
+
+								<div class="twoCol feedSearch clearfix">
+									<div class="col">
+										<div class="form-box form-box-default required">
+											<label>Source of Feedback</label>
+											<h:selectOneMenu id="sourceOfFbk" styleClass="form-control"
+												value="#{internalFeedbackFormController.sourceID}">
+												<f:selectItem itemLabel="--Select One--" itemValue="0" />
+												<f:selectItems itemLabel="#{source.sourceName}" var="source"
+													itemValue="#{source.sourceId}"
+													value="#{internalFeedbackFormController.sources}" />
+											</h:selectOneMenu>
+										</div>
+									</div>
+									<div class="col">
+										<div class="form-box form-box-default required">
+											<label>Feedback Type</label>
+											<h:selectOneMenu id="feedbackType" styleClass="form-control"
+												onchange="showMandatoryFields(false);"
+												value="#{internalFeedbackFormController.feedbackType}">
+												<f:selectItem itemLabel="--Select One--" itemValue="0" />
+												<f:selectItems itemLabel="#{feedbackType.feedbackTypeName}"
+													var="feedbackType"
+													itemValue="#{feedbackType.feedbackTypeId}"
+													value="#{internalFeedbackFormController.feedbackTypes}" />
+												<f:ajax event="change" render="FeedbackTypeTab"
+													execute="@this"></f:ajax>
+											</h:selectOneMenu>
+										</div>
+									</div>
+								</div>
+
+								<div class="twoCol feedSearch clearfix">
+									<div class="col">
+										<div class="form-box form-box-default required" id="nameValid" onpaste="return checkSpecialCharactor(event);">
+											<h:outputLabel value="Pax Name" />
+											<h:inputText id="paxName" maxlength="200"
+												value="#{internalFeedbackFormController.dto.customerMaster.custName}"
+												styleClass="form-control"
+												onkeypress="return validAlphabetsWitSpace(event);" />
+										</div>
+										&nbsp;
+									<h:outputLabel style="font-weight:bold; font-size:11px;"  value="		Please enter your name as per your booking/ ticket confirmation."/>
+									</div>
+									<br/>
+									<div class="col">
+										<div class="form-box form-box-default " id="nameValid" onpaste="return checkSpecialCharactor(event);">
+											<h:outputLabel value="Middle Name" />
+											<h:inputText id="middleName" maxlength="200"
+												value="#{internalFeedbackFormController.dto.customerMaster.custMiddleName}"
+												styleClass="form-control"
+												onkeypress="return validAlphabetsWitSpace(event);" />
+										</div>
+										<br/>
+									</div>
+									
+									<div class="col">
+										<div class="form-box form-box-default required" id="nameValid" onpaste="return checkSpecialCharactor(event);">
+											<h:outputLabel value="Last Name" />
+											<h:inputText id="lastName" maxlength="200"
+												value="#{internalFeedbackFormController.dto.customerMaster.custLastName}"
+												styleClass="form-control"
+												onkeypress="return validAlphabetsWitSpace(event);" />
+										</div>
+									</div>
+
+									<div class="col">
+										<div class="radio radio-success">
+											<span class="label">Gender<b style="color: #f55753">*</b></span>
+											<h:selectOneRadio id="gender"
+												value="#{internalFeedbackFormController.dto.customerMaster.custGender}">
+												<f:selectItem itemValue="Male" itemLabel="Male" />
+												<f:selectItem itemValue="Female" itemLabel="Female" />
+											</h:selectOneRadio>
+										</div>
+									</div>
+								</div>
+
+								<div class="twoCol feedSearch clearfix">
+									<div class="col">
+										<div class="form-box form-box-default" id="numberValid" onpaste="return checkSpecialCharactor(event);">
+											<h:outputLabel value="Sindbad Number" />
+											<h:inputText id="ffpNumber" maxlength="9"
+												value="#{internalFeedbackFormController.dto.customerMaster.ffpNo}"
+												styleClass="form-control"
+												onkeypress="return validDigits(event);" />
+										</div>
+									</div>
+
+									<div class="col">
+										<div class="form-box form-box-default required" id="emailTest">
+											<h:outputLabel value="Email Address" />
+											<h:inputText id="emailID"
+												value="#{internalFeedbackFormController.dto.customerMaster.custEmail}"
+												styleClass="form-control emailClass" />
+										</div>
+									</div>
+
+								</div>
+								<div class="twoCol feedSearch clearfix">
+
+									<div class="col">
+										<div class="form-box form-box-default required"
+											id="countryValid">
+											<h:outputLabel value="Country" />
+											<h:selectOneMenu id="contyID" styleClass="form-control"
+												value="#{internalFeedbackFormController.dto.customerMaster.country.countryID}">
+												<f:selectItem itemLabel="--Select One--" itemValue="0" />
+												<f:selectItems itemLabel="#{country.countryName}"
+													var="country" itemValue="#{country.countryID}"
+													value="#{internalFeedbackFormController.countries}" />
+												<f:attribute name="countryID"
+													value="#{internalFeedbackFormController.dto.customerMaster.country.countryID}" />
+												<f:ajax event="change"
+													listener="#{internalFeedbackFormController.fetchCountryCode}"
+													execute="@this" render="ajaxCountryCode" />
+											</h:selectOneMenu>
+										</div>
+									</div>
+
+									<!-- <div class="col">
+										<div class="form-box form-box-default">
+											<h:outputLabel value="Fax" />
+											<h:inputText maxlength="15"
+												value="#{internalFeedbackFormController.dto.customerMaster.custFax}"
+												styleClass="form-control"
+												onkeypress="return validDigits(event);" />
+										</div>
+									</div> -->
+
+								</div>
+
+								<div class="twoCol feedSearch clearfix" id="ajaxCountryCode">
+									<h:panelGroup id="ajaxCountryCode">
+										<div class="col">
+											<div
+												class="form-box form-box-default phonefield multirequired"
+												id="mobileValid" onpaste="return checkSpecialCharactor(event);">
+
+												<h:outputLabel value="Mobile Phone" />
+												<h:inputText id="countryCodeMobile" maxlength="5"
+													value="#{internalFeedbackFormController.dto.customerMaster.countryCode}"
+													styleClass="form-control phone-country"
+													title="Country Code"
+													onkeypress="return validDigits(event);" />
+												<h:inputText id="mobilePhone"
+													value="#{internalFeedbackFormController.dto.customerMaster.custMobilePhone}"
+													styleClass="form-control phone-no" title="Mobile Number"
+													onkeypress="return validDigits(event);" maxlength="15" />
+
+											</div>
+										</div>
+
+										<div class="col">
+											<div
+												class="form-box form-box-default phonefield multirequired"
+												id="landlineValid" onpaste="return checkSpecialCharactor(event);">
+												<h:outputLabel value="Land Phone with City Code" />
+												<h:inputText id="countryCode" maxlength="5"
+													value="#{internalFeedbackFormController.dto.customerMaster.countryCode}"
+													styleClass="form-control phone-country"
+													title="Country Code"
+													onkeypress="return validDigits(event);" />
+												<h:inputText id="areaCode" maxlength="7"
+													value="#{internalFeedbackFormController.dto.customerMaster.cityCode}"
+													styleClass="form-control phone-area" title="City Code"
+													onkeypress="return validDigits(event);" />
+												<h:inputText id="landPhone" maxlength="15"
+													value="#{internalFeedbackFormController.dto.customerMaster.custLandPhone}"
+													styleClass="form-control phone-no" title="Phone Number"
+													onkeypress="return validDigits(event);" />
+											</div>
+										</div>
+									</h:panelGroup>
+								</div>
+								<h:panelGroup id="FeedbackTypeTab">
+									<div class="twoCol feedSearch clearfix">
+
+										<!-- 	<div class="col">
+										<div class="form-box form-box-default multirequired">
+											<h:outputLabel value="Contact Address" />
+											<h:inputTextarea
+												value="#{internalFeedbackFormController.dto.customerMaster.custAddress}"
+												styleClass="form-control" />
+										</div>
+									</div> -->
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '30'}">
+												<div id="purchasedFromDiv" class="form-box form-box-default">
+													<h:outputLabel value="Purchased Your Ticket From" />
+													<h:selectOneMenu id="purchasedFrom"
+														styleClass="form-control"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.ticketPurchasedFrom}">
+														<f:selectItem itemLabel="--Select One--" itemValue="0" />
+														<f:selectItem itemLabel="Online" itemValue="Online" />
+														<f:selectItem itemLabel="Oman air office"
+															itemValue="Oman air office" />
+														<f:selectItem itemLabel="Travel Agent"
+															itemValue="Travel Agent" />
+														<f:selectItem itemLabel="Call center"
+															itemValue="Call center" />
+														<f:ajax event="change" render="detailsTab" execute="@this"></f:ajax>
+													</h:selectOneMenu>
+												</div>
+											</h:panelGroup>
+										</div>
+
+
+										<h:panelGroup id="detailsTab">
+											<div class="col">
+
+												<h:panelGroup
+													rendered="#{internalFeedbackFormController.dto.complaintsMaster.ticketPurchasedFrom eq 'Travel Agent'}">
+													<div
+														class="form-box form-box-default form-group form-group-default input-group required">
+														<h:outputLabel value="Travel Agent Details" />
+														<h:inputText
+															value="#{internalFeedbackFormController.dto.complaintsMaster.agentDetails}"
+															styleClass="form-control">
+														</h:inputText>
+													</div>
+												</h:panelGroup>
+												<h:panelGroup
+													rendered="#{internalFeedbackFormController.dto.complaintsMaster.ticketPurchasedFrom eq 'Oman air office'}">
+													<div
+														class="form-box form-box-default form-group form-group-default input-group required">
+														<h:outputLabel value="Oman air Office Details" />
+														<h:inputText
+															value="#{internalFeedbackFormController.dto.complaintsMaster.officeDetails}"
+															styleClass="form-control">
+														</h:inputText>
+													</div>
+												</h:panelGroup>
+
+
+											</div>
+										</h:panelGroup>
+
+									</div>
+
+									<div class="twoCol feedSearch clearfix">
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' }">
+												<div id="pnrDiv" class="form-box form-box-default" onpaste="return checkSpecialCharactor(event);">
+													<h:outputLabel value="Booking Ref.No./PNR" />
+													<h:inputText
+														id = "pnrDiv"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.pnrNo}"
+														styleClass="form-control" maxlength="6"
+														onkeypress="return validAlphabets(event);" />
+												</div>
+											</h:panelGroup>
+										</div>
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '30'}">
+												<div class="form-box form-box-default">
+													<h:outputLabel value="Travel Class" />
+													<h:selectOneMenu styleClass="form-control"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.classOfTravel}">
+														<f:selectItem itemLabel="--Select One--" itemValue="0" />
+														<f:selectItem itemLabel="First Class" itemValue="F" />
+														<f:selectItem itemLabel="Business Class" itemValue="J" />
+														<f:selectItem itemLabel="Economy class" itemValue="Y" />
+													</h:selectOneMenu>
+												</div>
+											</h:panelGroup>
+										</div>
+
+									</div>
+
+									<div class="twoCol feedSearch clearfix">
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '30' || internalFeedbackFormController.feedbackType eq '20'}">
+												<div class="form-box form-box-default required" onpaste="return checkSpecialCharactor(event);">
+													<h:outputLabel value="Flight Number" />
+													<h:inputText
+														id="flightNumber"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.flightNo}"
+														styleClass="form-control" maxlength="6" />
+												</div>
+											</h:panelGroup>
+										</div>
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '20' || internalFeedbackFormController.feedbackType eq '30'}">
+												<div id="ticketNumberDiv" class="form-box form-box-default required" onpaste="return checkSpecialCharactor(event);">
+													<h:outputLabel value="Enter 13 Digit Ticket Number" />
+													<h:inputText id="ticketNumber"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.ticketNumber}"
+														styleClass="form-control" maxlength="13"
+														onkeypress="return validDigits(event);" />
+												</div>
+											</h:panelGroup>
+										</div>
+
+									</div>
+
+									<div class="twoCol feedSearch clearfix">
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '30' || internalFeedbackFormController.feedbackType eq '20'}">
+												<!-- <div
+													class="form-box form-box-default form-group form-group-default input-group"> -->
+													<div
+													class="form-box form-box-default form-group form-group-default input-group required">
+													<h:outputLabel value="Date of Travel" />
+													<h:inputText id="dateOfTravel"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.travelDt}"
+														styleClass="form-control dtpciker" inputSize="60"
+														onfocus="setDatepicker();">
+														<f:attribute name="travelDt"
+															value="#{internalFeedbackFormController.dto.complaintsMaster.travelDt}" />
+														<f:ajax event="change"
+															listener="#{internalFeedbackFormController.prepareIncidentDate}"
+															execute="@this" render="datePanel"
+															onevent="setDatepicker" />
+														<rich:placeholder value="(Click here to select date)"></rich:placeholder>
+													</h:inputText>
+												</div>
+											</h:panelGroup>
+										</div>
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10'}">
+												<h:panelGroup id="datePanel">
+													<div
+														class="form-box form-box-default form-group form-group-default input-group">
+														<h:outputLabel value="Incident Date" />
+														<h:inputText id="incidentDate"
+															value="#{internalFeedbackFormController.dto.complaintsMaster.incidentDt}"
+															styleClass="form-control dtpciker" inputSize="60"
+															onclick="setDatepicker();">
+															<rich:placeholder value="(Click here to select date)"></rich:placeholder>
+														</h:inputText>
+													</div>
+												</h:panelGroup>
+											</h:panelGroup>
+										</div>
+
+									</div>
+									<div class="twoCol feedSearch clearfix">
+
+										<div class="col">
+											<h:panelGroup 
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '30' || internalFeedbackFormController.feedbackType eq '20'}">
+												<div class="form-box form-box-default">
+													<h:outputLabel value="Point of Departure" />
+													<h:selectOneMenu id="pointOfDeparture"
+														styleClass="form-control"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.departure.stationId}">
+														<f:selectItem itemLabel="--Select One--" itemValue="0" />
+														<f:selectItems
+															itemLabel="#{stationD.stationCode} - #{stationD.stationName}"
+															var="stationD" itemValue="#{stationD.stationId}"
+															value="#{internalFeedbackFormController.stations}" />
+													</h:selectOneMenu>
+												</div>
+											</h:panelGroup>
+										</div>
+
+										<div class="col">
+											<h:panelGroup
+												rendered="#{internalFeedbackFormController.feedbackType eq '10' || internalFeedbackFormController.feedbackType eq '30' || internalFeedbackFormController.feedbackType eq '20'}">
+												<div class="form-box form-box-default">
+													<h:outputLabel value="Point of Arrival" />
+													<h:selectOneMenu id="pointOfArrival"
+														styleClass="form-control"
+														value="#{internalFeedbackFormController.dto.complaintsMaster.arrival.stationId}">
+														<f:selectItem itemLabel="--Select One--" itemValue="0" />
+														<f:selectItems
+															itemLabel="#{stationA.stationCode} - #{stationA.stationName}"
+															var="stationA" itemValue="#{stationA.stationId}"
+															value="#{internalFeedbackFormController.stations}" />
+													</h:selectOneMenu>
+
+												</div>
+											</h:panelGroup>
+										</div>
+
+									</div>
+								</h:panelGroup>
+								<div class="twoCol feedSearch clearfix">
+
+									<div class="col" style="width: 100%">
+										<div class="form-box form-box-default required">
+											<h:outputLabel value="Description" />
+											<h:inputTextarea a:maxlength="250" styleClass="editor formControl" 
+												style="width:500px;border:none" id="desc" 
+												value="#{internalFeedbackFormController.dto.complaintsMaster.description}" >
+											
+												</h:inputTextarea>
+										</div>
+									</div>
+								</div>
+
+								<div class="twoCol feedSearch clearfix">
+
+									<div class="col">
+										<div class="form-box form-box-default">
+											<rich:panel id="fileUploadPanel">
+												<h:outputLabel
+													value="File Size Should not be greater than 12MB"
+													style="color:red"
+													rendered="#{internalFeedbackFormController.msgValue eq true}" />
+													<h:outputLabel
+													value="File upload failed. Please try again"
+													style="color:red"
+													rendered="#{internalFeedbackFormController.isFileUploadFailed eq true}" />
+												<h:outputLabel value="Attach Related Documents" />
+												<rich:fileUpload id="fileUpload"
+													fileUploadListener="#{internalFeedbackFormController.fileUploadAssist}"
+													maxFilesQuantity="5" style="border: none;"
+													render="fileUploadPanel"
+													acceptedTypes="doc, docx, txt, rtf, pdf, xls, xlsx, zip, jpg, jpeg, jpe, gif, png, bmp, rar, eml, msg, html, htm"
+													sizeExceededLabel="Please Upload files less than 12MB in size"
+													ontyperejected="alert('Only JPG, JPE, JPEG, GIF, PNG, PDF, BMP, DOC, DOCX, TXT, RTF, XLS, XLSX, ZIP, RAR, EML, MSG and HTML files are accepted');"
+													listHeight="1px" immediateUpload="true">
+													<f:attribute name="attachmentValue" value="6" />
+												</rich:fileUpload>
+												<div>
+													<h:dataTable var="attachmentLocal"
+														columnClasses="width50, width15"
+														value="#{internalFeedbackFormController.uploadAttachmentMap.get('6')}"
+														id="attachmentTable">
+														<h:column>
+															<h:outputLabel value="#{attachmentLocal.actualFileName}" />
+														</h:column>
+														<h:column>
+															<a4j:commandButton
+																style="width: 80px; background-color: #ec6f5a;color:white;font-size:12px"
+																actionListener="#{internalFeedbackFormController.deleteAttachmentAssit}"
+																id="#{panel}deleteAttachment" value="Delete"
+																render="fileUploadPanel" execute="@this" title="Delete">
+																<f:param name="filePathDelete"
+																	value="#{attachmentLocal.systemFileName}" />
+																<f:param name="attachmentValue" value="6" />
+															</a4j:commandButton>
+														</h:column>
+													</h:dataTable>
+
+												</div>
+
+												<div align="center">
+													<a4j:commandLink id="clerAllID"
+														action="#{internalFeedbackFormController.clearUploadData}"
+														execute="@this" render="fileUploadPanel" value="Clear All"
+														styleClass="btn btn-primary red"
+														rendered="#{not empty internalFeedbackFormController.uploadAttachmentMap.get('6')}">
+														<f:param name="attachmentValue" value="6" />
+													</a4j:commandLink>
+												</div>
+
+
+
+												<div class="smallTxt">You can upload doc, docx, txt,
+													rtf, pdf, xls, xlsx, zip, jpg, jpeg, jpe, gif, png, bmp,
+													rar, eml, msg, html or htm files. (Maximum total size of
+													12MB)</div>
+											</rich:panel>
+										</div>
+									</div>
+
+								</div>
+
+								<div class="twoCol feedSearch forms topSpace">
+									<h:selectBooleanCheckbox id="chkAcceptance"
+										value="#{internalFeedbackFormController.dto.declaration}" />
+									I have provided all relevant information /attachments for this
+									passenger feedback
+
+
+								</div>
+								<div class="twoCol topSpace btnGroup">
+									<a4j:commandLink render="@form" status="commonLoadingStatus"
+										id="sub"
+										actionListener="#{internalFeedbackFormController.save}"
+										styleClass="btn btn-primary btn-cons" value="Submit"
+										oncomplete="scrollUp();loadAllJquery();" />
+
+									<h:commandButton type="reset" styleClass="btn btn-primary red"
+										value="Reset" onclick="scrollUp();">
+									</h:commandButton>
+
+
+								</div>
+
+								<div class="twoCol topSpace mandatInfo">
+									<span>*</span><b>Mandatory fields</b><br /> <span>**</span><b>At
+										least one is mandatory.</b>
+								</div>
+							</h:form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>
