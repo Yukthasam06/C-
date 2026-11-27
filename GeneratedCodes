@@ -134,3 +134,62 @@
       	<welcome-file>LoginPage.xhtml</welcome-file>
    	</welcome-file-list>
 </web-app>
+
+
+This is the UserSessionFilter
+package aero.omanair.web.filter;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import aero.omanair.ccms.web.UserSession;
+
+public class UserSessionFilter implements Filter {
+
+    /**
+     * Checks if user is logged in. If not it redirects to the login.xhtml page.
+     */
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        // Get the loginBean from session attribute
+        UserSession userSession = (UserSession)((HttpServletRequest)request).getSession().getAttribute("userSession");
+
+        String requestURL = ((HttpServletRequest)request).getRequestURL().toString();
+
+        if (!requestURL.contains("/OnlineFeedbackForm.xhtml"))
+        {
+
+            if (userSession == null || !userSession.isAuthenticated())
+            {
+                String contextPath = ((HttpServletRequest)request).getContextPath();
+                ((HttpServletResponse)response).sendRedirect(contextPath + "/LoginPage.xhtml");
+            }
+        }
+
+        /*
+         * String requestURL = ((HttpServletRequest)request).getRequestURL().toString(); if (requestURL.contains("/LoginPage.xhtml")) { if (userSession != null
+         * && userSession.isAuthenticated()) { String contextPath = ((HttpServletRequest)request).getContextPath();
+         * ((HttpServletResponse)response).sendRedirect(contextPath + "/pages/Dashboard.xhtml"); } }
+         */
+
+        chain.doFilter(request,response);
+
+    }
+
+    public void init(FilterConfig config) throws ServletException {
+        // Nothing to do here!
+    }
+
+    public void destroy() {
+        // Nothing to do here!
+    }
+
+}
+
