@@ -1,428 +1,1385 @@
-if(isValid){
-                $('#divIndicator').show();
-                var urlString =  serialiseDiv("delays-"+fltid);
-                //alert(urlString);
-                var url = "saveDelayDtls.action?flightId=" + <s:property value="flightId"/> + "&"+ urlString;
-                //alert(url);
-                $.get(url, function(data){
-                    $('#divIndicator').hide();
-                     if(data.indexOf("delayForm") > -1){
-                        $('#delays-'+<s:property value="flightId"/>).html(data).show();
-                    }else{
-                        alert(data);
-                    }            
-                    
-                });
-                updateTotalDelay();
-            }
+ @charset "utf-8";
+/* CSS Document */
 
-if(isValid){
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+*:before,
+*:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Open sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.42857143;
+  color: #6d6d6d;  
+  margin:0;
+}
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+a {
+  color: #24a8d8;
+  text-decoration: none;
+}
+a:hover,
+a:focus {
+  color: #1a84ab;
+  text-decoration: none;
+}
+a:focus {
+  outline: none;
+  outline-offset: 0;
+}
+/*
+.clearfix:before,
+.clearfix:after {
+  content: " ";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+.clearfix:after{visibility:hidden;display:block;font-size:0;content:" ";clear:both;height:0}
+*/
 
-    $("#divIndicator").show();
+.clearfix {overflow:auto}
 
-    reindexRows(fltid);
-
-    var payload = $("#newDelaytbl").find(":input").serialize() 
-                  + "&flightId=" + encodeURIComponent(fltid);
-
-    console.log("Payload: " + payload);
-
-    $.ajax({
-        type: "POST",
-        url: "saveDelayDtlsNew.action",
-        data: payload,
-
-        success: function(data){
-
-            $('#divIndicator').hide();
-
-            // 🔥 SAME LOGIC AS OLD CODE
-            if(data.indexOf("newDelayTable") > -1 || data.indexOf("delayBody") > -1){
-
-                // success → render updated table
-                $('#newDelays-'+fltid).html(data).show();
-
-                alert("Delay Details Saved Successfully");
-
-            } else {
-
-                // 🔴 backend error message
-                alert(data);
-            }
-        },
-
-        error: function(){
-
-            $('#divIndicator').hide();
-
-            alert("Error while saving delay details");
-        }
-    });
-
-    updateTotalNewDelay();
+img {
+	line-height:0px;
+}
+.clearmargin {
+	margin:0!important;
+}
+.smallTxt {
+	font-size:11px;
+	color:#a2a2a2;
+	margin-top:5px;
 }
 
-if ("error".equals(initPage()) || !serverValidate()) {
-	            return "error";
-	        }
+.accHeader {
+    cursor:pointer;
+	position:relative;
+}
+.accHeader.current {
+}
+.accHeader .accIcon,.accHeader.current .accIcon {
+	background:url('../images/acc_icon.png') top no-repeat;
+	width:24px;
+	height:24px;
+	position:absolute;
+	top:24px;
+	right:24px;
+}
+.accHeader.current .accIcon {
+	background:url('../images/acc_icon.png') bottom no-repeat;
+}
 
-$(".saveNewDelayIcon").click(function(){
 
-        var isValid = true;
-        var primaryCount = 0;
 
-        var rowCountVal = $("#delayBody-"+fltid+ " tr").length;
-	 $("#delayBody-"+fltid+" tr").each(function(i){
-	
-		    var row = $(this);
-	
-		    var process = row.find("select[name$='.processId']").val();
-		    var reason = row.find("select[name$='.reasonId']").val();
-		    var stakeholder = row.find("select[name$='.stakeholderId']").val();
-		    var newDelayCode = row.find("input[name$='.newDelayCode']").val();
-		    var newDelayMinutes = row.find("input[name$='.newDelayMinutes']").val();
-		    var type = row.find("select[name$='.type']").val();
-		    var newDelayRemarks = row.find("input[name$='.newDelayRemarks']").val();
-	
-		    console.log("ROW:", i);
-		    console.log("Process:", process);
-		    console.log("reason:"+reason);
-            console.log("stakeholder:"+stakeholder);
-            console.log("newDelayCode:"+newDelayCode);
-            console.log("newDelayMinutes:"+newDelayMinutes);
-            console.log("type:"+type);
-            console.log("newDelayRemarks:"+newDelayRemarks);
-		    if(process == "-1" || process == null){
-		        alert("Please select Process in row " + (i+1));
-		        row.find("select[name$='.processId']").focus();
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(reason == "-1" || reason == null){
-		        alert("Please select Reason in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(stakeholder == "-1" || stakeholder == null){
-		        alert("Please select Stakeholder in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(newDelayCode == "" || newDelayCode == null){
-		        alert("Delay Code is missing in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(newDelayMinutes == "" || newDelayMinutes == null){
-		        alert("Delay Minutes is missing in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(isNaN(newDelayMinutes)){
-		        alert("Delay Minutes must be numeric in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(type == "" || type == null){
-		        alert("Please select Type in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-	
-		    if(type == "Primary"){
-		        primaryCount++;
-		    }
-	
-		    if(newDelayRemarks == "" || newDelayRemarks == null){
-		        alert("Delay Remarks is missing in row " + (i+1));
-		        isValid = false;
-		        return false;
-		    }
-		});
-        if(primaryCount > 1){
-            alert("Only one delay can be marked as Primary.");
-            isValid = false;
-            return false;
-        }
+.topbar {
+  padding: 0;
+  border-bottom: 2px solid #e9ebed;
+  -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 0 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 0 0 rgba(0, 0, 0, 0.05);
+  background:#fff;
+  padding:0 30px;
+}
+.topbar ul {
+	margin:0;
+	padding:0;
+	float:left
+}
+.topbar ul li {
+	list-style:none;
+	float:left;
+}
+.topbar ul li.brand {
+	margin:14px 0;
+}
+.topbar ul li.brandName {
+	margin:20px 10px;
+	font-size:18px;
+	color:#37474f;
+}
+.topbar ul.userIcons {
+	float:right;
+	margin-top:15px;
+}
+.topbar ul.userIcons img {
+	float:left;
+}
+.topbar ul.userIcons .userName {
+	float:left;
+	color:#959595;
+	margin:9px 0 0 3px;
+}
+.wrapper {
+	background:#008bae;
+}
+.wrapper .sidebar {
+	width:250px;
+	color:#fff;
+	float:left;
+}
+.wrapper .sidebar ul {
+	margin:0;
+	padding:0;
+}
+.wrapper .sidebar ul li {
+	list-style:none;
+	display:block;
+	padding:0;
+	margin:0;
+}
+.wrapper .sidebar .sidebarSearch {
+	padding:15px;
+}
+.wrapper .sidebar .sidebarSearch .input-icon {
+	position:relative;
+}
+.wrapper .sidebar .sidebarSearch .input-icon i {
+	position:absolute;
+	right:10px;
+	font-size:16px;
+	color:#ced1d1;
+	top:6px;
+	height:16px;
+	width:16px;
+}
+.wrapper .sidebar .sidebarSearch .input-icon i:hover {
+	color:#fff;
+	cursor:pointer;
+}
+.wrapper .sidebar .sidebarSearch input[type=text] {
+	border:none;
+	background:none;
+	padding:6px 10px;
+	border-bottom:#4daec6 solid 1px;
+	width:100%;
+	color:#fff;
+}
+.wrapper .sidebar li h4 {
+	font-size:14px;
+	text-transform:uppercase;
+	padding:15px;
+	margin:0;
+	font-weight:400;
+}
+.wrapper .sidebar li {
+	display:block;
+}
+.wrapper .sidebar li a {
+	padding:15px 25px;
+	display:block;
+	color:#fff;
+}
+.wrapper .sidebar li a:hover {
+	background:#007291;
+}
+.wrapper .sidebar li a i {
+  font-size: 18px;
+  margin-right: 17px;
+  color: #fff;
+  width:18px;
+}
 
-        if(primaryCount == 0){
-            alert("One delay must be marked as Primary.");
-            isValid = false;
-            return false;
-        }
-        
-        if (isValid){            
-            var totNewDelay = parseInt($('#newDelaySum').val());
-            var actNewDelay = parseInt($("#totalDelay").val());
-            if(isNaN(totNewDelay)){
-            	totNewDelay=0;
-            	totNewDelay=parseInt(totNewDelay);
-                //alert("IT IS NAN");
-            }else{
-            	totNewDelay=parseInt(totNewDelay);
-            }
-           
-            if(isNaN(actNewDelay)){
-            	actNewDelay=0;
-            	actNewDelay=parseInt(actNewDelay);
-                //alert("IT IS NAN");
-            }else{
-            	actNewDelay=parseInt(actNewDelay);
-            }
-            if(actNewDelay>0 || totNewDelay!=0){
-                if(totNewDelay != actNewDelay){
-                    alert("Total Delay Minutes is not matching with Actual Delay!!");
-                    isValid = false;
-                    return false;
-                }
-            }
-       }
-        
-        if(isValid){
-	        $("#divIndicator").show();
-	        reindexRows(fltid);
-	        var payload = $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid);
-	        console.log("Payload: " + payload);
-	        $.ajax({
-			    type: "POST",
-			    url: "saveDelayDtlsNew.action",
-			    data: $("#newDelaytbl").find(":input").serialize()+ "&flightId=" + encodeURIComponent(fltid),
-			
-			    success: function(data){
-			        $('#divIndicator').hide();
-			        $('#newDelays-'+fltid).html(data).show();
-			        alert("Delay Details Saved Successfully");
-			    },
-			
-			    error: function(){
-			        $('#divIndicator').hide();
-			        alert("Error while saving delay details");
-			    }
-			}); 
-	        updateTotalNewDelay();
-        }
-    });
+.pageTitle {
+	background:#fafafa;
+	margin-left:250px;
+	padding:20px 30px;
+	border-bottom: 1px solid #e6e6e6;
+}
+.pageTitle h1 {
+	font-size:22px;
+	font-weight:normal;
+	text-transform:uppercase;
+	margin:0;
+	padding:0;
+	color: #FF7E00;
+}
+.pageTitle h1 span {
+	color:#3bafda;
+}
+.wrapper .pageContent {
+	padding:30px;
+	margin-left:250px;
+	position:relative;
+	background-color:#ebf0f3;
+	min-height:850px;
+}
+.panel {
+	margin-bottom:10px;
+	background:#fff;
+	width:100%;
+}
+.panelb {
+	margin-bottom:15px;
+}
+.panelHeader {
+	padding:15px 15px 15px 25px;
+	background:#fafafa;
+	position:relative;
+}
+.panelHeader h1 {
+	font-size:20px;
+	font-weight:normal;
+	text-transform:uppercase;
+	margin:0;
+	padding:0;
+}
+.preformatted {
+    white-space: pre-wrap;
+}
+.panelHeader h2 {
+	font-size:16px;
+	font-weight:normal;
+	text-transform:uppercase;
+	margin:0;
+	padding:0;
+	color: #4E873F;
+}
+.panelContent {
+	padding:20px;
+}
+.panelContent.tableWrapper {
+	padding-top:0;
+}
+.dataTable th {
+	text-align:left;
+	font-size:14px;
+    padding:10px 10px 7px 10px;
+	border-bottom:#e5e5e5 solid 1px;
+	height:10px;
+	font-weight:bold;
+}
+.dataTable th span {
+	display:block;
+	float:left;
+	margin-right:5px;
+}
+.dataTable th img {
+	margin-top:3px;
+	cursor:pointer;
+}
+.dataTable tr td {
+	border-bottom:#e5e5e5 solid 1px;
+	padding:10px;
+}
+.dataTable.tableHover tr:hover td {
+	background:#f5f5f5;
+}
+.dataTable.tableSelect td {
+	cursor:pointer;
+}
 
-});
+.dataTable i {
+	margin-right:5px;
+	font-size:15px;
+}
+.linkDelete i{
+	color:#ff6050;
+}
+.linkEdit i{
+	color:#2dcb74;
+}
+.paginationWrapper {
+	margin-top:15px;
+}
+.paginationWrapper .dataTableLength {
+	float:left;
+}
+.paginationWrapper .dataTableLength select {
+	margin:0 5px;
+	padding:5px
+}
+.paginationWrapper .dataTablePaginate {
+	float:right;
+}
+.paginationWrapper .dataTablePaginate ul {
+	margin:0;
+	padding:0;
+	list-style:none;
+}
+.paginationWrapper .dataTablePaginate ul li {
+	margin:0;
+	padding:0;
+	float:left;	
+}
+.paginationWrapper .dataTablePaginate ul li a {
+	color:#333;
+	display:block;
+	background:#efefef;
+	padding:5px 12px;
+	margin-left:3px;
+	border:#ddd solid 1px;
+}
+.paginationWrapper .dataTablePaginate ul li a:hover, .paginationWrapper .dataTablePaginate ul li a.active {
+	background:#cacaca;
+}
 
-<action name="saveDelayDtlsNew" method="saveDelayDtlsNew" class="aero.omanair.pax.otp.web.actions.FlightDelayNewAction">
-                <result name="success">/jsp/departure-tab-delays-dtls-new.jsp</result>
-                <result name="error">/jsp/flightsCreateError.jsp</result>                
-    </action> 
+.panel.colProfile {
+	width:40%;
+}
+.colProfile .userInfo {
+	background:#3bafda;
+	font-size:15px;
+	color:#fff;
+	padding:23px 18px;
+}
+.colProfile .userInfo span {
+	font-size:22px;
+	display:block;
+}
+.colProfile .userInfo .userContact {
+	font-size:13px;
+	margin-top:15px;
+}
+.colProfile .userInfo img {
+	float:left;
+	margin-right:20px;
+}
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+.panel.colStat {
+	width:57%;
+	margin-left:3%;
+}
 
-Modify the List Data (Recommended Struts Approach): The most reliable method is to format the strings in the Java action class before they are passed to the s:select tag. You can wrap the first letter of each string in an HTML <span> tag with a specific CSS class.
-In your Java Action: When populating the list (e.g., an ArrayList of strings or objects), modify the display name to include a <span>.
-java
-// Example with raw strings
-List<String> options = new ArrayList<>();
-options.add("<span class='first-letter'>A</span>pple");
-options.add("<span class='first-letter'>B</span>anana");
-// ... getters and setters
-In your JSP: Add the escape="false" attribute to your s:select tag to ensure the browser renders the HTML tags instead of treating them as plain text.
-jsp
-<s:select list="options" name="selectedOption" escape="false" />
-In your CSS: Define the style for the first-letter class.
-css
-.first-letter {
-  font-size: 1.2em; /* Make the first letter bigger */
+
+/* ------------------------------------------------------------------------------------- */
+
+
+.twoCol {
+}
+.twoCol .col {
+	width:50%;
+	float:left;
+}
+
+.form-box-default {
+    background-color: #fff;
+    border: 1px solid #ededed;
+    border-radius: 2px;
+    overflow: hidden;
+    padding: 7px 12px 4px;
+    position: relative;
+    -webkit-transition:background-color 0.2s ease;
+	transition:background-color 0.2s ease;
+}
+.form-box {
+	margin-bottom:12px;
+}
+.form-box-default.required:after {
+	color:#f55753;
+	content:"*";
+	font-family:arial;
+	font-size:20px;
+	position:absolute;
+	right:15px;
+	top:9px;
+}
+.form-box-default.multirequired:after {
+	color:#f55753;
+	content:"**";
+	font-family:arial;
+	font-size:20px;
+	position:absolute;
+	right:15px;
+	top:9px;
+}
+.form-box-default.disabled {
+	background:#f8f8f8;
+	color:rgba(98, 98, 98, 0.23);
+}
+.form-box-default.disabled input {
+	opacity:.6;
+}
+.form-box-default.disabled.focused {
+	background:#f8f8f8;
+}
+.form-box-default.disabled.focused label {
+	opacity:1;
+}
+.form-box-default.focused {
+	border-color:rgba(0, 0, 0, 0.1)!important;
+	background-color:#f0f0f0;
+}
+.form-box-default.focused label {
+	opacity:.4;
+}
+.form-box-default .form-control {
+	border:none;
+	height:25px;
+	min-height:25px;
+	padding:0;
+	background:none;
+	color:#6d6d6d;
+	width:100%;
+}
+.form-box-default textarea.form-control {
+	height:120px;
+}
+.form-box-default .form-control.error {
+	color:#2c2c2c;
+}
+.form-box-default .form-control:focus {
+	background:none;
+}
+.form-box-default label {
+	font-weight:600;
+	margin:0;
+	display:block;
+	-webkit-transition:opacity 0.2s ease;
+	transition:opacity 0.2s ease;
+}
+.form-box-default.has-error {
+	background-color:rgba(245, 87, 83, 0.1);
+}
+
+.feedSearch .form-box {
+	width:85%;
+}
+.has-error .help-block, .has-error .control-label, .has-error .radio, .has-error .checkbox, .has-error .radio-inline, .has-error .checkbox-inline {
+	color:#f55753;
+}
+.has-error .form-control {
+	border-color:#f55753;
+	-webkit-box-shadow:none;
+	box-shadow:none;
+}
+.has-error .form-control:focus {
+	border-color:#f22823;
+	-webkit-box-shadow:none;
+	box-shadow:none;
+}
+
+.form-box-default select {
+	width:100%;
+}
+.radio span {
+	margin-bottom:5px;
+}
+
+.form-group-default {
+	background-color:#fff;
+	position:relative;
+	border:1px solid rgba(0, 0, 0, 0.07);
+	border-radius:2px;
+	padding-top:7px;
+	padding-left:12px;
+	padding-right:12px;
+	padding-bottom:4px;
+	overflow:hidden;
+	-webkit-transition:background-color 0.2s ease;
+	transition:background-color 0.2s ease;
+}
+.form-group-default.disabled {
+	background:#f8f8f8;
+	color:rgba(98, 98, 98, 0.23);
+}
+.form-group-default.disabled input {
+	opacity:.6;
+}
+.form-group-default.disabled.focused {
+	background:#f8f8f8;
+}
+.form-group-default.disabled.focused label {
+	opacity:1;
+}
+.form-group-default.focused {
+	border-color:rgba(0, 0, 0, 0.1)!important;
+	background-color:#f0f0f0;
+}
+.form-group-default.focused label {
+	opacity:.4;
+	-webkit-backface-visibility:hidden;
+	-moz-backface-visibility:hidden;
+	backface-visibility:hidden;
+}
+.form-group-default.has-error {
+	background-color:rgba(245, 87, 83, 0.1);
+}
+.form-group-default.has-success .form-control-feedback, .form-group-default.has-error .form-control-feedback {
+	display:none!important;
+}
+.form-group-default.has-success .form-control, .form-group-default.has-success .form-control:focus, .form-group-default.has-error .form-control, .form-group-default.has-error .form-control:focus {
+	border:none;
+	box-shadow:none;
+}
+.form-group-default.input-group {
+	padding:0;
+}
+.form-group-default.input-group>label {
+	margin-top:6px;
+	padding-left:12px;
+}
+.form-group-default.input-group>.form-control {
+	margin-top:-2px;
+	margin-bottom:3px;
+	padding-left:12px;
+}
+.form-group-default.input-group .input-group-addon {
+	border-radius:0;
+	border:none;
+}
+.form-group-default.input-group.focused .input-group-addon {
+	border-color:rgba(0, 0, 0, 0.1);
+}
+.form-group-default .form-control {
+	border:none;
+	height:25px;
+	min-height:25px;
+	padding:0;
+	margin-top:-4px;
+	background:none;
+}
+.form-group-default .form-control.error {
+	color:#2c2c2c;
+}
+.form-group-default .form-control:focus {
+	background:none;
+}
+.form-group-default label {
+	margin:0;
+	display:block;
+	opacity:1;
+	-webkit-transition:opacity 0.2s ease;
+	transition:opacity 0.2s ease;
+}
+.input-group-addon {
+	background:#f0f0f0;
+	border:1px solid rgba(0, 0, 0, 0.07);
+	color:rgba(98, 98, 98, 0.47);
+	font-size:14px;
+	padding:6px 9px;
+	border-radius:3px;
+	transition:border 0.2s linear 0s, box-shadow 0.2s linear 0s, color 0.2s linear 0s, box-shadow 0.2s linear 0s, background 0.2s linear 0s;
+	text-align:center;
+	vertical-align:middle;
+}
+.input-group-addon i {
+	position:relative;
+	top:1px;
+}
+.input-group-addon:not(:first-child):not(:last-child), .input-group-btn:not(:first-child):not(:last-child), .input-group .form-control:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+.form-group-default.input-group > .form-control {
+    margin-bottom: 3px;
+    margin-top: -2px;
+    padding-left: 12px;
+}
+.input-group-addon, .input-group-btn, .input-group .form-control {
+    display:table-cell;
+}
+.form-group-default .form-control {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border: medium none;
+    height: 25px;
+    margin-top: -4px;
+    min-height: 25px;
+    padding: 0;
+}
+.input-group .form-control {
+    float: left;
+    margin-bottom: 0;
+    position: relative;
+    width: 100%;
+    z-index: 2;
+}
+.input-group {
+    border-collapse: separate;
+    display: table;
+    position: relative;
+}
+
+.phonefield .phone-country, .phonefield .phone-area {
+	width:25%;
+	border-right:#ededed solid 1px;
+	float:left;
+	padding-right:10px;
+}
+.phonefield .phone-area {
+	padding:0 10px;
+}
+.phonefield .phone-no {
+	width:50%;
+	float:left;
+	padding:0 10px;
+}
+
+/* -------------------------------------------------------------- */
+
+.radio label, .checkbox label {
+	display:inline-block;
+	cursor:pointer;
+	position:relative;
+	padding-left:16px!important;
+	margin-right:15px;
+	font-size:13px;
+}
+.radio label:before, .checkbox label:before {
+	content:"";
+	display:inline-block;
+	width:17px;
+	height:17px;
+	margin-right:10px;
+	position:absolute;
+	left:0px;
+	background-color:#ffffff;
+}
+.radio label {
+	margin-bottom:6px;
+}
+.radio label:before {
+	bottom:2.5px;
+	border-radius:99px;
+	-webkit-transition:border 0.3s 0s cubic-bezier(0.455, 0.03, 0.215, 1.33);
+	transition:border 0.3s 0s cubic-bezier(0.455, 0.03, 0.215, 1.33);
+}
+.radio input[type=radio]:checked+label:before {
+	border-width:5px;
+}
+.radio input[type=radio] {
+	
+}
+.radio input[type=radio][disabled]+label {
+	opacity:0.65;
+}
+.radio.radio-success input[type=radio]:checked+label:before {
+	border-color:#10cfbd;
+}
+.radio.radio-primary input[type=radio]:checked+label:before {
+	border-color:#6d5cae;
+}
+.radio.radio-info input[type=radio]:checked+label:before {
+	border-color:#3b4752;
+}
+.radio.radio-warning input[type=radio]:checked+label:before {
+	border-color:#f8d053;
+}
+.radio.radio-danger input[type=radio]:checked+label:before {
+	border-color:#f55753;
+}
+.radio.radio-complete input[type=radio]:checked+label:before {
+	border-color:#48b0f7;
+}
+.checkbox input[type=radio][disabled]+label:after {
+	background-color:#e6e6e6;
+}
+.checkbox label {
+	transition:border 0.2s linear 0s, color 0.2s linear 0s;
+	white-space:nowrap;
+}
+.checkbox label:before {
+	border-radius:3px;
+	transition:border 0.2s linear 0s, color 0.2s linear 0s;
+}
+.checkbox label::after {
+	display:inline-block;
+	width:16px;
+	height:16px;
+	position:absolute;
+	left:3.2px;
+	top:0px;
+	font-size:11px;
+	transition:border 0.2s linear 0s, color 0.2s linear 0s;
+}
+.checkbox label:after {
+	border-radius:3px;
+}
+.checkbox input[type=checkbox] {
+	display:none;
+}
+.checkbox.checkbox-circle label:after {
+	border-radius:99px;
+}
+.checkbox.checkbox-circle label:before {
+	border-radius:99px;
+}
+.checkbox input[type=checkbox]:checked+label:before {
+	border-width:8px;
+}
+.checkbox input[type=checkbox]:checked+label::after {
+font-family:'FontAwesome';
+content:"\F00C";
+color:#fff;
+}
+.checkbox input[type=checkbox][disabled]+label {
+	opacity:0.65;
+}
+.checkbox input[type=checkbox][disabled]+label:before {
+	background-color:#eceff3;
+}
+.checkbox.right label {
+	margin-right:35px;
+	padding-left:0!important;
+}
+.checkbox.right label:before {
+	right:-35px;
+	left:auto;
+}
+.checkbox.right input[type=checkbox]:checked+label {
+	position:relative;
+}
+.checkbox.right input[type=checkbox]:checked+label::after {
+font-family:'FontAwesome';
+content:"\F00C";
+position:absolute;
+right:-27px;
+left:auto;
+}
+.checkbox.check-success input[type=checkbox]:checked+label:before {
+	border-color:#10cfbd;
+}
+.checkbox.check-primary input[type=checkbox]:checked+label:before {
+	border-color:#6d5cae;
+}
+.checkbox.check-complete input[type=checkbox]:checked+label:before {
+	border-color:#48b0f7;
+}
+.checkbox.check-warning input[type=checkbox]:checked+label:before {
+	border-color:#f8d053;
+}
+.checkbox.check-danger input[type=checkbox]:checked+label:before {
+	border-color:#f55753;
+}
+.checkbox.check-info input[type=checkbox]:checked+label:before {
+	border-color:#3b4752;
+}
+.checkbox.check-success input[type=checkbox]:checked+label::after, .checkbox.check-primary input[type=checkbox]:checked+label::after, .checkbox.check-complete input[type=checkbox]:checked+label::after, .checkbox.check-warning input[type=checkbox]:checked+label::after, .checkbox.check-danger input[type=checkbox]:checked+label::after, .checkbox.check-info input[type=checkbox]:checked+label::after {
+color:#ffffff;
+}
+
+
+.tabsWrapper {
+	margin-top:40px;
+}
+.tabsMenu {
+	border-bottom:2px solid #3bafda;
+}
+
+.tabsMenu li {
+    line-height: 30px;
+    float: left;
+    background-color: #fafafa;
+    border-top: 1px solid #e7e7e7;
+    border-right: 1px solid #e7e7e7;
+    border-left: 1px solid #e7e7e7;
+	font-size:15px;
+	margin-right:5px;
+}
+
+.tabsMenu li.current {
+    position: relative;
+    background-color: #3bafda;
+    border-bottom: 1px solid #fff;
+	border-color:#3bafda;
+}
+
+.tabsMenu li a {
+    padding: 6px 10px;
+    color: #6d6d6d;
+    text-decoration: none;
+}
+
+.tabsMenu .current a {
+    color: #fff;
+}
+
+.tab {
+    margin: 20px 0;
+    width: auto;
+}
+
+.tabContent {
+    display: none;
+}
+
+#tab-1 {
+ display: block;   
+}
+
+
+
+/* -------------------------------------------------------------- */
+
+.btn {
+	font-size:14px;
+	font-weight:normal;
+	letter-spacing:0.01em;
+	-webkit-font-smoothing:antialiased;
+	-webkit-text-size-adjust:100%;
+	-ms-text-size-adjust:100%;
+	-webkit-font-feature-settings:"kern" 1;
+	-moz-font-feature-settings:"kern" 1;
+	margin-bottom:0;
+	border:1px solid #f0f0f0;
+	text-align:center;
+	vertical-align:middle;
+	cursor:pointer;
+	border-radius:3px;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	background-image:none!important;
+	color:#fff;
+	background-color:#ffffff;
+	text-shadow:none;
+	box-shadow:none;
+	line-height:21px;
+	padding:5px 25px;
+	position:relative;
+	transition:color 0.1s linear 0s, background-color 0.1s linear 0s, opacity 0.2s linear 0s!important;
+}
+.btn:focus {
+	outline:0!important;
+}
+.btn:hover {
+	background-color:#fafafa;
+	border:1px solid rgba(98, 98, 98, 0.27);
+}
+.btn.active {
+	border-color:#e6e6e6;
+	background:#fff;
+}
+.btn:hover, .btn:focus, .btn:active, .btn.active, .btn.disabled, .btn[disabled] {
+	box-shadow:none;
+}
+.btn-primary, .btn-primary:focus {
+	color:#ffffff;
+	background-color:#3bafda;
+	border-color:#3bafda;
+}
+.btn-primary.active, .btn-primary:active, .btn-primary.active:focus, .btn-primary:active:focus, .btn-primary:active:hover {
+	background-color:#3bafda;
+	border-color:#3bafda;
+	color:#ffffff;
+}
+.btn-primary.hover, .btn-primary:hover {
+	background-color:#41bdeb;
+	border-color:#41bdeb;
+	color:#ffffff;
+}
+.btn-primary.active:hover {
+	background:#5e4f96;
+	border-color:#5e4f96;
+}
+.btn.disabled {
+	background:#bfbfbf;
+	border:#bfbfbf solid 1px;
+}
+.btn.green,.btn.green:focus,.btn.green:active:focus{
+	background:#2dcb74;
+	border:#2dcb74 solid 1px;
+}
+.btn.green:hover {
+	background:#45da88;
+	border:#45da88 solid 1px;
+}
+.btn.red,.btn.red:focus,.btn.red:active:focus{
+	background:#ec6f5a;
+	border:#ec6f5a solid 1px;
+}
+.btn.red:hover {
+	background:#ff7365;
+	border:#ff7365 solid 1px;
+}
+/* Custom */
+.btn.custom{
+	/*background:#2dcb74;*/
+	background:#0089AE;
+	border:#ec6f5a solid 1px;
+}
+.btn.custom:active:focus
+{
+	background:#808080;
+	border:#ec6f5a;
+}
+
+.btn.custom:focus
+{
+	background:#808080;
+	border:#ec6f5a  solid 1px;
+}
+.btn.custom:hover {
+	background:#808080;
+	border:#ec6f5a  solid 1px;
+}
+.panelRtBtn {
+	position:absolute;
+	top:11px;
+	right:25px;
+}
+.btnGroup .btn {
+	margin-right:20px;
+}
+.topSpace {
+	margin-top:20px;
+}
+.mandatInfo span {
+	text-align:right;
+	margin-right:8px;
+	color:#f55753;
+	width:20px;
+	display:block;
+	float:left
+}
+
+
+.msgBox {
+	background:#fff;
+}
+.msgBox p {
+	padding:22px 15px;
+	margin:0;
+}
+.msgBox span {
+	display:block;
+	background:#f5f5f5;
+	padding:10px 15px;
+	color:#aaa;
+}
+.msgBox span i {
+	margin-right:5px;
+}
+.msgBox.red {
+	border-left:#ec6f5a solid 3px;
+}
+.msgBox.orange {
+	border-left:#fea223 solid 3px;
+}
+.msgBox.green {
+	border-left:#2dcb74 solid 3px;
+}
+
+.outershadow {
+	border-bottom:#e0e0e0 solid 1px;
+	border-right:#e0e0e0 solid 1px;
+}
+.innershadow {
+	border-bottom:#cececd solid 1px;
+	border-right:#cececd solid 1px;
+}
+.infoBoxWrapper {
+	margin-bottom:15px;
+}
+.infoBoxWrapper .infoBox {
+	float:left;
+	font-size:20px;
+	color:#fff;
+	text-transform:uppercase;
+	float:left;
+	margin-right:2.73%;
+	width:31.5%;
+}
+.infoBoxWrapper .infoBox span {
+	display:block;
+	font-size:13px;
+	text-transform:none;
+	margin-top:8px;
+	line-height:16px;
+}
+.infoBoxWrapper .infoBox .infoBoxLt,.infoBoxWrapper .infoBox .infoBoxRt,.infoBoxWrapper .infoBox .infoBoxCol {
+	float:left;
+	padding:16px 5px 14px 20px;
+}
+.infoBoxWrapper .infoBox .infoBoxLt {
+	width:60%;
+}
+.infoBoxWrapper .infoBox .infoBoxRt {
+	width:40%;
+	font-size:40px;
+	line-height:28px;
+	border-left:#ebf0f3 solid 1px;
+}
+.infoBoxWrapper .infoBox .infoBoxCol ul {
+	margin-top:11px;
+}
+.infoBoxWrapper .infoBox .infoBoxCol ul li {
+	font-size:13px;
+	text-transform:none;
+	float:left;
+	padding:0 8px;
+	border-left:#e3e3e3 solid 1px;
+	line-height:13px;
+}
+.infoBoxWrapper .infoBox .infoBoxCol ul li.first {
+	padding-left:0;
+	border:0;
+}
+.infoBoxWrapper .infoBox .infoBoxCol ul li.last {
+	padding-right:0;
+}
+.infoBoxWrapper .infoBox .infoBoxCol ul li a {
+	color:#fff;
+}
+.infoBoxWrapper .infoBox.orange {
+	background:#f6bb42;
+}
+.infoBoxWrapper .infoBox.green {
+	background:#9cd159;
+}
+.infoBoxWrapper .infoBox.blue {
+	background:#3bafda;
+}
+
+.label {
+	font-size:13px;
+	font-weight:bold;
+	display:block;
+}
+.listCol > i {
+	float:left;
+	height:30px;
+	width:30px;
+	font-size:30px;
+	color:#3bafda;
+	margin:3px 17px 0 0;
+	text-align:center;
+}
+ul.listCol {
+	float:left;
+	width:100%;
+}
+.listCol li {
+	margin-bottom:25px;
+	width: 50%;
+}
+.compDetails {
+	clear:both;
+	padding:12px 16px;
+	background:#f8f8f8;
+}
+.compDetailsArabic {
+	clear:both;
+	padding:12px 16px;
+	background:#f8f8f8;
+	text-align: right;
+}
+.attachments {
+	margin-top:20px;
+}
+.listAttach {
+	margin-top:10px;
+}
+.listAttach li {
+	margin-bottom:10px;
+}
+.listAttach i {
+	font-size:18px;
+	margin-right:8px;
+}
+.listAttach li input[type=checkbox] {
+	margin-right:10px;
+}
+.forms label {
+	margin-bottom:5px;
+}
+.forms .formControl {
+	background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 2px;
+    overflow: hidden;
+    padding: 7px 12px 4px;
+    position: relative;
+    -webkit-transition:background-color 0.2s ease;
+	transition:background-color 0.2s ease;
+	width:300px;
+}
+.forms .formcontrol1 {
+	background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 2px;
+    overflow-x: none;
+    overflow-y: auto;
+    padding: 7px 12px 4px;
+    position: relative;
+    transition:background-color 0.2s ease;
+	width:900px;
+    height:110px;
+}
+.forms .formGroup {
+	margin-bottom:25px;
+}
+
+.formWrapper {
+	background:#fafafa;
+	padding:15px 20px;
+	border:1px solid #e6e6e6;
+	border-left:0;
+	border-right:0;
+}
+.lightbox { display: none; }
+
+.width5  { width:  5%; }
+.width10 { width: 10%; }
+.width15 { width: 15%; }
+.width20 { width: 20%; }
+.width25 { width: 25%; }
+.width30 { width: 30%; }
+.width35 { width: 35%; }
+.width40 { width: 40%; }
+.width75 { width: 70%; }
+.width13 { width: 13%; }
+
+.height10
+{
+	height:10px;
+}
+ul {
+	list-style-type: none;
+}
+.rich-calendar-exterior
+{
+	border-color : red;
+}
+
+.errorPage {
+	background:#37474f;
+}
+.errorWrapper {
+	text-align:center;
+	color:#fff;
+	margin-top:150px;
+}
+.errorWrapper h1 {
+	font-size:100px;
+	font-weight:bold;
+}
+.errorWrapper h1 span {
+	font-size:30px;
+	font-weight:normal;
+	text-transform:uppercase;
+	display:block;
+}
+.errorWrapper h2 {
+	font-size:18px;
+	font-weight:normal;
+	margin-top:22px;
+}
+.errorWrapper .errorBtn {
+	margin-top:40px;
+}
+
+
+/* Alert styles */
+.alertTitle {
   font-weight: bold;
-  /* Add any other desired styles */
+}
+.alertMessage {
+  -ms-word-wrap: break-word;
+  word-wrap: break-word;
+}
+.alertMessage a, .alertMessage label {
+  color: #ffffff;
+}
+.alertMessage a:hover {
+  color: #cccccc;
+  text-decoration: none;
+}
+.alertCloseButton {
+  position: relative;
+  right: -0.3em;
+  top: -0.3em;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffffff;
+  -webkit-text-shadow: 0 1px 0 #ffffff;
+  text-shadow: 0 1px 0 #ffffff;
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80);
+}
+.alertCloseButton:hover,
+.alertCloseButton:focus {
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.4;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  filter: alpha(opacity=40);
+}
+/*Additional properties for button version
+ iOS requires the button element instead of an anchor tag.
+ If you want the anchor version, it requires `href="#"`.*/
+button.alertCloseButton {
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+}
+.alert {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 6px;
+  padding: 10px 15px 10px 50px;
+  -moz-border-radius: 3px 3px 3px 3px;
+  -webkit-border-radius: 3px 3px 3px 3px;
+  border-radius: 3px 3px 3px 3px;
+  background-position: 15px center;
+  background-repeat: no-repeat;
+  -moz-box-shadow: 0 0 12px #999999;
+  -webkit-box-shadow: 0 0 12px #999999;
+  box-shadow: 0 0 12px #999999;
+  color: #ffffff;
+  opacity: 0.8;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
+  filter: alpha(opacity=80);
+  margin-bottom: 30px;
+}
+.alert:hover {
+  -moz-box-shadow: 0 0 3px #000000;
+  -webkit-box-shadow: 0 0 7px #000000;
+  box-shadow: 0 0 7px #000000;
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+  cursor: pointer;
+}
+.alertInfo {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGwSURBVEhLtZa9SgNBEMc9sUxxRcoUKSzSWIhXpFMhhYWFhaBg4yPYiWCXZxBLERsLRS3EQkEfwCKdjWJAwSKCgoKCcudv4O5YLrt7EzgXhiU3/4+b2ckmwVjJSpKkQ6wAi4gwhT+z3wRBcEz0yjSseUTrcRyfsHsXmD0AmbHOC9Ii8VImnuXBPglHpQ5wwSVM7sNnTG7Za4JwDdCjxyAiH3nyA2mtaTJufiDZ5dCaqlItILh1NHatfN5skvjx9Z38m69CgzuXmZgVrPIGE763Jx9qKsRozWYw6xOHdER+nn2KkO+Bb+UV5CBN6WC6QtBgbRVozrahAbmm6HtUsgtPC19tFdxXZYBOfkbmFJ1VaHA1VAHjd0pp70oTZzvR+EVrx2Ygfdsq6eu55BHYR8hlcki+n+kERUFG8BrA0BwjeAv2M8WLQBtcy+SD6fNsmnB3AlBLrgTtVW1c2QN4bVWLATaIS60J2Du5y1TiJgjSBvFVZgTmwCU+dAZFoPxGEEs8nyHC9Bwe2GvEJv2WXZb0vjdyFT4Cxk3e/kIqlOGoVLwwPevpYHT+00T+hWwXDf4AJAOUqWcDhbwAAAAASUVORK5CYII=") !important;
+}
+.alertError {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHOSURBVEhLrZa/SgNBEMZzh0WKCClSCKaIYOED+AAKeQQLG8HWztLCImBrYadgIdY+gIKNYkBFSwu7CAoqCgkkoGBI/E28PdbLZmeDLgzZzcx83/zZ2SSXC1j9fr+I1Hq93g2yxH4iwM1vkoBWAdxCmpzTxfkN2RcyZNaHFIkSo10+8kgxkXIURV5HGxTmFuc75B2RfQkpxHG8aAgaAFa0tAHqYFfQ7Iwe2yhODk8+J4C7yAoRTWI3w/4klGRgR4lO7Rpn9+gvMyWp+uxFh8+H+ARlgN1nJuJuQAYvNkEnwGFck18Er4q3egEc/oO+mhLdKgRyhdNFiacC0rlOCbhNVz4H9FnAYgDBvU3QIioZlJFLJtsoHYRDfiZoUyIxqCtRpVlANq0EU4dApjrtgezPFad5S19Wgjkc0hNVnuF4HjVA6C7QrSIbylB+oZe3aHgBsqlNqKYH48jXyJKMuAbiyVJ8KzaB3eRc0pg9VwQ4niFryI68qiOi3AbjwdsfnAtk0bCjTLJKr6mrD9g8iq/S/B81hguOMlQTnVyG40wAcjnmgsCNESDrjme7wfftP4P7SP4N3CJZdvzoNyGq2c/HWOXJGsvVg+RA/k2MC/wN6I2YA2Pt8GkAAAAASUVORK5CYII=") !important;
+}
+.alertSuccess {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADsSURBVEhLY2AYBfQMgf///3P8+/evAIgvA/FsIF+BavYDDWMBGroaSMMBiE8VC7AZDrIFaMFnii3AZTjUgsUUWUDA8OdAH6iQbQEhw4HyGsPEcKBXBIC4ARhex4G4BsjmweU1soIFaGg/WtoFZRIZdEvIMhxkCCjXIVsATV6gFGACs4Rsw0EGgIIH3QJYJgHSARQZDrWAB+jawzgs+Q2UO49D7jnRSRGoEFRILcdmEMWGI0cm0JJ2QpYA1RDvcmzJEWhABhD/pqrL0S0CWuABKgnRki9lLseS7g2AlqwHWQSKH4oKLrILpRGhEQCw2LiRUIa4lwAAAABJRU5ErkJggg==") !important;
+}
+.alertWarning {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGYSURBVEhL5ZSvTsNQFMbXZGICMYGYmJhAQIJAICYQPAACiSDB8AiICQQJT4CqQEwgJvYASAQCiZiYmJhAIBATCARJy+9rTsldd8sKu1M0+dLb057v6/lbq/2rK0mS/TRNj9cWNAKPYIJII7gIxCcQ51cvqID+GIEX8ASG4B1bK5gIZFeQfoJdEXOfgX4QAQg7kH2A65yQ87lyxb27sggkAzAuFhbbg1K2kgCkB1bVwyIR9m2L7PRPIhDUIXgGtyKw575yz3lTNs6X4JXnjV+LKM/m3MydnTbtOKIjtz6VhCBq4vSm3ncdrD2lk0VgUXSVKjVDJXJzijW1RQdsU7F77He8u68koNZTz8Oz5yGa6J3H3lZ0xYgXBK2QymlWWA+RWnYhskLBv2vmE+hBMCtbA7KX5drWyRT/2JsqZ2IvfB9Y4bWDNMFbJRFmC9E74SoS0CqulwjkC0+5bpcV1CZ8NMej4pjy0U+doDQsGyo1hzVJttIjhQ7GnBtRFN1UarUlH8F3xict+HY07rEzoUGPlWcjRFRr4/gChZgc3ZL2d8oAAAAASUVORK5CYII=") !important;
+}
+.alert {
+  background-color: #030303;
+}
+.alertSuccess {
+  background-color: #51a351;
+}
+.alertError {
+  background-color: #bd362f;
+}
+.alertInfo {
+  background-color: #2f96b4;
+}
+.alertWarning {
+  background-color: #f89406;
 }
 
 
-private String formatDropdownValue(String value) {
-    if (value == null || value.isEmpty()) return value;
-
-    char firstChar = Character.toUpperCase(value.charAt(0));
-
-    // Convert to FULL-WIDTH Unicode (visually bigger)
-    char bigChar = (char)(firstChar + 65248);
-
-    String rest = value.substring(1);
-
-    return bigChar + rest;
+.rf-fu {
+	border-style: none;
+	border-width: 0px;
+    width: 400px;
+}
+.rf-fu-itm {
+	border-bottom-style: none;
+	border-bottom-width: 0px;
+    padding: 12px;
+    white-space: nowrap;
+}				
+				
+.jqte {
+	border: none;
 }
 
+.right{text-align:right}			
 
-//NEW
+.columnWidth{
+	width: 200px;
+}	
 
-private String formatDropdownValue(String value) {
-    if (value == null || value.isEmpty()) return value;
-
-    // Extract first letter
-    char firstChar = Character.toUpperCase(value.charAt(0));
-
-    // Convert to FULL-WIDTH Unicode (visually bigger)
-    char bigChar = (char)(firstChar + 65248);
-
-    String cleanedValue;
-
-    // Case 1: If value is like "A - aircraft..."
-    if (value.length() > 3 && value.charAt(1) == ' ' && value.charAt(2) == '-') {
-        cleanedValue = value.substring(3).trim(); // remove "A -"
-    } 
-    // Case 2: If value is like "Aaircraft..." or normal text
-    else {
-        cleanedValue = value.substring(1).trim();
-    }
-
-    // ✅ Add space after big letter
-    return bigChar + " " + cleanedValue;
+.twoCol {
+}
+.twoCol .col {
+	width:50%;
+	float:left;
 }
 
-ArrayList<SelectionTO> processList = (ArrayList<SelectionTO>) getDelegate().getProcesses();
-
-for (SelectionTO s : processList) {
-    s.setValue(formatDropdownValue(s.getValue()));
+.listCol.twoCol {
+	width:100%;
+}
+.listCol.twoCol li {
+	width:46%;
+	float:left;
+	margin-right:15px;
 }
 
-setProcesses(processList);
-
-
-private String formatDropdownValue(String value) {
-    if (value == null || value.isEmpty()) return value;
-
-    char firstChar = value.charAt(0);
-
-    String cleanedValue;
-
-    // Remove "A - " pattern if present
-    if (value.length() > 3 && value.charAt(1) == ' ' && value.charAt(2) == '-') {
-        cleanedValue = value.substring(3).trim();
-    } else {
-        cleanedValue = value.substring(1).trim();
-    }
-
-    return getFullWidthLetter(firstChar) + " " + cleanedValue;
+.jqte_editor ol {
+    margin: 10px;
+    list-style-type: decimal;
+ 
+}
+.jqte_editor ul {
+    margin: 10px;
+    list-style-type: disc;
+}
+.form-box ul {
+    margin: 10px;
+    list-style-type: disc;
+}
+.form-box ol {
+    margin: 10px;
+    list-style-type: decimal;
+}
+This is core.css file and below is the jquery_override.css file
+.ui-datepicker-buttonpane ui-widget-content button{
+	font-weight: bold;
+}
+.ui-datepicker{
+width: 17.2em;
+font-weight: bold;
 }
 
-private String getFullWidthLetter(char c) {
-    if (c >= 'A' && c <= 'Z') {
-        return String.valueOf((char)(c + 65248));
-    }
-    if (c >= 'a' && c <= 'z') {
-        return String.valueOf((char)(Character.toUpperCase(c) + 65248));
-    }
-    return String.valueOf(c);
+ .ui-datepicker .ui-datepicker-calendar .ui-state-default {
+	    border: medium none;
+	    color: #0C0B0B;
+	    background: #C4C4C4;
+	}
+	.ui-widget {
+	    font-family: Verdana,Arial,sans-serif;
+	    font-size: 1.1em;
+	    font-weight: bold;
+	}
+	.ui-widget-content {
+	    color: #1234F2;
+	}
+	.ui-priority-secondary, .ui-widget-content .ui-priority-secondary, .ui-widget-header .ui-priority-secondary {
+	    opacity: 1.7;
+	    font-weight: bold;
+	}
+	.ui-datepicker th{
+	color: #008BAE;
+	}
+	.ui-priority-secondary{
+	font-weight: bold;
+	}
+	
+	button.ui-datepicker-current {
+    float: left;
+    font-weight: bold;
+	}
+
+	.ui-datepicker-current ui-state-default ui-priority-secondary ui-corner-all ui-state-hover
+	{
+		font-weight: bold;
+	}
+	
+	
+	
+	td.ui-datepicker-today {
+    background: #dff6e4;
 }
-
-
-///////////////////////////
-
-$("#delayBody-"+fltid+" tr").each(function(){
-    var row = $(this);
-
-    var processId = row.find("select[name$='.processId']").val();
-    var reasonId = row.find("input[id^='hidden_reason']").val();
-    var stakeholderId = row.find("input[id^='hidden_stakeholder']").val();
-
-    if(processId && processId != "-1"){
-        loadReasonsOnLoad(row, processId, reasonId, stakeholderId);
-    }
-});
-
-function loadReasonsOnLoad(row, processId, selectedReasonId, selectedStakeholderId){
-
-    var reasonSelect = row.find("select[name$='.reasonId']");
-
-    $.ajax({
-        url: "loadReasons.action",
-        type: "GET",
-        data: { processId: processId },
-        success: function(response){
-
-            reasonSelect.empty();
-            reasonSelect.html('<option value="-1">Select Reason</option>');
-            reasonSelect.append(response);
-
-            if(selectedReasonId){
-                reasonSelect.val(selectedReasonId);
-
-                // Now load stakeholders also
-                loadStakeholdersOnLoad(row, selectedReasonId, selectedStakeholderId);
-            }
-        }
-    });
+td.ui-datepicker-current-day {
+    background: darkgreen;
+    color: #fff;
 }
-
-function loadStakeholdersOnLoad(row, reasonId, selectedStakeholderId){
-
-    var stakeholderSelect = row.find("select[name$='.stakeholderId']");
-
-    $.ajax({
-        url: "loadStakeholders.action",
-        type: "GET",
-        data: { reasonId: reasonId },
-        success: function(response){
-
-            stakeholderSelect.empty();
-            stakeholderSelect.html('<option value="-1">Select Stakeholder</option>');
-            stakeholderSelect.append(response);
-
-            if(selectedStakeholderId){
-                stakeholderSelect.val(selectedStakeholderId);
-
-                // Optional: load delay code
-                loadDelayCodeOnLoad(row, selectedStakeholderId);
-            }
-        }
-    });
-}
-
-function loadDelayCodeOnLoad(row, stakeholderId){
-
-    var delayCodeField = row.find("input[name$='.newDelayCode'], input[name$='.delayCode']");
-
-    $.ajax({
-        url: "loadDelayCode.action",
-        type: "GET",
-        data: { stakeholderId: stakeholderId },
-        success: function(response){
-            delayCodeField.val(response);
-        }
-    });
-}
-
-
-
-[DelayDetailNewTO [processId=10, processName=null, reasonId=203, reasonName=null, stakeholderId=1636, stakeholderName=null, stakeolderSubgroup=null, newDelayCode=JJJ, newDelayMinutes=3, newDelayRemarks=test1, newDelayId=36, flightId=null, type=Primary, lastModifiedBy=null, lastModifiedDate=null], null, DelayDetailNewTO [processId=8, 12, processName=null, reasonId=166, 255, reasonName=null, stakeholderId=1333, 2118, stakeholderName=null, stakeolderSubgroup=null, newDelayCode=HHK, LLL, newDelayMinutes=1, 1, newDelayRemarks=test2, test4, TEST5, newDelayId=37, flightId=null, type=Secondary, Secondary, lastModifiedBy=null, lastModifiedDate=null]]
-
-Payload: delayDetailsNew%5B0%5D.newDelayId=36&delayDetailsNew%5B0%5D.processId=10&delayDetailsNew%5B0%5D.reasonId=203&delayDetailsNew%5B0%5D.stakeholderId=1636&delayDetailsNew%5B0%5D.newDelayCode=JJJ&delayDetailsNew%5B0%5D.newDelayMinutes=3&delayDetailsNew%5B0%5D.type=Primary&delayDetailsNew%5B0%5D.newDelayRemarks=test1&delayDetailsNew%5B2%5D.newDelayId=37&delayDetailsNew%5B2%5D.processId=8&delayDetailsNew%5B2%5D.reasonId=166&delayDetailsNew%5B2%5D.stakeholderId=1333&delayDetailsNew%5B2%5D.newDelayCode=HHK&delayDetailsNew%5B2%5D.newDelayMinutes=1&delayDetailsNew%5B2%5D.type=Secondary&delayDetailsNew%5B2%5D.newDelayRemarks=test2%2C+test4&delayDetailsNew%5B2%5D.processId=12&delayDetailsNew%5B2%5D.reasonId=255&delayDetailsNew%5B2%5D.stakeholderId=2118&delayDetailsNew%5B2%5D.newDelayCode=LLL&delayDetailsNew%5B2%5D.newDelayMinutes=1&delayDetailsNew%5B2%5D.type=Secondary&delayDetailsNew%5B2%5D.newDelayRemarks=TEST5&flightId=1097055
-
-
-function reindexRows(fltid){
-
-    $("#delayBody-" + fltid + " tr").each(function(index){
-
-        var row = $(this);
-
-        // Update all input/select names
-        row.find(":input").each(function(){
-
-            var name = $(this).attr("name");
-            if(name){
-                // Replace old index with new index
-                var newName = name.replace(/delayDetailsNew\[\d+\]/, "delayDetailsNew[" + index + "]");
-                $(this).attr("name", newName);
-            }
-        });
-
-    });
-}
-
-$(".saveNewDelayIcon").click(function(){
-
-    var fltid = "<s:property value='flightId'/>";
-
-    reindexRows(fltid);   // 🔥 ADD THIS LINE
-
-    var payload = $("#newDelaytbl").find(":input").serialize()
-                   + "&flightId=" + encodeURIComponent(fltid);
