@@ -44,3 +44,43 @@
 	<h:outputScript> showLoadingStatus(); </h:outputScript>
 </h:body>
 </html>
+
+commonScriptFiles.xhtml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition> 
+	<h:outputScript name="jquery.js" />
+	<h:outputScript> var $ = jQuery.noConflict(); </h:outputScript>
+	
+	<!-- Common scripts -->
+	<h:outputScript library="default" name="js/ddsmoothmenu.js" />
+	<h:outputScript library="default" name="js/ddsmoothmenu_init.js" />
+	<h:outputScript library="default" name="js/ccmsUtils.js" />	
+	<h:outputScript library="default" name="pages/jquery/jquery-1.11.1.min.js" />	
+	<h:outputScript library="default" name="pages/jquery/jquery-ui.js" />
+	
+	<!--  Favorite Icon -->
+	<link rel="icon" href="#{request.contextPath}/resources/default/images/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="#{request.contextPath}/resources/default/images/favicon.ico" type="image/x-icon" />
+</ui:composition>
+</html>
+
+commonStyleFiles.xhtml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<ui:composition> 
+	<!-- CSS references -->
+	<h:outputStylesheet name="http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700" />
+	<h:outputStylesheet library="default" name="css/font-awesome.css" />
+	<h:outputStylesheet library="default" name="css/core.css" />
+	<h:outputStylesheet library="default" name="css/font.css" />
+</ui:composition>
+</html>
